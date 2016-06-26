@@ -20,13 +20,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import javax.swing.JFrame;
+import javax.swing.UIManager;
 
+import com.sciquizapp.sciquizserver.ChooseDropActionDemo;
 import com.sciquizapp.sciquizserver.AWTCounter;
+import com.sciquizapp.sciquizserver.DBManager;
 
 public class MyServer {
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception {
 
+		DBManager dao = new DBManager();
+	    dao.createDBIfNotExists();
+	    dao.createQuestionsTableIfNotExists();
+	    
 		//Setup the table
 
 		//Create and set up the window.
@@ -41,6 +48,10 @@ public class MyServer {
 		frame.pack();
 		frame.setVisible(true);
 
+		//Turn off metal's use of bold fonts
+		ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo();
+        UIManager.put("swing.boldMetal", Boolean.FALSE);
+        newChooseDropAction.createAndShowGUI();
 		
 		AWTCounter app = new AWTCounter(TableUserVsQuest);
 
@@ -62,11 +73,18 @@ public class MyServer {
 				socket = serverSocket.accept();
 				dataInputStream = new DataInputStream(socket.getInputStream());
 				dataOutputStream = new DataOutputStream(socket.getOutputStream());
-				TableUserVsQuest.addUser(String.valueOf(socket.getInetAddress()));
 				System.out.println("ip: " + socket.getInetAddress());
 				String textToWrite = dataInputStream.readUTF();
+				//TableUserVsQuest.addUser(String.valueOf(socket.getInetAddress()));
+				if (!TableUserVsQuest.IsUserInTable(textToWrite)) {
+					TableUserVsQuest.addUser(textToWrite.split(";")[0]);
+				}
+				
 				app.editTextField(textToWrite);
 				dataOutputStream.writeUTF(String.valueOf(app.getQuestionNumber()));
+				if (textToWrite.endsWith(";")) {
+					TableUserVsQuest.addAnswerForUser(textToWrite);
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

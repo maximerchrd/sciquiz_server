@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.TableView.TableRow;
 
 
 public class Table extends JPanel {
@@ -24,16 +25,11 @@ public class Table extends JPanel {
 
 		// Create a couple of columns 
 		model.addColumn("Utilisateurs"); 
-		model.addColumn("Col2"); 
+		model.addColumn("Score"); 
 
 		// Append a row 
 		model.addRow(new Object[]{"/192.168.43.3"});
 		model.addRow(new Object[]{"/192.168.43.5"});
-		model.addRow(new Object[]{"/192.168.43.6"});
-		model.addRow(new Object[]{"/192.168.43.7"});
-		model.addRow(new Object[]{"/192.168.43.10"});
-		model.addRow(new Object[]{"/192.168.43.4"});
-		model.addRow(new Object[]{"/192.168.43.3"});
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
@@ -99,13 +95,40 @@ public class Table extends JPanel {
 		}
 		//System.out.println("i after loop:" + i);
 		if (i == model2.getRowCount()) model2.addRow(new Object[]{User});
-
+		model2.setValueAt(0, model2.getRowCount() - 1, 1);
 	}
 	public void addQuestion(String Question) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
 	}
-	public void addAnswerForUser(String User) {
-
+	public void addAnswerForUser(String UserAndAnswer) {
+		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
+		int rowNumber = 0;
+		while (!model2.getValueAt(rowNumber, 0).toString().matches(UserAndAnswer.split(";")[0])) {
+			rowNumber++;
+		}
+		
+		//if statement to prevent from answering more than once to the current question
+		if (model2.getValueAt(rowNumber, model2.getColumnCount() - 1) == null) {
+			model2.setValueAt(UserAndAnswer.split(";")[2], rowNumber, model2.getColumnCount() - 1);
+			
+			// increases score if answer right
+			if (UserAndAnswer.split(";")[3].toString().matches("right")) {
+				int score = (int)model2.getValueAt(rowNumber, 1);
+				model2.setValueAt(score + 1, rowNumber, 1);
+			}
+		}
+	}
+	public Boolean IsUserInTable(String UserAndAnswer) {
+		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
+		int rowNumber = 0;
+		while (rowNumber < model2.getRowCount() && !(model2.getValueAt(rowNumber, 0).toString().matches(UserAndAnswer.split(";")[0]))) {
+			rowNumber++;
+		}
+		
+		if (rowNumber >= model2.getRowCount()) {
+			return false;
+		} else { return true; }
+		
 	}
 }

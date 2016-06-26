@@ -35,7 +35,7 @@ public class AWTCounter extends Frame implements ActionListener {
 		// btnCount registers this instance as ActionEvent listener
 
 		setTitle("Sciquiz Server");  // "super" Frame sets title
-		setSize(250, 100);        // "super" Frame sets initial window size
+		setSize(250, 200);        // "super" Frame sets initial window size
 
 		// System.out.println(this);
 		// System.out.println(lblCount);
