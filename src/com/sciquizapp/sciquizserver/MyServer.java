@@ -33,11 +33,12 @@ public class MyServer {
 		DBManager dao = new DBManager();
 	    dao.createDBIfNotExists();
 	    dao.createQuestionsTableIfNotExists();
+	    dao.getAllQuestions();
 	    
 		//Setup the table
 
 		//Create and set up the window.
-		JFrame frame = new JFrame("Table");
+		JFrame frame = new JFrame("Learning Tracker");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		//Create and set up the content pane.
