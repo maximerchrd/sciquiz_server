@@ -25,6 +25,7 @@ import javax.swing.UIManager;
 import com.sciquizapp.sciquizserver.ChooseDropActionDemo;
 import com.sciquizapp.sciquizserver.AWTCounter;
 import com.sciquizapp.sciquizserver.DBManager;
+import com.sciquizapp.sciquizserver.DisplayQuestion;
 
 public class MyServer {
 
@@ -45,6 +46,7 @@ public class MyServer {
 		Table TableUserVsQuest = new Table();
 		TableUserVsQuest.setOpaque(true); //content panes must be opaque
 		frame.setContentPane(TableUserVsQuest);
+		
 		//Display the window.
 		frame.pack();
 		frame.setVisible(true);

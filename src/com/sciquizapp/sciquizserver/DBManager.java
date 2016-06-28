@@ -24,7 +24,6 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("Opened database successfully");
 	}
 	public void createQuestionsTableIfNotExists() throws Exception {
 		// First create the table if it doesn't exist
@@ -33,11 +32,10 @@ public class DBManager {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
-			System.out.println("Opened database successfully");
 
 			stmt = c.createStatement();
 			String sql = " DROP TABLE question; CREATE TABLE IF NOT EXISTS question " +
-					"(ID_QUESTION       INT PRIMARY KEY     NOT NULL," +
+					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
 					" QUESTION           TEXT    NOT NULL, " +
@@ -58,12 +56,14 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("Table dropped and created successfully");
 
 		// Then store the questions into the table
-		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette");
+		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette.jpg");
 		this.addQuestion(q1);
-		System.out.println("Records created successfully");
+		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/sky.jpg");
+		this.addQuestion(q2);
+		Question q3=new Question("TP","1","Picture of world","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/world.jpg");
+		this.addQuestion(q3);
 	}
 	// Adding new question to database
 	public void addQuestion(Question quest) throws Exception {
@@ -74,11 +74,10 @@ public class DBManager {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 			c.setAutoCommit(false);
-			System.out.println("Opened database successfully");
 			stmt = c.createStatement();
-			String sql = 	"INSERT INTO question (ID_QUESTION,SUBJECT,LEVEL,QUESTION,ANSWER," +
+			String sql = 	"INSERT INTO question (SUBJECT,LEVEL,QUESTION,ANSWER," +
 					"OPTIONA,OPTIONB,OPTIONC,OPTIOND,TRIAL1,TRIAL2,TRIAL3,TRIAL4,IMAGE_PATH) " +
-					"VALUES (" + quest.getID() + ",'" +
+					"VALUES ('" +
 					quest.getSUBJECT() + "'," + 
 					quest.getLEVEL() + ",'" +
 					quest.getQUESTION() + "','" +
@@ -100,7 +99,6 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("QUestion added successfully");	
 	}
 
 	// get a list of all questions in database

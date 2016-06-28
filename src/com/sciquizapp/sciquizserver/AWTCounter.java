@@ -24,10 +24,12 @@ public class AWTCounter extends Frame implements ActionListener {
 		parentFrame.add(lblCount);                    // "super" Frame adds Label
 
 		tfCount = new TextField("0", 10); // construct TextField
+		tfCount.setBounds(200, 50, 30, 10);
 		//tfCount.setEditable(false);       // set to read-only
 		parentFrame.add(tfCount);                     // "super" Frame adds tfCount
 
 		btnSetQuestNumber = new Button("Set Question Number");   // construct Button
+		btnSetQuestNumber.setBounds(300, 50, 30, 10);
 		parentFrame.add(btnSetQuestNumber);                    // "super" Frame adds Button
 
 		btnSetQuestNumber.addActionListener(this);
@@ -35,7 +37,7 @@ public class AWTCounter extends Frame implements ActionListener {
 		// btnCount registers this instance as ActionEvent listener
 
 		//setTitle("Sciquiz Server");  // "super" Frame sets title
-		parentFrame.setSize(250, 200);        // "super" Frame sets initial window size
+		parentFrame.setSize(500, 500);        // "super" Frame sets initial window size
 
 		// System.out.println(this);
 		// System.out.println(lblCount);

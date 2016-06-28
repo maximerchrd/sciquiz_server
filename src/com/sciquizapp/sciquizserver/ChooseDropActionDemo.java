@@ -31,10 +31,17 @@
  
 package com.sciquizapp.sciquizserver;
  
+import com.sciquizapp.sciquizserver.DBManager;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+import com.sciquizapp.sciquizserver.Question;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
  
 public class ChooseDropActionDemo extends JFrame {
      
@@ -42,17 +49,20 @@ public class ChooseDropActionDemo extends JFrame {
     DefaultListModel copy = new DefaultListModel();
     DefaultListModel move = new DefaultListModel();
     JList dragFrom;
+    List<Question> questionList = new ArrayList<Question>();
      
-    public ChooseDropActionDemo(JFrame parentFrame) {
+    public ChooseDropActionDemo(final JFrame parentFrame) {
         super("ChooseDropActionDemo");
          
-        for (int i = 20; i >= 0; i--) {
-            from.add(0, "Source item " + i);
-        }
- 
-        for (int i = 2; i >= 0; i--) {
-            copy.add(0, "Target item " + i);
-            move.add(0, "Target item " + i);
+        DBManager database = new DBManager();
+        try {
+			questionList = database.getAllQuestions();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        for (int i = 0; i < questionList.size(); i++) {
+        	from.add(0, questionList.get(i).getQUESTION());
         }
  
         JPanel p = new JPanel();
@@ -71,21 +81,35 @@ public class ChooseDropActionDemo extends JFrame {
         parentFrame.add(p, BorderLayout.WEST);
          
         JList moveTo = new JList(move);
-        moveTo.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
+        moveTo.setTransferHandler(new ToTransferHandler(TransferHandler.MOVE));
         moveTo.setDropMode(DropMode.INSERT);
-        JList copyTo = new JList(copy);
-        copyTo.setTransferHandler(new ToTransferHandler(TransferHandler.MOVE));
+        
+        final JList copyTo = new JList(copy);
+        copyTo.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
         copyTo.setDropMode(DropMode.INSERT);
-         
+        copyTo.addListSelectionListener(new ListSelectionListener() {
+
+            @Override
+            public void valueChanged(ListSelectionEvent arg0) {
+                if (!arg0.getValueIsAdjusting()) {
+                	//display question
+                	int indexOfQuestion = copyTo.getSelectedIndex();
+                	Question questionToDisplay = new Question();
+                	questionToDisplay = questionList.get(indexOfQuestion);
+            	    DisplayQuestion dis_question = new DisplayQuestion(questionToDisplay, parentFrame);
+                }
+            }
+        }); 
+        
         p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        label = new JLabel("Drop to COPY to here:");
+        label = new JLabel("Drop to MOVE to here:");
         label.setAlignmentX(0f);
         p.add(label);
         sp = new JScrollPane(moveTo);
         sp.setAlignmentX(0f);
         p.add(sp);
-        label = new JLabel("Drop to MOVE to here:");
+        label = new JLabel("Drop to COPY to here:");
         label.setAlignmentX(0f);
         p.add(label);
         sp = new JScrollPane(copyTo);
@@ -182,6 +206,13 @@ public class ChooseDropActionDemo extends JFrame {
             list.requestFocusInWindow();
  
             return true;
-        }  
+        }
+        public Question getSelectedQuestion() {
+        	JList copyTo = new JList(copy);
+        	int indexOfQuestion = copyTo.getSelectedIndex();
+        	Question questionToReturn = new Question();
+        	questionToReturn = questionList.get(indexOfQuestion);
+        	return questionToReturn;           
+        }
     } 
 }
