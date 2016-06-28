@@ -13,7 +13,7 @@ public class AWTCounter extends Frame implements ActionListener {
 	private int questionNumber = 0;     // Counter's value
 	private Table UVsQ;
 	/** Constructor to setup GUI components and event handling */
-	public AWTCounter (Table UsersVsQuestions) {
+	public AWTCounter (Table UsersVsQuestions, JFrame parentFrame) {
 		UVsQ = UsersVsQuestions;
 		
 		setLayout(new FlowLayout());
@@ -21,28 +21,28 @@ public class AWTCounter extends Frame implements ActionListener {
 		//  from left-to-right, and flow to next row from top-to-bottom.
 
 		lblCount = new Label("Question Number");  // construct Label
-		add(lblCount);                    // "super" Frame adds Label
+		parentFrame.add(lblCount);                    // "super" Frame adds Label
 
 		tfCount = new TextField("0", 10); // construct TextField
 		//tfCount.setEditable(false);       // set to read-only
-		add(tfCount);                     // "super" Frame adds tfCount
+		parentFrame.add(tfCount);                     // "super" Frame adds tfCount
 
 		btnSetQuestNumber = new Button("Set Question Number");   // construct Button
-		add(btnSetQuestNumber);                    // "super" Frame adds Button
+		parentFrame.add(btnSetQuestNumber);                    // "super" Frame adds Button
 
 		btnSetQuestNumber.addActionListener(this);
 		// Clicking Button source fires ActionEvent
 		// btnCount registers this instance as ActionEvent listener
 
-		setTitle("Sciquiz Server");  // "super" Frame sets title
-		setSize(250, 200);        // "super" Frame sets initial window size
+		//setTitle("Sciquiz Server");  // "super" Frame sets title
+		parentFrame.setSize(250, 200);        // "super" Frame sets initial window size
 
 		// System.out.println(this);
 		// System.out.println(lblCount);
 		// System.out.println(tfCount);
 		// System.out.println(btnCount);
 
-		setVisible(true);         // "super" Frame shows
+		parentFrame.setVisible(true);         // "super" Frame shows
 
 		// System.out.println(this);
 		// System.out.println(lblCount);

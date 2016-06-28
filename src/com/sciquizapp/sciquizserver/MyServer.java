@@ -50,11 +50,10 @@ public class MyServer {
 		frame.setVisible(true);
 
 		//Turn off metal's use of bold fonts
-		ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo();
+		ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame);
         UIManager.put("swing.boldMetal", Boolean.FALSE);
-        newChooseDropAction.createAndShowGUI();
 		
-		AWTCounter app = new AWTCounter(TableUserVsQuest);
+		AWTCounter app = new AWTCounter(TableUserVsQuest, frame);
 
 		ServerSocket serverSocket = null;
 		Socket socket = null;

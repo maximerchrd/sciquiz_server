@@ -43,7 +43,7 @@ public class ChooseDropActionDemo extends JFrame {
     DefaultListModel move = new DefaultListModel();
     JList dragFrom;
      
-    public ChooseDropActionDemo() {
+    public ChooseDropActionDemo(JFrame parentFrame) {
         super("ChooseDropActionDemo");
          
         for (int i = 20; i >= 0; i--) {
@@ -68,7 +68,7 @@ public class ChooseDropActionDemo extends JFrame {
         JScrollPane sp = new JScrollPane(dragFrom);
         sp.setAlignmentX(0f);
         p.add(sp);
-        add(p, BorderLayout.WEST);
+        parentFrame.add(p, BorderLayout.WEST);
          
         JList moveTo = new JList(move);
         moveTo.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
@@ -92,21 +92,11 @@ public class ChooseDropActionDemo extends JFrame {
         sp.setAlignmentX(0f);
         p.add(sp);
         p.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-        add(p, BorderLayout.CENTER);
+        parentFrame.add(p, BorderLayout.CENTER);
          
         ((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
  
         getContentPane().setPreferredSize(new Dimension(320, 315));
-    }
- 
-     public void createAndShowGUI() {
-        //Create and set up the window.
-        ChooseDropActionDemo test = new ChooseDropActionDemo();
-        test.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         
-        //Display the window.
-        test.pack();
-        test.setVisible(true);
     }
      
     class FromTransferHandler extends TransferHandler {
