@@ -1,6 +1,8 @@
 package com.sciquizapp.sciquizserver;
 import java.awt.*;        // Using AWT container and component classes
 import java.awt.event.*;  // Using AWT event classes and listener interfaces
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -11,14 +13,26 @@ public class AWTCounter extends Frame implements ActionListener {
 	private TextField tfAnswer;
 	private Button btnSetQuestNumber;   // Declare component Button
 	private int questionNumber = 0;     // Counter's value
+	private Question current_question = null; //active question (highlighted when button pressed)
 	private Table UVsQ;
+	private ChooseDropActionDemo drop_action_member = null;
+	private List<Question> questionList = new ArrayList<Question>();
 	/** Constructor to setup GUI components and event handling */
-	public AWTCounter (Table UsersVsQuestions, JFrame parentFrame) {
+	public AWTCounter (Table UsersVsQuestions, JFrame parentFrame, ChooseDropActionDemo dropaction) {
 		UVsQ = UsersVsQuestions;
-		
+		drop_action_member = dropaction;
 		setLayout(new FlowLayout());
 		// "super" Frame sets its layout to FlowLayout, which arranges the components
 		//  from left-to-right, and flow to next row from top-to-bottom.
+		
+		//put the questions in a list
+		DBManager database = new DBManager();
+        try {
+			questionList = database.getAllQuestions();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		lblCount = new Label("Question Number");  // construct Label
 		parentFrame.add(lblCount);                    // "super" Frame adds Label
@@ -38,19 +52,7 @@ public class AWTCounter extends Frame implements ActionListener {
 
 		//setTitle("Sciquiz Server");  // "super" Frame sets title
 		parentFrame.setSize(500, 500);        // "super" Frame sets initial window size
-
-		// System.out.println(this);
-		// System.out.println(lblCount);
-		// System.out.println(tfCount);
-		// System.out.println(btnCount);
-
 		parentFrame.setVisible(true);         // "super" Frame shows
-
-		// System.out.println(this);
-		// System.out.println(lblCount);
-		// System.out.println(tfCount);
-		// System.out.println(btnCount);
-
 		tfAnswer = new TextField("", 30); // construct TextField
 		tfAnswer.setEditable(false);       // set to read-only
 		add(tfAnswer);                     // "super" Frame adds tfCount
@@ -63,6 +65,12 @@ public class AWTCounter extends Frame implements ActionListener {
 		//++questionNumber; // increase the counter value
 		// Display the counter value on the TextField tfCount
 		questionNumber = Integer.parseInt(tfCount.getText());
+		try {
+			SendQuestion new_send_question = new SendQuestion(questionList.get(drop_action_member.question_index));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		UVsQ.addQuestion(String.valueOf(questionNumber));
 		//tfCount.setText(questionNumber + ""); // convert int to String
 	}
@@ -76,5 +84,8 @@ public class AWTCounter extends Frame implements ActionListener {
 
 	public int getQuestionNumber() {
 		return questionNumber;
+	}
+	public Question getQuestion() {
+		return current_question;
 	}
 }

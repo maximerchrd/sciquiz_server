@@ -31,6 +31,7 @@ public class MyServer {
 
 	public static void main(String[] args) throws Exception {
 
+		//does db stuffs
 		DBManager dao = new DBManager();
 	    dao.createDBIfNotExists();
 	    dao.createQuestionsTableIfNotExists();
@@ -55,7 +56,8 @@ public class MyServer {
 		ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame);
         UIManager.put("swing.boldMetal", Boolean.FALSE);
 		
-		AWTCounter app = new AWTCounter(TableUserVsQuest, frame);
+        //Sends question to clients       
+		AWTCounter app = new AWTCounter(TableUserVsQuest, frame, newChooseDropAction);
 
 		ServerSocket serverSocket = null;
 		Socket socket = null;
@@ -72,7 +74,7 @@ public class MyServer {
 
 		while(true){
 			try {
-				socket = serverSocket.accept();
+				socket = serverSocket.accept();  //the program stops here waiting for a connection
 				dataInputStream = new DataInputStream(socket.getInputStream());
 				dataOutputStream = new DataOutputStream(socket.getOutputStream());
 				System.out.println("ip: " + socket.getInetAddress());

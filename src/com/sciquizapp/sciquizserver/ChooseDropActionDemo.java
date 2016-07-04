@@ -44,13 +44,13 @@ import java.util.ArrayList;
 import java.util.List;
  
 public class ChooseDropActionDemo extends JFrame {
-     
+    public int question_index = 0;
     DefaultListModel from = new DefaultListModel();
     DefaultListModel copy = new DefaultListModel();
     DefaultListModel move = new DefaultListModel();
     JList dragFrom;
     List<Question> questionList = new ArrayList<Question>();
-     
+ 
     public ChooseDropActionDemo(final JFrame parentFrame) {
         super("ChooseDropActionDemo");
          
@@ -94,6 +94,7 @@ public class ChooseDropActionDemo extends JFrame {
                 if (!arg0.getValueIsAdjusting()) {
                 	//display question
                 	int indexOfQuestion = copyTo.getSelectedIndex();
+                	question_index = indexOfQuestion;
                 	Question questionToDisplay = new Question();
                 	questionToDisplay = questionList.get(indexOfQuestion);
             	    DisplayQuestion dis_question = new DisplayQuestion(questionToDisplay, parentFrame);
