@@ -13,6 +13,8 @@
 
 package com.sciquizapp.sciquizserver;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,7 +22,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.UIManager;
+
+import javafx.scene.layout.BorderPane;
 
 import com.sciquizapp.sciquizserver.ChooseDropActionDemo;
 import com.sciquizapp.sciquizserver.AWTCounter;
@@ -33,10 +39,15 @@ public class MyServer {
 
 		//does db stuffs
 		DBManager dao = new DBManager();
-	    dao.createDBIfNotExists();
-	    dao.createQuestionsTableIfNotExists();
-	    dao.getAllQuestions();
-	    
+		dao.createDBIfNotExists();
+		dao.createQuestionsTableIfNotExists();
+		dao.getAllQuestions();
+
+		//declares jpanels for different parts of the window
+		JPanel panel_for_questlist = new JPanel(); // useless now, do something later?
+		JPanel panel_for_counter = new JPanel();
+		JPanel panel_for_disquest = new JPanel();
+		
 		//Setup the table
 
 		//Create and set up the window.
@@ -46,19 +57,39 @@ public class MyServer {
 		//Create and set up the content pane.
 		Table TableUserVsQuest = new Table();
 		TableUserVsQuest.setOpaque(true); //content panes must be opaque
-		frame.setContentPane(TableUserVsQuest);
-		
-		//Display the window.
-		frame.pack();
-		frame.setVisible(true);
+		//frame.setContentPane(TableUserVsQuest);
+
+
 
 		//Turn off metal's use of bold fonts
-		ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame);
-        UIManager.put("swing.boldMetal", Boolean.FALSE);
-		
-        //Sends question to clients       
-		AWTCounter app = new AWTCounter(TableUserVsQuest, frame, newChooseDropAction);
+		ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame, panel_for_questlist, panel_for_disquest);
+		UIManager.put("swing.boldMetal", Boolean.FALSE);
 
+
+
+		// implements the splitting of the window
+		/*JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, newChooseDropAction.p, TableUserVsQuest);
+		frame.getContentPane().add(splitPane);*/
+
+
+
+		AWTCounter app = new AWTCounter(TableUserVsQuest, frame, newChooseDropAction, panel_for_counter);
+
+		//implement the division of the window with borderlayout
+		JPanel parent = new JPanel();
+		parent.setLayout(new GridLayout(0,2));
+		parent.add(panel_for_questlist);
+		//parent.add(newChooseDropAction.panel_for_copy);
+		parent.add(TableUserVsQuest);
+		parent.add(panel_for_counter);
+		parent.add(panel_for_disquest);
+		//parent.add(app.btnSetQuestNumber, BorderLayout.EAST);
+		//Display the window.
+		//frame.pack();
+		frame.setContentPane(parent);
+		frame.setVisible(true);
+
+		//Sends question to clients  
 		ServerSocket serverSocket = null;
 		Socket socket = null;
 		DataInputStream dataInputStream = null;
@@ -83,7 +114,7 @@ public class MyServer {
 				if (!TableUserVsQuest.IsUserInTable(textToWrite)) {
 					TableUserVsQuest.addUser(textToWrite.split(";")[0]);
 				}
-				
+
 				app.editTextField(textToWrite);
 				dataOutputStream.writeUTF(String.valueOf(app.getQuestionNumber()));
 				if (textToWrite.endsWith(";")) {

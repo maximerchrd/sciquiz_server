@@ -49,9 +49,11 @@ public class ChooseDropActionDemo extends JFrame {
     DefaultListModel copy = new DefaultListModel();
     DefaultListModel move = new DefaultListModel();
     JList dragFrom;
+    public JPanel panel_for_from;
+    public JPanel panel_for_copy;
     List<Question> questionList = new ArrayList<Question>();
  
-    public ChooseDropActionDemo(final JFrame parentFrame) {
+    public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest) {
         super("ChooseDropActionDemo");
          
         DBManager database = new DBManager();
@@ -65,8 +67,8 @@ public class ChooseDropActionDemo extends JFrame {
         	from.add(0, questionList.get(i).getQUESTION());
         }
  
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        panel_for_from = new JPanel();
+        panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
         dragFrom = new JList(from);
         dragFrom.setTransferHandler(new FromTransferHandler());
         dragFrom.setPrototypeCellValue("List Item WWWWWW");
@@ -74,19 +76,22 @@ public class ChooseDropActionDemo extends JFrame {
         dragFrom.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JLabel label = new JLabel("Drag from here:");
         label.setAlignmentX(0f);
-        p.add(label);
+        panel_for_from.add(label);
         JScrollPane sp = new JScrollPane(dragFrom);
         sp.setAlignmentX(0f);
-        p.add(sp);
-        parentFrame.add(p, BorderLayout.WEST);
+        panel_for_from.add(sp);
+        parentFrame.add(panel_for_from, BorderLayout.WEST);
          
-        JList moveTo = new JList(move);
+        /*JList moveTo = new JList(move);
         moveTo.setTransferHandler(new ToTransferHandler(TransferHandler.MOVE));
-        moveTo.setDropMode(DropMode.INSERT);
+        moveTo.setDropMode(DropMode.INSERT);*/
         
         final JList copyTo = new JList(copy);
         copyTo.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
         copyTo.setDropMode(DropMode.INSERT);
+        
+        //listener for when highlighted line changed
+	    final DisplayQuestion dis_question = new DisplayQuestion(panel_disquest);
         copyTo.addListSelectionListener(new ListSelectionListener() {
 
             @Override
@@ -97,27 +102,32 @@ public class ChooseDropActionDemo extends JFrame {
                 	question_index = indexOfQuestion;
                 	Question questionToDisplay = new Question();
                 	questionToDisplay = questionList.get(indexOfQuestion);
-            	    DisplayQuestion dis_question = new DisplayQuestion(questionToDisplay, parentFrame);
+            	    dis_question.ShowQuestion(questionToDisplay, parentFrame, panel_disquest);
+            	    dis_question.repaint();
                 }
             }
         }); 
         
-        p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        label = new JLabel("Drop to MOVE to here:");
+        panel_for_copy = new JPanel();
+        panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
+        /*label = new JLabel("Drop to MOVE to here:");
         label.setAlignmentX(0f);
-        p.add(label);
+        panel_for_copy.add(label);
         sp = new JScrollPane(moveTo);
         sp.setAlignmentX(0f);
-        p.add(sp);
+        panel_for_copy.add(sp);*/
         label = new JLabel("Drop to COPY to here:");
         label.setAlignmentX(0f);
-        p.add(label);
+        panel_for_copy.add(label);
         sp = new JScrollPane(copyTo);
         sp.setAlignmentX(0f);
-        p.add(sp);
-        p.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-        parentFrame.add(p, BorderLayout.CENTER);
+        panel_for_copy.add(sp);
+        panel_for_copy.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+        panel_questlist.setLayout(new FlowLayout());
+        panel_questlist.add(panel_for_from);
+        panel_questlist.add(panel_for_copy);
+        
+        //parentFrame.add(panel_for_copy, BorderLayout.CENTER);
          
         ((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
  
