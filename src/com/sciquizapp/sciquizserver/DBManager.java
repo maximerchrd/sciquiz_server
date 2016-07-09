@@ -34,7 +34,7 @@ public class DBManager {
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 
 			stmt = c.createStatement();
-			String sql = " DROP TABLE question; CREATE TABLE IF NOT EXISTS question " +
+			String sql = " CREATE TABLE IF NOT EXISTS question " +
 					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
