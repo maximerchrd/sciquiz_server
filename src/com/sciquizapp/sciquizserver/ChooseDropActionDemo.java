@@ -40,6 +40,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,7 +114,7 @@ public class ChooseDropActionDemo extends JFrame {
 					int indexOfQuestion = copyTo.getSelectedIndex();
 					question_index = indexOfQuestion;
 					Question questionToDisplay = new Question();
-					questionToDisplay = questionList.get(indexOfQuestion);
+					questionToDisplay = questionList.get(indexOfQuestion);					//needs to be fixed; the index is the one in the database
 					dis_question.ShowQuestion(questionToDisplay, parentFrame, panel_disquest);
 					dis_question.repaint();
 				}
@@ -138,6 +139,38 @@ public class ChooseDropActionDemo extends JFrame {
 		panel_questlist.setLayout(new FlowLayout());
 		panel_questlist.add(panel_for_from);
 		panel_questlist.add(panel_for_copy);
+
+		//start the server for sending the question
+		final SendQuestionBluetooth send_quest = new SendQuestionBluetooth();
+		Thread serverthread = new Thread() {
+			public void run() {
+				try {
+					send_quest.startServer();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}  
+		};
+
+		serverthread.start();
+		//implement a button to send the highlighted question
+		JButton send_quest_button = new JButton("activer la question");
+		send_quest_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Question question_to_send = new Question();
+				question_to_send = questionList.get(copyTo.getSelectedIndex());
+				try {
+					send_quest.SendQuestion(question_to_send);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		panel_for_from.add(send_quest_button);
 
 		//parentFrame.add(panel_for_copy, BorderLayout.CENTER);
 

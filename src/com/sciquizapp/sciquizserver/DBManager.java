@@ -34,7 +34,7 @@ public class DBManager {
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 
 			stmt = c.createStatement();
-			String sql = " CREATE TABLE IF NOT EXISTS question " +
+			String sql = " DROP TABLE IF EXISTS 'question'; CREATE TABLE IF NOT EXISTS question " +
 					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
@@ -62,7 +62,7 @@ public class DBManager {
 		this.addQuestion(q1);
 		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/sky.jpg");
 		this.addQuestion(q2);
-		Question q3=new Question("TP","1","Picture of world","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/world.jpg");
+		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
 		this.addQuestion(q3);
 	}
 	// Adding new question to database
