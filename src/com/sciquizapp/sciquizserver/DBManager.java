@@ -60,7 +60,7 @@ public class DBManager {
 		// Then store the questions into the table
 		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette.jpg");
 		this.addQuestion(q1);
-		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/sky.jpg");
+		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/medium_pic.jpg");
 		this.addQuestion(q2);
 		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
 		this.addQuestion(q3);
