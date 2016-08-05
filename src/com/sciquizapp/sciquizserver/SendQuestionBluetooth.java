@@ -27,10 +27,12 @@ public class SendQuestionBluetooth {
 	private String connectionString;
 	private StreamConnection connection = null;
 	private StreamConnectionNotifier streamConnNotifier = null;
-	private OutputStream outStream = null;
 	private FileInputStream fis = null;
 	private BufferedInputStream bis = null;
+	private OutputStream outStream = null;
 	private ArrayList<OutputStream> outstream_list;
+	private InputStream inStream = null;
+	private ArrayList<InputStream> instream_list;
 
 	//start server
 	public void startServer() throws IOException {
@@ -46,6 +48,7 @@ public class SendQuestionBluetooth {
 		//Wait for client connection
 		System.out.println("\nServer Started. Waiting for clients to connect...");
 		outstream_list = new ArrayList<OutputStream>();
+		instream_list = new ArrayList<InputStream>();
 
 		Thread connectionthread = new Thread() {
 			public void run() {
@@ -60,10 +63,11 @@ public class SendQuestionBluetooth {
 
 
 						//read string from spp client
-						InputStream inStream=connection.openInputStream();
+						inStream = connection.openInputStream();
 						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
 						String lineRead=bReader.readLine();
 						System.out.println(lineRead);
+						instream_list.add(inStream);
 
 						//open outputstream
 						outStream = connection.openOutputStream();
@@ -132,11 +136,29 @@ public class SendQuestionBluetooth {
 				outstream_list.get(i).flush();
 			}
 			System.out.println("Done.");
-
 		} else {
 			System.out.println("StreamConnection variable is null. No device connected in mode intéractif. \n");
 		}
-
-
+		listenForAnswer();
+	}
+	private void listenForAnswer() throws IOException {
+		for (int i = 0; i < instream_list.size(); i++) {
+			final InputStream answerInStream = instream_list.get(i);
+			Thread listeningthread = new Thread() {
+				public void run() {
+					try {
+						byte [] in_bytearray  = new byte[1000];
+						int bytesread = answerInStream.read(in_bytearray);
+						if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
+						String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
+						System.out.println(answerString);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			};
+			listeningthread.start();
+		}
 	}
 }
