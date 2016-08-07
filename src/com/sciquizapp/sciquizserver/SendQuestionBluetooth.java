@@ -33,12 +33,14 @@ public class SendQuestionBluetooth {
 	private ArrayList<OutputStream> outstream_list;
 	private InputStream inStream = null;
 	private ArrayList<InputStream> instream_list;
+	private static final int MAX_NUMBER_OF_CLIENTS = 1;
 
 	//start server
 	public void startServer() throws IOException {
 
 		//Create a UUID for SPP
 		uuid = new UUID("1101", true);
+		
 		//Create the servicve url
 		connectionString = "btspp://localhost:" + uuid +";name=Sample SPP Server";
 
@@ -64,13 +66,14 @@ public class SendQuestionBluetooth {
 
 						//read string from spp client
 						inStream = connection.openInputStream();
-						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
-						String lineRead=bReader.readLine();
-						System.out.println(lineRead);
+//						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
+//						String lineRead=bReader.readLine();
+//						System.out.println(lineRead);
 						instream_list.add(inStream);
 
 						//open outputstream
 						outStream = connection.openOutputStream();
+						SendNewConnectionResponse(outStream);
 						outstream_list.add(outStream);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -160,5 +163,16 @@ public class SendQuestionBluetooth {
 			};
 			listeningthread.start();
 		}
+	}
+	
+	private void SendNewConnectionResponse(OutputStream outStreamToNewClient) throws IOException {
+		String response = "SERVER///OK///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
+		byte[] bytes = new byte[40];
+		int bytes_length = response.getBytes("UTF-8").length;
+		for (int i = 0; i < bytes_length; i++) {
+			bytes[i] = response.getBytes("UTF-8")[i];
+		}
+		outStreamToNewClient.write(bytes, 0, bytes.length);
+		outStreamToNewClient.flush();
 	}
 }
