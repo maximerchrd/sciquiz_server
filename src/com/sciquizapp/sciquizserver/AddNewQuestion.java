@@ -8,13 +8,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import javax.swing.Box;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -35,7 +38,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	private JFileChooser mFileChooser;
 	private String mFilePath = "";
 
-	public AddNewQuestion() {
+	public AddNewQuestion(final List<Question> arg_questionList, final DefaultListModel<String> arg_from_questions, 
+			final DefaultListModel<String> arg_from_IDs) {
 		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
 		Box box = Box.createVerticalBox();
 		new_question_frame.add( box );
@@ -112,6 +116,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 		//implement a button to add a new question to the database
 		final DBManager new_db_man = new DBManager();
+		
 		JButton save_quest_button = new JButton("ajouter une question");
 		save_quest_button.addActionListener(new ActionListener()
 		{
@@ -125,6 +130,11 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				arg_questionList.add(new_quest);
+				arg_from_questions.addElement(new_quest.getQUESTION());
+				arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
+//				DefaultListModel<String>  jlist_model = (DefaultListModel<String>) arg_dragFrom.getModel();
+//				arg_dragFrom.setModel(jlist_model);
 				new_question_frame.dispatchEvent(new WindowEvent(new_question_frame, WindowEvent.WINDOW_CLOSING));
 			}
 		});

@@ -46,10 +46,11 @@ import java.util.List;
 
 public class ChooseDropActionDemo extends JFrame {
 	public int question_index = 0;
-	DefaultListModel from = new DefaultListModel();
-	DefaultListModel copy = new DefaultListModel();
-	DefaultListModel move = new DefaultListModel();
-	JList dragFrom;
+	DefaultListModel<String> from_questions = new DefaultListModel<String>();
+	DefaultListModel<String> from_IDs = new DefaultListModel<String>();
+	DefaultListModel<String> copy_question = new DefaultListModel<String>();
+	DefaultListModel<String> copy_IDs = new DefaultListModel<String>();
+	JList<String> dragFrom;
 	public JPanel panel_for_from;
 	public JPanel panel_for_copy;
 	List<Question> questionList = new ArrayList<Question>();
@@ -65,12 +66,13 @@ public class ChooseDropActionDemo extends JFrame {
 			e.printStackTrace();
 		}
 		for (int i = 0; i < questionList.size(); i++) {
-			from.add(0, questionList.get(i).getQUESTION());
+			from_questions.addElement(questionList.get(i).getQUESTION());
+			from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
 		}
 
 		panel_for_from = new JPanel();
 		panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
-		dragFrom = new JList(from);
+		dragFrom = new JList<String>(from_questions);
 		dragFrom.setTransferHandler(new FromTransferHandler());
 		dragFrom.setPrototypeCellValue("List Item WWWWWW");
 		dragFrom.setDragEnabled(true);
@@ -88,7 +90,7 @@ public class ChooseDropActionDemo extends JFrame {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				AddNewQuestion new_quest = new AddNewQuestion();
+				AddNewQuestion new_quest = new AddNewQuestion(questionList, from_questions, from_IDs);
 			}
 		});
 		panel_for_from.add(new_quest_button);
@@ -99,14 +101,13 @@ public class ChooseDropActionDemo extends JFrame {
         moveTo.setTransferHandler(new ToTransferHandler(TransferHandler.MOVE));
         moveTo.setDropMode(DropMode.INSERT);*/
 
-		final JList copyTo = new JList(copy);
+		final JList<String> copyTo = new JList<String>(copy_question);
 		copyTo.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
 		copyTo.setDropMode(DropMode.INSERT);
 
 		//listener for when highlighted line changed
 		final DisplayQuestion dis_question = new DisplayQuestion(panel_disquest);
 		copyTo.addListSelectionListener(new ListSelectionListener() {
-
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()) {
@@ -188,7 +189,7 @@ public class ChooseDropActionDemo extends JFrame {
 
 		public Transferable createTransferable(JComponent comp) {
 			index = dragFrom.getSelectedIndex();
-			if (index < 0 || index >= from.getSize()) {
+			if (index < 0 || index >= from_questions.getSize()) {
 				return null;
 			}
 
@@ -200,7 +201,7 @@ public class ChooseDropActionDemo extends JFrame {
 				return;
 			}
 
-			from.removeElementAt(index);
+			from_questions.removeElementAt(index);
 		}
 	}
 
@@ -264,7 +265,7 @@ public class ChooseDropActionDemo extends JFrame {
 			return true;
 		}
 		public Question getSelectedQuestion() {
-			JList copyTo = new JList(copy);
+			JList copyTo = new JList(copy_question);
 			int indexOfQuestion = copyTo.getSelectedIndex();
 			Question questionToReturn = new Question();
 			questionToReturn = questionList.get(indexOfQuestion);

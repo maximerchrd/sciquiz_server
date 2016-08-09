@@ -81,7 +81,7 @@ public class DisplayQuestion extends JComponent {
     	thumb.setIcon(icon);
         //parentFrame.add(this);
         //parentFrame.setVisible(true);
-        System.out.println("trying to display question");
+//        System.out.println("trying to display question");
     }
     /*public void paintComponent (Graphics g){
         if(image == null) return;
