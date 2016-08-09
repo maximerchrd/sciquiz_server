@@ -3,16 +3,23 @@ package com.sciquizapp.sciquizserver;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.awt.image.ImageFilter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 
-public class AddNewQuestion {
+public class AddNewQuestion extends JPanel implements ActionListener{
 	JLabel question_label;
 	JLabel answer1_label;
 	JLabel answer2_label;
@@ -25,6 +32,8 @@ public class AddNewQuestion {
 	JTextField answer4_text;
 	ImageIcon icon;
 	JLabel thumb;
+	private JFileChooser mFileChooser;
+	private String mFilePath = "";
 
 	public AddNewQuestion() {
 		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
@@ -40,6 +49,7 @@ public class AddNewQuestion {
 		answer3_text = new JTextField("");
 		answer4_label = new JLabel("Réponse 4:");
 		answer4_text = new JTextField("");
+
 		//Image image=GenerateImage.toImage(true);  //this generates an image file
 		//icon = new ImageIcon(image); 
 		thumb = new JLabel();
@@ -55,14 +65,60 @@ public class AddNewQuestion {
 		box.add(answer4_label);
 		box.add(answer4_text);
 
-		final DBManager new_db_man = new DBManager();
+		//implement a button to add a picture
+		JButton add_image_button = new JButton("ajouter une image");
+		add_image_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				//Set up the file chooser.
+				if (mFileChooser == null) {
+					mFileChooser = new JFileChooser();
+
+					//Add a custom file filter and disable the default
+					//(Accept All) file filter.
+					//		        	mFileChooser.addChoosableFileFilter(new ImageFilter());
+					//		        	mFileChooser.setAcceptAllFileFilterUsed(false);
+
+				}
+
+				//Show it.
+				int returnVal = mFileChooser.showDialog(AddNewQuestion.this,
+						"Attach");
+				//Process the results.
+				File source_file = new File("");
+				String directory = "res/drawable/";
+				
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					source_file = mFileChooser.getSelectedFile();
+					System.out.println("Attaching file: " + source_file.getName());
+				} else {
+					System.out.println("Attachment cancelled by user.");
+				}
+				File dest_file = new File(directory + source_file.getName());
+				try {
+					Files.copy(source_file.toPath(), dest_file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				mFilePath = directory + source_file.getName();
+
+				//Reset the file chooser for the next time it's shown.
+				mFileChooser.setSelectedFile(null);
+			}
+		});
+		box.add(add_image_button);
+
 		//implement a button to add a new question to the database
+		final DBManager new_db_man = new DBManager();
 		JButton save_quest_button = new JButton("ajouter une question");
 		save_quest_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(), answer2_text.getText(), answer3_text.getText(), answer4_text.getText(),answer1_text.getText(),"");
+				Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(), 
+						answer2_text.getText(), answer3_text.getText(), answer4_text.getText(),answer1_text.getText(),mFilePath);
 				try {
 					new_db_man.addQuestion(new_quest);
 				} catch (Exception e1) {
@@ -76,6 +132,12 @@ public class AddNewQuestion {
 
 		new_question_frame.setBounds(0, 0, 500, 500);
 		new_question_frame.setVisible(true);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

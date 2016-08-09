@@ -34,6 +34,9 @@ public class SendQuestionBluetooth {
 	private InputStream inStream = null;
 	private ArrayList<InputStream> instream_list;
 	private static final int MAX_NUMBER_OF_CLIENTS = 1;
+	private int number_of_clients = 0;
+	//temporary ArrayList of strings containing Client's mac addresse
+	private ArrayList<String> mClientsAddresses;
 
 	//start server
 	public void startServer() throws IOException {
@@ -51,6 +54,7 @@ public class SendQuestionBluetooth {
 		System.out.println("\nServer Started. Waiting for clients to connect...");
 		outstream_list = new ArrayList<OutputStream>();
 		instream_list = new ArrayList<InputStream>();
+		mClientsAddresses = new ArrayList<String>();
 
 		Thread connectionthread = new Thread() {
 			public void run() {
@@ -63,18 +67,18 @@ public class SendQuestionBluetooth {
 						System.out.println("Remote device address: "+dev.getBluetoothAddress());
 						System.out.println("Remote device name: "+dev.getFriendlyName(true));
 
-
-						//read string from spp client
-						inStream = connection.openInputStream();
-//						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
-//						String lineRead=bReader.readLine();
-//						System.out.println(lineRead);
-						instream_list.add(inStream);
-
-						//open outputstream
+						//open outputstream and instream
 						outStream = connection.openOutputStream();
+						inStream = connection.openInputStream();
 						SendNewConnectionResponse(outStream);
-						outstream_list.add(outStream);
+//						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) outstream_list.add(outStream);
+						
+						//read string from spp client
+						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
+						String lineRead=bReader.readLine();
+						System.out.println(lineRead);
+//						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) instream_list.add(inStream);
+						mClientsAddresses.add(lineRead);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -153,8 +157,10 @@ public class SendQuestionBluetooth {
 						byte [] in_bytearray  = new byte[1000];
 						int bytesread = answerInStream.read(in_bytearray);
 						if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
-						String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
-						System.out.println(answerString);
+						if (bytesread >= 0) {
+							String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
+							System.out.println(answerString);
+						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -166,7 +172,16 @@ public class SendQuestionBluetooth {
 	}
 	
 	private void SendNewConnectionResponse(OutputStream outStreamToNewClient) throws IOException {
-		String response = "SERVER///OK///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
+		String response = "A PROBLEM OCCURED";
+		if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
+			response = "SERVER///OK///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
+			number_of_clients++;
+			outstream_list.add(outStream);
+			instream_list.add(inStream);
+		} else if (number_of_clients > 0) {
+			response = "SERVER///" + mClientsAddresses.get(0) + "///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
+		}
+			
 		byte[] bytes = new byte[40];
 		int bytes_length = response.getBytes("UTF-8").length;
 		for (int i = 0; i < bytes_length; i++) {
