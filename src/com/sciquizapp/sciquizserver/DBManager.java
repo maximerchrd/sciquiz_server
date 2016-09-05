@@ -111,7 +111,7 @@ public class DBManager {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 			c.setAutoCommit(false);
-			System.out.println("Opened database successfully");
+//			System.out.println("Opened database successfully");
 
 			stmt = c.createStatement();
 			ResultSet rs = stmt.executeQuery( "SELECT * FROM QUESTION;" );
@@ -140,7 +140,7 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("Operation done successfully");
+//		System.out.println("Operation done successfully");
 		return quesList;
 	}
 } 

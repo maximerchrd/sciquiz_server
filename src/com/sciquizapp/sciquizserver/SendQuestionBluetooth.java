@@ -11,11 +11,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.bluetooth.*;
 import javax.microedition.io.*;
+
+import com.intel.bluetooth.RemoteDeviceHelper;
+
+import sun.rmi.runtime.Log;
 
 /**
  * Class that implements an SPP Server which accepts single line of
@@ -37,6 +44,12 @@ public class SendQuestionBluetooth {
 	private int number_of_clients = 0;
 	//temporary ArrayList of strings containing Client's mac addresse
 	private ArrayList<String> mClientsAddresses;
+	
+	//variables for bluetooth client
+	public static final Vector<RemoteDevice> devicesDiscovered = new Vector();
+	private static String connectionURL=null;
+	//object used for waiting
+	private static Object lock=new Object();
 
 	//start server
 	public void startServer() throws IOException {
@@ -49,13 +62,112 @@ public class SendQuestionBluetooth {
 
 		//open server url
 		streamConnNotifier = (StreamConnectionNotifier)Connector.open( connectionString );
-
+		
 		//Wait for client connection
 		System.out.println("\nServer Started. Waiting for clients to connect...");
 		outstream_list = new ArrayList<OutputStream>();
 		instream_list = new ArrayList<InputStream>();
 		mClientsAddresses = new ArrayList<String>();
 
+		//code below for bluetooth client
+		final Object inquiryCompletedEvent = new Object();
+
+        devicesDiscovered.clear();
+
+        DiscoveryListener listener = new DiscoveryListener() {
+
+            public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+                System.out.println("Device " + btDevice.getBluetoothAddress() + " found");
+                devicesDiscovered.addElement(btDevice);
+                try {
+                    System.out.println("     name " + btDevice.getFriendlyName(false));
+                } catch (IOException cantGetDeviceName) {
+                }
+            }
+
+            public void inquiryCompleted(int discType) {
+                System.out.println("Device Inquiry completed!");
+                synchronized(inquiryCompletedEvent){
+                    inquiryCompletedEvent.notifyAll();
+                }
+            }
+
+          //implement this method since services are not being discovered
+            public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+                if(servRecord!=null && servRecord.length>0){
+                    connectionURL=servRecord[0].getConnectionURL(0,false);
+                }
+                synchronized(lock){
+                    lock.notify();
+                }
+            }
+          //implement this method since services are not being discovered
+            public void serviceSearchCompleted(int transID, int respCode) {
+                synchronized(lock){
+                    lock.notify();
+                }
+            }
+
+        };
+
+        DiscoveryAgent agent = LocalDevice.getLocalDevice().getDiscoveryAgent();
+        synchronized(inquiryCompletedEvent) {
+            boolean started = agent.startInquiry(DiscoveryAgent.GIAC, listener);
+            if (started) {
+                System.out.println("wait for device inquiry to complete...");
+                try {
+					inquiryCompletedEvent.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                System.out.println(devicesDiscovered.size() +  " device(s) found");
+            }
+        }
+      //check for spp service
+        RemoteDevice remoteDevice=devicesDiscovered.get(1);
+        UUID[] uuidSet = new UUID[1];
+        uuidSet[0]=new UUID("0000110100001000800000805F9B34FB", false);
+
+
+      //Bonding the device:
+        try {
+        	System.out.println("Authentication (pairing) :" + RemoteDeviceHelper.authenticate(remoteDevice));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } 
+      
+      
+        System.out.println("\nSearching for service...");
+        System.out.println("searchServices result: " + agent.searchServices(null,uuidSet,remoteDevice,listener));
+
+        try {
+            synchronized(lock){
+                lock.wait();
+            }
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if(connectionURL==null){
+            System.out.println("Device does not support Simple SPP Service.");
+            System.exit(0);
+        }
+
+        //connect to the server and send a line of text
+        StreamConnection streamConnection=(StreamConnection)Connector.open(connectionURL);
+
+        //send string
+        OutputStream clientoutStream=streamConnection.openOutputStream();
+        PrintWriter pWriter=new PrintWriter(new OutputStreamWriter(clientoutStream));
+        pWriter.write("Test String from SPP Client\r\n");
+        pWriter.flush();
+        
+        
+        
+		
 		Thread connectionthread = new Thread() {
 			public void run() {
 				while (true) {
