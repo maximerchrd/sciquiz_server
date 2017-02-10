@@ -67,7 +67,8 @@ public class AWTCounter extends Frame implements ActionListener {
 		// Display the counter value on the TextField tfCount
 		questionNumber = Integer.parseInt(tfCount.getText());
 		try {
-			SendQuestion new_send_question = new SendQuestion(questionList.get(drop_action_member.question_index));
+			NetworkCommunication new_send_question = new NetworkCommunication();
+			new_send_question.SendQuestion(questionList.get(drop_action_member.question_index));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

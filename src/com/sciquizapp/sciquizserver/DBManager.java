@@ -64,6 +64,85 @@ public class DBManager {
 		this.addQuestion(q2);
 		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
 		this.addQuestion(q3);
+
+		//Create multiple choice questions table if it doesn't exist
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+
+			stmt = c.createStatement();
+			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
+					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" SUBJECT           TEXT    NOT NULL, " +
+					" LEVEL      INT     NOT NULL, " +
+					" QUESTION           TEXT    NOT NULL, " +
+					" ANSWER           TEXT    NOT NULL, " +
+					" OPTION1           TEXT    NOT NULL, " +
+					" OPTION2           TEXT    NOT NULL, " +
+					" OPTION3           TEXT    NOT NULL, " +
+					" OPTION4           TEXT    NOT NULL, " +
+					" OPTION5           TEXT    NOT NULL, " +
+					" OPTION6           TEXT    NOT NULL, " +
+					" OPTION7           TEXT    NOT NULL, " +
+					" OPTION8           TEXT    NOT NULL, " +
+					" OPTION9           TEXT    NOT NULL, " +
+					" TRIAL0           TEXT    NOT NULL, " +
+					" TRIAL1           TEXT    NOT NULL, " +
+					" TRIAL2           TEXT    NOT NULL, " +
+					" TRIAL3           TEXT    NOT NULL, " +
+					" TRIAL4           TEXT    NOT NULL, " +
+					" TRIAL5           TEXT    NOT NULL, " +
+					" TRIAL6           TEXT    NOT NULL, " +
+					" TRIAL7           TEXT    NOT NULL, " +
+					" TRIAL8           TEXT    NOT NULL, " +
+					" TRIAL9           TEXT    NOT NULL, " +
+					" IMAGE_PATH           TEXT    NOT NULL) ";
+			stmt.executeUpdate(sql);
+			stmt.close();
+			c.close();
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		//Create short answer questions table if it doesn't exist
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+
+			stmt = c.createStatement();
+			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
+					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" SUBJECT           TEXT    NOT NULL, " +
+					" LEVEL      INT     NOT NULL, " +
+					" QUESTION           TEXT    NOT NULL, " +
+					" IMAGE_PATH           TEXT    NOT NULL) ";
+			stmt.executeUpdate(sql);
+			stmt.close();
+			c.close();
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		//Create short answer questions table if it doesn't exist
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+
+			stmt = c.createStatement();
+			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
+					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" SUBJECT           TEXT    NOT NULL, " +
+					" LEVEL      INT     NOT NULL, " +
+					" QUESTION           TEXT    NOT NULL, " +
+					" ANSWER           TEXT    NOT NULL, " +
+					" IMAGE_PATH           TEXT    NOT NULL) ";
+			stmt.executeUpdate(sql);
+			stmt.close();
+			c.close();
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
 	}
 	// Adding new question to database
 	public void addQuestion(Question quest) throws Exception {
@@ -91,6 +170,52 @@ public class DBManager {
 					quest.getTRIAL3() + "','" +
 					quest.getTRIAL4() + "','" +
 					quest.getIMAGE() + "');"; 
+			stmt.executeUpdate(sql);
+			stmt.close();
+			c.commit();
+			c.close();
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+	}
+	// Adding new question to database
+	public void addMultipleChoiceQuestion(QuestionMultipleChoice quest) throws Exception {
+		Connection c = null;
+		Statement stmt = null;
+		stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+			c.setAutoCommit(false);
+			stmt = c.createStatement();
+			String sql = 	"INSERT INTO question (SUBJECT,LEVEL,QUESTION,ANSWER," +
+					"OPTIONA,OPTIONB,OPTIONC,OPTIOND,TRIAL1,TRIAL2,TRIAL3,TRIAL4,IMAGE_PATH) " +
+					"VALUES ('" +
+					quest.getSUBJECT() + "'," +
+					quest.getLEVEL() + ",'" +
+					quest.getQUESTION() + "','" +
+					quest.getANSWER() + "','" +
+					quest.getOPT1() + "','" +
+					quest.getOPT2() + "','" +
+					quest.getOPT3() + "','" +
+					quest.getOPT4() + "','" +
+					quest.getOPT5() + "','" +
+					quest.getOPT6() + "','" +
+					quest.getOPT7() + "','" +
+					quest.getOPT8() + "','" +
+					quest.getOPT9() + "','" +
+					quest.getTRIAL0() + "','" +
+					quest.getTRIAL1() + "','" +
+					quest.getTRIAL2() + "','" +
+					quest.getTRIAL3() + "','" +
+					quest.getTRIAL4() + "','" +
+					quest.getTRIAL5() + "','" +
+					quest.getTRIAL6() + "','" +
+					quest.getTRIAL7() + "','" +
+					quest.getTRIAL8() + "','" +
+					quest.getTRIAL9() + "','" +
+					quest.getIMAGE() + "');";
 			stmt.executeUpdate(sql);
 			stmt.close();
 			c.commit();

@@ -1,16 +1,11 @@
 package com.sciquizapp.sciquizserver;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
@@ -43,50 +38,50 @@ public class SendQuestionBluetooth {
 
 		//Create a UUID for SPP
 		uuid = new UUID("1101", true);
-		
+
 		//Create the servicve url
 		connectionString = "btspp://localhost:" + uuid +";name=Sample SPP Server";
 
 		//open server url
 		streamConnNotifier = (StreamConnectionNotifier)Connector.open( connectionString );
 
-		//Wait for client connection
-		System.out.println("\nServer Started. Waiting for clients to connect...");
-		outstream_list = new ArrayList<OutputStream>();
-		instream_list = new ArrayList<InputStream>();
-		mClientsAddresses = new ArrayList<String>();
-
-		Thread connectionthread = new Thread() {
-			public void run() {
-				while (true) {
-					try {
-						System.out.println("waiting for next client to connect");
-						connection = streamConnNotifier.acceptAndOpen();
-
-						RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
-						System.out.println("Remote device address: "+dev.getBluetoothAddress());
-						System.out.println("Remote device name: "+dev.getFriendlyName(true));
-
-						//open outputstream and instream
-						outStream = connection.openOutputStream();
-						inStream = connection.openInputStream();
-						SendNewConnectionResponse(outStream);
-//						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) outstream_list.add(outStream);
-						
-						//read string from spp client
-						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
-						String lineRead=bReader.readLine();
-						System.out.println(lineRead);
-//						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) instream_list.add(inStream);
-						mClientsAddresses.add(lineRead);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}  
-			}
-		};
-		connectionthread.start();
+//		//Wait for client connection
+//		System.out.println("\nServer Started. Waiting for clients to connect...");
+//		outstream_list = new ArrayList<OutputStream>();
+//		instream_list = new ArrayList<InputStream>();
+//		mClientsAddresses = new ArrayList<String>();
+//
+//		Thread connectionthread = new Thread() {
+//			public void run() {
+//				while (true) {
+//					try {
+//						System.out.println("waiting for next client to connect");
+//						connection = streamConnNotifier.acceptAndOpen();
+//
+//						RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
+//						System.out.println("Remote device address: "+dev.getBluetoothAddress());
+//						System.out.println("Remote device name: "+dev.getFriendlyName(true));
+//
+//						//open outputstream and instream
+//						outStream = connection.openOutputStream();
+//						inStream = connection.openInputStream();
+//						SendNewConnectionResponse(outStream);
+////						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) outstream_list.add(outStream);
+//
+//						//read string from spp client
+//						BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
+//						String lineRead=bReader.readLine();
+//						System.out.println(lineRead);
+////						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) instream_list.add(inStream);
+//						mClientsAddresses.add(lineRead);
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//				}
+//			}
+//		};
+//		connectionthread.start();
 
 		//send response to spp client
 		/*outStream = connection.openOutputStream();
@@ -144,7 +139,7 @@ public class SendQuestionBluetooth {
 			}
 			System.out.println("Done.");
 		} else {
-			System.out.println("StreamConnection variable is null. No device connected in mode intéractif. \n");
+			System.out.println("StreamConnection variable is null. No device connected in mode intï¿½ractif. \n");
 		}
 		listenForAnswer();
 	}

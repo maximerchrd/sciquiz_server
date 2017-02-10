@@ -55,7 +55,7 @@ public class ChooseDropActionDemo extends JFrame {
 	public JPanel panel_for_copy;
 	List<Question> questionList = new ArrayList<Question>();
 
-	public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest) {
+	public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
 		super("ChooseDropActionDemo");
 
 		DBManager database = new DBManager();
@@ -164,7 +164,7 @@ public class ChooseDropActionDemo extends JFrame {
 				Question question_to_send = new Question();
 				question_to_send = questionList.get(copyTo.getSelectedIndex());
 				try {
-					send_quest.SendQuestion(question_to_send);
+					network_singleton.SendQuestion(question_to_send);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
