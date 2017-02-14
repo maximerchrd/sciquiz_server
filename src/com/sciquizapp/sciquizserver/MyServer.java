@@ -97,7 +97,7 @@ public class MyServer {
         //Display the window.
         //frame.pack();
         frame.setContentPane(parent);
-        frame.setBounds(0, 0, 500, 500);
+        frame.setBounds(0, 0, 1000, 500);
         frame.setVisible(true);
 //		//Sends question to clients
 //		ServerSocket serverSocket = null;

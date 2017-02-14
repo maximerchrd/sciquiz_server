@@ -127,14 +127,15 @@ public class NetworkCommunication {
 			question_text += arg_quest.getIMAGE().split("/")[2];
 			byte [] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
 
-			// send file : the sizes of the text and of the file are given in the first 20 bytes
+			// send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
 
 			//writing of the first 20 bytes
 			File myFile = new File (arg_quest.getIMAGE());
 			int intfileLength = (int)myFile.length();
 			int textbyteslength = bytearraytext.length;
 			byte [] bytearray  = new byte [20 + textbyteslength + intfileLength];
-			String fileLength = String.valueOf((int)myFile.length());
+			String fileLength = "QUEST";
+			fileLength += ":" + String.valueOf((int)myFile.length());
 			fileLength += ":" + String.valueOf(textbyteslength);
 			byte [] bytearraystring = fileLength.getBytes(Charset.forName("UTF-8"));
 			for (int i = 0; i < bytearraystring.length; i++) {
@@ -159,6 +160,11 @@ public class NetworkCommunication {
 				outstream_list.get(i).flush();
 			}
 			System.out.println("Done.");
+//			String array_string = "";
+//			for (int i = 0; i < bytearray.length; i++) {
+//				array_string += bytearray[i];
+//			}
+//			System.out.print(array_string);
 		} else {
 			System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
 		}
