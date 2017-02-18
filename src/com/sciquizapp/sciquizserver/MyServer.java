@@ -37,19 +37,6 @@ public class MyServer {
 
     public static void main(String[] args) throws Exception {
 
-        //start bluetooth network in new thread
-        NetworkCommunication CommunicationWithClients = new NetworkCommunication();
-        Thread networkThread = new Thread() {
-            public void run() {
-                try {
-                    CommunicationWithClients.startServer();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        networkThread.start();
-
         //does db stuffs
         DBManager dao = new DBManager();
         dao.createDBIfNotExists();
@@ -72,6 +59,19 @@ public class MyServer {
         TableUserVsQuest.setOpaque(true); //content panes must be opaque
         //frame.setContentPane(TableUserVsQuest);
 
+
+        //start bluetooth network in new thread
+        NetworkCommunication CommunicationWithClients = new NetworkCommunication(TableUserVsQuest);
+        Thread networkThread = new Thread() {
+            public void run() {
+                try {
+                    CommunicationWithClients.startServer();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        networkThread.start();
 
         //Turn off metal's use of bold fonts
         ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame, panel_for_questlist, panel_for_disquest, CommunicationWithClients);

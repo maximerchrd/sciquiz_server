@@ -94,7 +94,9 @@ public class Table extends JPanel {
 			i++;
 		}
 		//System.out.println("i after loop:" + i);
-		if (i == model2.getRowCount()) model2.addRow(new Object[]{User});
+		if (i == model2.getRowCount()) {
+			model2.addRow(new Object[]{User});
+		}
 		model2.setValueAt(0, model2.getRowCount() - 1, 1);
 	}
 	public void addQuestion(String Question) {

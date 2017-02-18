@@ -16,6 +16,7 @@ import javax.bluetooth.*;
  *
  */
 public class NetworkCommunication {
+	private Table mTableQuestionVsUser = null;
 	private UUID uuid = null;
 	private String connectionString;
 	private StreamConnection connection = null;
@@ -31,6 +32,11 @@ public class NetworkCommunication {
 	//temporary ArrayList of strings containing Client's mac addresse
 	private ArrayList<String> mClientsAddresses;
 
+	public NetworkCommunication(Table TableQuestionVsUser) {
+		mTableQuestionVsUser = TableQuestionVsUser;
+	}
+	public NetworkCommunication() {
+	}
 	//start server
 	public void startServer() throws IOException {
 		LocalDevice local = null;
@@ -68,6 +74,7 @@ public class NetworkCommunication {
 						try {
 							RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
 							System.out.println("Remote device address: "+dev.getBluetoothAddress());
+							mTableQuestionVsUser.addUser(dev.getBluetoothAddress());
 							//System.out.println("Remote device name: "+dev.getFriendlyName(true));
 
 							//open outputstream and instream
