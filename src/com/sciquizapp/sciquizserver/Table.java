@@ -103,22 +103,22 @@ public class Table extends JPanel {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
 	}
-	public void addAnswerForUser(String UserAndAnswer) {
+	public void addAnswerForUser(Student student, String answer) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int rowNumber = 0;
-		while (!model2.getValueAt(rowNumber, 0).toString().matches(UserAndAnswer.split(";")[0])) {
+		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getAddress().replace(":",""))) {
 			rowNumber++;
 		}
 		
 		//if statement to prevent from answering more than once to the current question
 		if (model2.getValueAt(rowNumber, model2.getColumnCount() - 1) == null) {
-			model2.setValueAt(UserAndAnswer.split(";")[2], rowNumber, model2.getColumnCount() - 1);
+			model2.setValueAt(answer, rowNumber, model2.getColumnCount() - 1);
 			
 			// increases score if answer right
-			if (UserAndAnswer.split(";")[3].toString().matches("right")) {
-				int score = (int)model2.getValueAt(rowNumber, 1);
-				model2.setValueAt(score + 1, rowNumber, 1);
-			}
+//			if (UserAndAnswer.split(";")[3].toString().matches("right")) {
+//				int score = (int)model2.getValueAt(rowNumber, 1);
+//				model2.setValueAt(score + 1, rowNumber, 1);
+//			}
 		}
 	}
 	public Boolean IsUserInTable(String UserAndAnswer) {

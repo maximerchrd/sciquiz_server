@@ -87,13 +87,14 @@ public class NetworkCommunication {
 //						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) outstream_list.add(outStream);
 
 							//read string from spp client
-							BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
-							String lineRead = "empty";
-							while (true && lineRead != null) {
-								lineRead=bReader.readLine();
-								System.out.println(lineRead);
-								mClientsAddresses.add(lineRead);
-							}
+//							BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
+//							String lineRead = "empty";
+//							while (true && lineRead != null) {
+//								lineRead=bReader.readLine();
+//								System.out.println(lineRead);
+//								mClientsAddresses.add(lineRead);
+//							}
+							listenForClients();
 
 //						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) instream_list.add(inStream);
 
@@ -124,7 +125,8 @@ public class NetworkCommunication {
 	public void SendQuestion(Question arg_quest) throws IOException {
 		//send question to spp client
 		if (connection != null) {
-
+			//add a row in the table for the new question and answers
+			mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
 			//make string and bytearray from question and answers
 			String question_text = arg_quest.getQUESTION() + "///";
 			question_text += arg_quest.getOPTA() + "///";
@@ -175,7 +177,34 @@ public class NetworkCommunication {
 		} else {
 			System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
 		}
-		//listenForAnswer();
+	}
+	private void listenForClients() throws IOException {
+		for (int i = 0; i < instream_list.size(); i++) {
+			final InputStream answerInStream = instream_list.get(i);
+			Thread listeningthread = new Thread() {
+				public void run() {
+					while(true) {
+						try {
+							byte[] in_bytearray = new byte[1000];
+							int bytesread = answerInStream.read(in_bytearray);
+							if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
+							if (bytesread >= 0) {
+								String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
+								System.out.println(answerString);
+								if (answerString.split("///")[0].contains("ANSW")) {
+									Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+									mTableQuestionVsUser.addAnswerForUser(student, answerString.split("///")[3]);
+								}
+							}
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+				}
+			};
+			listeningthread.start();
+		}
 	}
 
 }

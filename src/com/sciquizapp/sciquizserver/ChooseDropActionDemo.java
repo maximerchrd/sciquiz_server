@@ -267,7 +267,7 @@ public class ChooseDropActionDemo extends JFrame {
 		public Question getSelectedQuestion() {
 			JList copyTo = new JList(copy_question);
 			int indexOfQuestion = copyTo.getSelectedIndex();
-			Question questionToReturn = new Question();
+			Question questionToReturn;
 			questionToReturn = questionList.get(indexOfQuestion);
 			return questionToReturn;           
 		}
