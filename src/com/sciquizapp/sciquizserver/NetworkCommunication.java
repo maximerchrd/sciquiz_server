@@ -37,7 +37,11 @@ public class NetworkCommunication {
 	}
 	public NetworkCommunication() {
 	}
-	//start server
+
+	/**
+	 * starts the bluetooth server
+	 * @throws IOException
+	 */
 	public void startServer() throws IOException {
 		LocalDevice local = null;
 
@@ -79,10 +83,10 @@ public class NetworkCommunication {
 
 							//open outputstream and instream
 							outStream = connection.openOutputStream();
-                            outstream_list.add(outStream);
-
 							inStream = connection.openInputStream();
-                            instream_list.add(inStream);
+
+							SendNewConnectionResponse();
+
 							//SendNewConnectionResponse(outStream);
 //						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) outstream_list.add(outStream);
 
@@ -178,6 +182,11 @@ public class NetworkCommunication {
 			System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
 		}
 	}
+
+	/**
+	 * method that listen for the client data transfers
+	 * @throws IOException
+	 */
 	private void listenForClients() throws IOException {
 		for (int i = 0; i < instream_list.size(); i++) {
 			final InputStream answerInStream = instream_list.get(i);
@@ -207,4 +216,23 @@ public class NetworkCommunication {
 		}
 	}
 
+	private void SendNewConnectionResponse() throws IOException {
+		String response = "A PROBLEM OCCURED";
+		if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
+			response = "SERVR///OK///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
+			number_of_clients++;
+			outstream_list.add(outStream);
+			instream_list.add(inStream);
+		} else {
+			response = "SERVR///MAX///";
+		}
+
+		byte[] bytes = new byte[20];
+		int bytes_length = response.getBytes("UTF-8").length;
+		for (int i = 0; i < bytes_length; i++) {
+			bytes[i] = response.getBytes("UTF-8")[i];
+		}
+		outStream.write(bytes, 0, bytes.length);
+		outStream.flush();
+	}
 }

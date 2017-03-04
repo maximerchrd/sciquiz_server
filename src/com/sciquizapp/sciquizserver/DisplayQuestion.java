@@ -37,13 +37,13 @@ public class DisplayQuestion extends JComponent {
     	panel_disquest.add( box );
     	question_label = new JLabel("Question:");
     	question_text = new JTextField("");
-    	answer1_label = new JLabel("Réponse 1:");
+    	answer1_label = new JLabel("Rï¿½ponse 1:");
     	answer1_text = new JTextField("");
-    	answer2_label = new JLabel("Réponse 2:");
+    	answer2_label = new JLabel("Rï¿½ponse 2:");
     	answer2_text = new JTextField("");
-    	answer3_label = new JLabel("Réponse 3:");
+    	answer3_label = new JLabel("Rï¿½ponse 3:");
     	answer3_text = new JTextField("");
-    	answer4_label = new JLabel("Réponse 4:");
+    	answer4_label = new JLabel("Rï¿½ponse 4:");
     	answer4_text = new JTextField("");
     	//Image image=GenerateImage.toImage(true);  //this generates an image file
     	//icon = new ImageIcon(image); 
@@ -62,6 +62,7 @@ public class DisplayQuestion extends JComponent {
     	box.add(thumb);
     }
     public void ShowQuestion (Question question_to_display, JFrame parentFrame, JPanel panel_disquest) {
+
     	question_text.setText(question_to_display.getQUESTION());
     	answer1_text.setText(question_to_display.getOPTA());
     	answer2_text.setText(question_to_display.getOPTB());
