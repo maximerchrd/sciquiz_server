@@ -29,6 +29,7 @@ public class NetworkCommunication {
 	private ArrayList<InputStream> instream_list;
 	private static final int MAX_NUMBER_OF_CLIENTS = 1;
 	private int number_of_clients = 0;
+	private ArrayList<Student> students_array;
 	//temporary ArrayList of strings containing Client's mac addresse
 	private ArrayList<String> mClientsAddresses;
 
@@ -67,40 +68,34 @@ public class NetworkCommunication {
 		outstream_list = new ArrayList<OutputStream>();
 		instream_list = new ArrayList<InputStream>();
 		mClientsAddresses = new ArrayList<String>();
+		students_array = new ArrayList<Student>();
 
 		while (true) {
 			try {
 				System.out.println("waiting for next client to connect");
-				connection = streamConnNotifier.acceptAndOpen();
+				Student student = new Student();
+				student.setConnection(streamConnNotifier.acceptAndOpen());
+				students_array.add(student);
+				//connection = streamConnNotifier.acceptAndOpen();
 
 				Thread connectionthread = new Thread() {
 					public void run() {
 						try {
-							RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
+							RemoteDevice dev = RemoteDevice.getRemoteDevice(students_array.get(students_array.size() - 1).getConnection());
 							System.out.println("Remote device address: "+dev.getBluetoothAddress());
+							students_array.get(students_array.size() - 1).setAddress(dev.getBluetoothAddress());
 							mTableQuestionVsUser.addUser(dev.getBluetoothAddress());
-							//System.out.println("Remote device name: "+dev.getFriendlyName(true));
 
 							//open outputstream and instream
-							outStream = connection.openOutputStream();
-							inStream = connection.openInputStream();
+							students_array.get(students_array.size() - 1).OpenStreams();
+							//outStream = connection.openOutputStream();
+							//inStream = connection.openInputStream();
+
 
 							SendNewConnectionResponse();
 
-							//SendNewConnectionResponse(outStream);
-//						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) outstream_list.add(outStream);
-
-							//read string from spp client
-//							BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
-//							String lineRead = "empty";
-//							while (true && lineRead != null) {
-//								lineRead=bReader.readLine();
-//								System.out.println(lineRead);
-//								mClientsAddresses.add(lineRead);
-//							}
 							listenForClients();
 
-//						if (number_of_clients <= MAX_NUMBER_OF_CLIENTS) instream_list.add(inStream);
 
 						} catch (IOException e1) {
 							e1.printStackTrace();
@@ -128,7 +123,7 @@ public class NetworkCommunication {
 
 	public void SendQuestion(Question arg_quest) throws IOException {
 		//send question to spp client
-		if (connection != null) {
+		//if (connection != null) {
 			//add a row in the table for the new question and answers
 			mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
 			//make string and bytearray from question and answers
@@ -168,19 +163,19 @@ public class NetworkCommunication {
 			//os = sock.getOutputStream();
 			System.out.println("Sending " + arg_quest.getIMAGE() + "(" + (int)myFile.length() + " bytes)");
 			System.out.println("Sending " + arraylength + " bytes in total");
-			for (int i = 0; i < outstream_list.size(); i++) {
-				outstream_list.get(i).write(bytearray,0,arraylength);
-				outstream_list.get(i).flush();
+//			for (int i = 0; i < outstream_list.size(); i++) {
+//				outstream_list.get(i).write(bytearray,0,arraylength);
+//				outstream_list.get(i).flush();
+//			}
+
+			for (int i = 0; i < students_array.size(); i++) {
+				students_array.get(i).getOutputStream().write(bytearray,0,arraylength);
+				students_array.get(i).getOutputStream().flush();
 			}
 			System.out.println("Done.");
-//			String array_string = "";
-//			for (int i = 0; i < bytearray.length; i++) {
-//				array_string += bytearray[i];
-//			}
-//			System.out.print(array_string);
-		} else {
-			System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
-		}
+		//} else {
+		//	System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
+		//}
 	}
 
 	/**
@@ -188,8 +183,9 @@ public class NetworkCommunication {
 	 * @throws IOException
 	 */
 	private void listenForClients() throws IOException {
-		for (int i = 0; i < instream_list.size(); i++) {
-			final InputStream answerInStream = instream_list.get(i);
+		for (int i = 0; i < students_array.size(); i++) {
+			final InputStream answerInStream = students_array.get(i).getInputStream();
+			final int j = i;
 			Thread listeningthread = new Thread() {
 				public void run() {
 					while(true) {
@@ -201,7 +197,9 @@ public class NetworkCommunication {
 								String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
 								System.out.println(answerString);
 								if (answerString.split("///")[0].contains("ANSW")) {
-									Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+									//Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+									students_array.get(j).setName(answerString.split("///")[2]);
+									Student student = students_array.get(j);
 									mTableQuestionVsUser.addAnswerForUser(student, answerString.split("///")[3]);
 								}
 							}
@@ -221,8 +219,8 @@ public class NetworkCommunication {
 		if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
 			response = "SERVR///OK///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
 			number_of_clients++;
-			outstream_list.add(outStream);
-			instream_list.add(inStream);
+			//outstream_list.add(outStream);
+			//instream_list.add(inStream);
 		} else {
 			response = "SERVR///MAX///";
 		}
@@ -232,7 +230,9 @@ public class NetworkCommunication {
 		for (int i = 0; i < bytes_length; i++) {
 			bytes[i] = response.getBytes("UTF-8")[i];
 		}
-		outStream.write(bytes, 0, bytes.length);
-		outStream.flush();
+		students_array.get(students_array.size() - 1).getOutputStream().write(bytes, 0, bytes.length);
+		students_array.get(students_array.size() - 1).getOutputStream().flush();
+		//outStream.write(bytes, 0, bytes.length);
+		//outStream.flush();
 	}
 }
