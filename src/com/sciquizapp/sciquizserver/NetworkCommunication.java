@@ -30,6 +30,7 @@ public class NetworkCommunication {
 	private static final int MAX_NUMBER_OF_CLIENTS = 1;
 	private int number_of_clients = 0;
 	private ArrayList<Student> students_array;
+	private Class aClass = null;
 	//temporary ArrayList of strings containing Client's mac addresse
 	private ArrayList<String> mClientsAddresses;
 	private DiscoveryAgent discoveryAgent = null;
@@ -72,27 +73,29 @@ public class NetworkCommunication {
 		outstream_list = new ArrayList<OutputStream>();
 		instream_list = new ArrayList<InputStream>();
 		mClientsAddresses = new ArrayList<String>();
-		students_array = new ArrayList<Student>();
+		//students_array = new ArrayList<Student>();
+		aClass = new Class();
 
 		while (true) {
 			try {
 				System.out.println("waiting for next client to connect");
 				Student student = new Student();
 				student.setConnection(streamConnNotifier.acceptAndOpen());
-				if (students_array.size() < 1) students_array.add(student);
+				aClass.addStudentIfNotInClass(student);
+				System.out.println("aClass.size() = " + aClass.getClassSize());
 				//connection = streamConnNotifier.acceptAndOpen();
 
 				Thread connectionthread = new Thread() {
 					public void run() {
 						try {
-							RemoteDevice remoteDevice = RemoteDevice.getRemoteDevice(students_array.get(students_array.size() - 1).getConnection());
-							students_array.get(students_array.size() - 1).setRemoteDevice(remoteDevice);
+							RemoteDevice remoteDevice = RemoteDevice.getRemoteDevice(aClass.getStudents_array().get(aClass.getClassSize() - 1).getConnection());
+							aClass.getStudents_array().get(aClass.getClassSize() - 1).setRemoteDevice(remoteDevice);
 							//System.out.println("Remote device address: "+dev.getBluetoothAddress());
-							students_array.get(students_array.size() - 1).setAddress(remoteDevice.getBluetoothAddress());
+							aClass.getStudents_array().get(aClass.getClassSize() - 1).setAddress(remoteDevice.getBluetoothAddress());
 							mTableQuestionVsUser.addUser(remoteDevice.getBluetoothAddress());
 
 							//open outputstream and instream
-							students_array.get(students_array.size() - 1).OpenStreams();
+							aClass.getStudents_array().get(aClass.getClassSize() - 1).OpenStreams();
 							//outStream = connection.openOutputStream();
 							//inStream = connection.openInputStream();
 
@@ -174,13 +177,13 @@ public class NetworkCommunication {
 //				outstream_list.get(i).flush();
 //			}
 
-			for (int i = 0; i < students_array.size(); i++) {
+			for (int i = 0; i < aClass.getClassSize(); i++) {
 				try {
-					students_array.get(i).getOutputStream().write(bytearray, 0, arraylength);
-					students_array.get(i).getOutputStream().flush();
+					aClass.getStudents_array().get(i).getOutputStream().write(bytearray, 0, arraylength);
+					aClass.getStudents_array().get(i).getOutputStream().flush();
 				} catch (IOException ex) {
 					ex.printStackTrace();
-					connectToSmartphone(students_array.get(i).getRemoteDevice());
+					connectToSmartphone(aClass.getStudents_array().get(i).getRemoteDevice());
 					try {
 						outStream.write(bytearray, 0, arraylength);
 						outStream.flush();
@@ -208,8 +211,8 @@ public class NetworkCommunication {
 	 * @throws IOException
 	 */
 	private void listenForClients() throws IOException {
-		for (int i = 0; i < students_array.size(); i++) {
-			final InputStream answerInStream = students_array.get(i).getInputStream();
+		for (int i = 0; i < aClass.getClassSize(); i++) {
+			final InputStream answerInStream = aClass.getStudents_array().get(i).getInputStream();
 			final int j = i;
 			Thread listeningthread = new Thread() {
 				public void run() {
@@ -223,8 +226,8 @@ public class NetworkCommunication {
 								System.out.println(answerString);
 								if (answerString.split("///")[0].contains("ANSW")) {
 									//Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
-									students_array.get(j).setName(answerString.split("///")[2]);
-									Student student = students_array.get(j);
+									aClass.getStudents_array().get(j).setName(answerString.split("///")[2]);
+									Student student = aClass.getStudents_array().get(j);
 									mTableQuestionVsUser.addAnswerForUser(student, answerString.split("///")[3]);
 								}
 							}
@@ -255,8 +258,8 @@ public class NetworkCommunication {
 		for (int i = 0; i < bytes_length; i++) {
 			bytes[i] = response.getBytes("UTF-8")[i];
 		}
-		students_array.get(students_array.size() - 1).getOutputStream().write(bytes, 0, bytes.length);
-		students_array.get(students_array.size() - 1).getOutputStream().flush();
+		aClass.getStudents_array().get(aClass.getClassSize() - 1).getOutputStream().write(bytes, 0, bytes.length);
+		aClass.getStudents_array().get(aClass.getClassSize() - 1).getOutputStream().flush();
 		//outStream.write(bytes, 0, bytes.length);
 		//outStream.flush();
 	}
@@ -265,38 +268,13 @@ public class NetworkCommunication {
 		System.out.print("connectToSmartphone");
 		UUID[] uuidSet = new UUID[1];
 		uuidSet[0] = new UUID("4c98e69fb27e415ab3e4769cf2baf51e", false);
-		discoveryAgent = localDevice.getDiscoveryAgent();
-		//create an instance of this class
-		BluetoothDeviceDiscovery bluetoothDeviceDiscovery = new BluetoothDeviceDiscovery();
-		//display local device address and name
-		//System.out.println("Address: "+localDevice.getBluetoothAddress());
-//	System.out.println("Name: "+localDevice.getFriendlyName());
-		//find devices
-		//DiscoveryAgent agent = localDevice.getDiscoveryAgent();
-//	System.out.println("Starting device inquiry...");
-		//try {
-			//Boolean discovered = discoveryAgent.startInquiry(DiscoveryAgent.GIAC, bluetoothDeviceDiscovery);
-			//int bla = discoveryAgent.searchServices(null,uuidSet, clientDevice, bluetoothDeviceDiscovery);
 			try {
-				streamConnection = (StreamConnection)Connector.open(bluetoothDeviceDiscovery.clientUrl);
+				streamConnection = (StreamConnection)Connector.open("btspp://" + clientDevice.getBluetoothAddress() + ":5;authenticate=false;encrypt=false;master=false");
 				outStream = streamConnection.openOutputStream();
 
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-		//} catch (BluetoothStateException e) {
-		//	e.printStackTrace();
-		//}
-
-//		try {
-//			synchronized(bluetoothDeviceDiscovery.lock){
-//				bluetoothDeviceDiscovery.lock.wait();
-//			}
-//		}
-//		catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
 		return false;
 	}
 }
