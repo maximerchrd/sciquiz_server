@@ -1,5 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
+import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.StreamConnection;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.io.OutputStream;
  * Created by maximerichard on 14/02/17.
  */
 public class Student {
+    private RemoteDevice mRemoteDevice = null;
     private String mAddress = "no address";
     private String mName = "no name";
     private StreamConnection mConnection = null;
@@ -30,6 +32,9 @@ public class Student {
         mConnection = arg_connection;
     }
     //setters
+    public void setRemoteDevice(RemoteDevice arg_remoteDevice) {
+        mRemoteDevice = arg_remoteDevice;
+    }
     public void setAddress(String arg_address) {
         mAddress = arg_address;
     }
@@ -40,6 +45,9 @@ public class Student {
         mConnection = arg_connection;
     }
     //getters
+    public RemoteDevice getRemoteDevice() {
+        return mRemoteDevice;
+    }
     public String getAddress() {
         return mAddress;
     }

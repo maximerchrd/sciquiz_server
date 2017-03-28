@@ -32,6 +32,9 @@ public class NetworkCommunication {
 	private ArrayList<Student> students_array;
 	//temporary ArrayList of strings containing Client's mac addresse
 	private ArrayList<String> mClientsAddresses;
+	private DiscoveryAgent discoveryAgent = null;
+	private LocalDevice localDevice = null;
+	private StreamConnection streamConnection = null;
 
 	public NetworkCommunication(Table TableQuestionVsUser) {
 		mTableQuestionVsUser = TableQuestionVsUser;
@@ -44,11 +47,11 @@ public class NetworkCommunication {
 	 * @throws IOException
 	 */
 	public void startServer() throws IOException {
-		LocalDevice local = null;
+		localDevice = null;
 
 		try {
-			local = LocalDevice.getLocalDevice();
-			local.setDiscoverable(DiscoveryAgent.GIAC);
+			localDevice = LocalDevice.getLocalDevice();
+			localDevice.setDiscoverable(DiscoveryAgent.GIAC);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -56,6 +59,7 @@ public class NetworkCommunication {
 		//Create a UUID for SPP
 		//uuid = new UUID("1101", true);
 		uuid = new UUID("d0c722b07e1511e1b0c40800200c9a66", false);
+		//uuid = new UUID("0000110100001000800000805f9b34fb", false);
 
 		//Create the servicve url
 		connectionString = "btspp://localhost:" + uuid.toString() +";name=Sample SPP Server";
@@ -75,16 +79,17 @@ public class NetworkCommunication {
 				System.out.println("waiting for next client to connect");
 				Student student = new Student();
 				student.setConnection(streamConnNotifier.acceptAndOpen());
-				students_array.add(student);
+				if (students_array.size() < 1) students_array.add(student);
 				//connection = streamConnNotifier.acceptAndOpen();
 
 				Thread connectionthread = new Thread() {
 					public void run() {
 						try {
-							RemoteDevice dev = RemoteDevice.getRemoteDevice(students_array.get(students_array.size() - 1).getConnection());
-							System.out.println("Remote device address: "+dev.getBluetoothAddress());
-							students_array.get(students_array.size() - 1).setAddress(dev.getBluetoothAddress());
-							mTableQuestionVsUser.addUser(dev.getBluetoothAddress());
+							RemoteDevice remoteDevice = RemoteDevice.getRemoteDevice(students_array.get(students_array.size() - 1).getConnection());
+							students_array.get(students_array.size() - 1).setRemoteDevice(remoteDevice);
+							//System.out.println("Remote device address: "+dev.getBluetoothAddress());
+							students_array.get(students_array.size() - 1).setAddress(remoteDevice.getBluetoothAddress());
+							mTableQuestionVsUser.addUser(remoteDevice.getBluetoothAddress());
 
 							//open outputstream and instream
 							students_array.get(students_array.size() - 1).OpenStreams();
@@ -125,6 +130,7 @@ public class NetworkCommunication {
 		//send question to spp client
 		//if (connection != null) {
 			//add a row in the table for the new question and answers
+
 			mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
 			//make string and bytearray from question and answers
 			String question_text = arg_quest.getQUESTION() + "///";
@@ -169,10 +175,29 @@ public class NetworkCommunication {
 //			}
 
 			for (int i = 0; i < students_array.size(); i++) {
-				students_array.get(i).getOutputStream().write(bytearray,0,arraylength);
-				students_array.get(i).getOutputStream().flush();
+				try {
+					students_array.get(i).getOutputStream().write(bytearray, 0, arraylength);
+					students_array.get(i).getOutputStream().flush();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+					connectToSmartphone(students_array.get(i).getRemoteDevice());
+					try {
+						outStream.write(bytearray, 0, arraylength);
+						outStream.flush();
+						outStream.close();
+						outStream = null;
+					} catch (IOException ex2) {
+						ex2.printStackTrace();
+					}
+				}
 			}
 			System.out.println("Done.");
+		//the sleep is here to try to prevent software to crash after sending question
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		//} else {
 		//	System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
 		//}
@@ -234,5 +259,44 @@ public class NetworkCommunication {
 		students_array.get(students_array.size() - 1).getOutputStream().flush();
 		//outStream.write(bytes, 0, bytes.length);
 		//outStream.flush();
+	}
+
+	private Boolean connectToSmartphone(RemoteDevice clientDevice) {
+		System.out.print("connectToSmartphone");
+		UUID[] uuidSet = new UUID[1];
+		uuidSet[0] = new UUID("4c98e69fb27e415ab3e4769cf2baf51e", false);
+		discoveryAgent = localDevice.getDiscoveryAgent();
+		//create an instance of this class
+		BluetoothDeviceDiscovery bluetoothDeviceDiscovery = new BluetoothDeviceDiscovery();
+		//display local device address and name
+		//System.out.println("Address: "+localDevice.getBluetoothAddress());
+//	System.out.println("Name: "+localDevice.getFriendlyName());
+		//find devices
+		//DiscoveryAgent agent = localDevice.getDiscoveryAgent();
+//	System.out.println("Starting device inquiry...");
+		//try {
+			//Boolean discovered = discoveryAgent.startInquiry(DiscoveryAgent.GIAC, bluetoothDeviceDiscovery);
+			//int bla = discoveryAgent.searchServices(null,uuidSet, clientDevice, bluetoothDeviceDiscovery);
+			try {
+				streamConnection = (StreamConnection)Connector.open(bluetoothDeviceDiscovery.clientUrl);
+				outStream = streamConnection.openOutputStream();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		//} catch (BluetoothStateException e) {
+		//	e.printStackTrace();
+		//}
+
+//		try {
+//			synchronized(bluetoothDeviceDiscovery.lock){
+//				bluetoothDeviceDiscovery.lock.wait();
+//			}
+//		}
+//		catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+		return false;
 	}
 }
