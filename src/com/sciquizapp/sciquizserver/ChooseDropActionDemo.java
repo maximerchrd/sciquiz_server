@@ -114,7 +114,7 @@ public class ChooseDropActionDemo extends JFrame {
 					//display question
 					int indexOfQuestion = copyTo.getSelectedIndex();
 					question_index = indexOfQuestion;
-					Question questionToDisplay = new Question();
+					Question questionToDisplay;
 					questionToDisplay = questionList.get(indexOfQuestion);					//needs to be fixed; the index is the one in the database
 					dis_question.ShowQuestion(questionToDisplay, parentFrame, panel_disquest);
 					dis_question.repaint();
@@ -142,7 +142,7 @@ public class ChooseDropActionDemo extends JFrame {
 		panel_questlist.add(panel_for_copy);
 
 		//start the server for sending the question
-		final SendQuestionBluetooth send_quest = new SendQuestionBluetooth();
+		/*final SendQuestionBluetooth send_quest = new SendQuestionBluetooth();
 		Thread serverthread = new Thread() {
 			public void run() {
 				try {
@@ -154,14 +154,14 @@ public class ChooseDropActionDemo extends JFrame {
 			}  
 		};
 
-		serverthread.start();
+		serverthread.start();*/
 		//implement a button to send the highlighted question
 		JButton send_quest_button = new JButton("activer la question");
 		send_quest_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				Question question_to_send = new Question();
+				Question question_to_send;
 				question_to_send = questionList.get(copyTo.getSelectedIndex());
 				try {
 					network_singleton.SendQuestion(question_to_send);

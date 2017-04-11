@@ -69,10 +69,28 @@ public class Student {
      * @return false if the connection is null
      * @throws IOException
      */
-    public Boolean OpenStreams() throws IOException {
-        if (mConnection != null) {
+    public Boolean openStreams() throws IOException {
+        if (mConnection != null && mOutputStream == null) {
             mOutputStream = mConnection.openOutputStream();
             mInputStream = mConnection.openInputStream();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Boolean openInputStream() throws IOException {
+        if (mConnection != null && mInputStream == null) {
+            mInputStream = mConnection.openInputStream();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Boolean openOutputStream() throws IOException {
+        if (mConnection != null && mOutputStream == null) {
+            mOutputStream = mConnection.openOutputStream();
             return true;
         } else {
             return false;

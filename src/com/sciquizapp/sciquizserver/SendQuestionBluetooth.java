@@ -13,7 +13,7 @@ import javax.bluetooth.*;
 import javax.microedition.io.*;
 
 /**
- * com.sciquizapp.sciquizserver.Class that implements an SPP Server which accepts single line of
+ * com.sciquizapp.sciquizserver.Classroom that implements an SPP Server which accepts single line of
  * message from an SPP client and sends a single line of response to the client.
  */
 
