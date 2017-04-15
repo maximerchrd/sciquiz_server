@@ -85,36 +85,45 @@ public class NetworkCommunication {
                         Student student = new Student();
                         student.setConnection(streamConnNotifier.acceptAndOpen());
 
+                        if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
+                            try {
+                                number_of_clients++;
+                                RemoteDevice remoteDevice = RemoteDevice.getRemoteDevice(student.getConnection());
+                                student.setRemoteDevice(remoteDevice);
+                                student.setAddress(remoteDevice.getBluetoothAddress());
+                                student.setmConnectedByBT(true);
+                                if (!aClass.studentAlreadyInClass(student)) {
+                                    student.openStreams();
+                                    aClass.addStudentIfNotInClass(student);
+                                    System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
+                                    mTableQuestionVsUser.addUser(remoteDevice.getBluetoothAddress());
+                                    SendNewConnectionResponse(student.getOutputStream(), false);
+                                    listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                } else {
+                                    aClass.updateStudent(student);
+                                    listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                }
 
-                        try {
-                            RemoteDevice remoteDevice = RemoteDevice.getRemoteDevice(student.getConnection());
-                            student.setRemoteDevice(remoteDevice);
-                            student.setAddress(remoteDevice.getBluetoothAddress());
-                            if (!aClass.studentAlreadyInClass(student)) {
-                                student.openInputStream();
-                                aClass.addStudentIfNotInClass(student);
-                                System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
-                                //mTableQuestionVsUser.addUser(remoteDevice.getBluetoothAddress());
-                            } else {
-                                aClass.updateStudent(student);
-                                listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                //open outputstream and instream
+                                //aClass.getStudents_array().get(aClass.getClassSize() - 1).openStreams();
+                                //serverOutStream = connection.openOutputStream();
+                                //inStream = connection.openInputStream();
+
+
+                                //SendNewConnectionResponse();
+                                //while (true) {
+
+                                //}
+
+
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
                             }
-
-                            //open outputstream and instream
-                            //aClass.getStudents_array().get(aClass.getClassSize() - 1).openStreams();
-                            //serverOutStream = connection.openOutputStream();
-                            //inStream = connection.openInputStream();
-
-
-                            //SendNewConnectionResponse();
-                            //while (true) {
-
-                            //}
-
-
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                        } else {
+                            student.openStreams();
+                            SendNewConnectionResponse(student.getOutputStream(), true);
                         }
+
 
                     } catch (IOException e2) {
                         // TODO Auto-generated catch block
@@ -141,7 +150,7 @@ public class NetworkCommunication {
 
         //add a row in the table for the new question and answers
 
-        //mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
+        mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
         //make string and bytearray from question and answers
         String question_text = arg_quest.getQUESTION() + "///";
         question_text += arg_quest.getOPTA() + "///";
@@ -184,27 +193,23 @@ public class NetworkCommunication {
 //				outstream_list.get(i).flush();
 //			}
 
-        Thread sendingthread = new Thread() {
-            public void run() {
-                for (int i = 0; i < aClass.getClassSize(); i++) {
+        //Thread sendingthread = new Thread() {
+         //   public void run() {
+                ArrayList<Student> FirstLayerStudents = aClass.getmFirstLayerStudents();
+                System.out.println(FirstLayerStudents.size());
+                for (int i = 0; i < FirstLayerStudents.size(); i++) {
 //                    try {
 //                        aClass.getStudents_array().get(i).getOutputStream().write(bytearray, 0, arraylength);
 //                        aClass.getStudents_array().get(i).getOutputStream().flush();
 //                    } catch (IOException ex) {
 //                        ex.printStackTrace();
-                        connectToSmartphone(aClass.getStudents_array().get(i).getRemoteDevice());
+                    OutputStream tempOutputStream = FirstLayerStudents.get(i).getOutputStream();
                         try {
-                            serverOutStream.write(bytearray, 0, arraylength);
-                            Thread.sleep(1000);     //wait to be sure that the smartphone has enough time to read
-                            serverOutStream.flush();
-                            serverOutStream.close();
-                            serverOutStream = null;
-                            streamConnection.close();
-                            streamConnection = null;
+                            tempOutputStream.write(bytearray, 0, arraylength);
+                            //Thread.sleep(1000);     //wait to be sure that the smartphone has enough time to read
+                            tempOutputStream.flush();
                         } catch (IOException ex2) {
                             ex2.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
 //                    }
                 /*try {
@@ -216,9 +221,9 @@ public class NetworkCommunication {
 					e.printStackTrace();
 				}*/
                 }
-            }
-        };
-        sendingthread.start();
+        //    }
+        //};
+        //sendingthread.start();
         System.out.println("Done.");
         //} else {
         //	System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
@@ -233,9 +238,9 @@ public class NetworkCommunication {
     private void listenForClient(final Student arg_student) throws IOException {
         //for (int i = 0; i < aClass.getClassSize(); i++) {
         final InputStream answerInStream = arg_student.getInputStream();
-        //Thread listeningthread = new Thread() {
-        //	public void run() {
-        //while(true) {
+        Thread listeningthread = new Thread() {
+        	public void run() {
+        while(true) {
         try {
             byte[] in_bytearray = new byte[1000];
             //System.out.println("listening to " + aClass.getStudents_array().get(j).getAddress());
@@ -249,8 +254,19 @@ public class NetworkCommunication {
                     //Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                     arg_student.setName(answerString.split("///")[2]);
                     //Student student = aClass.getStudents_array().get(j);
-                    //mTableQuestionVsUser.addAnswerForUser(student, answerString.split("///")[3]);
+                    mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
 
+                } else if (answerString.split("///")[0].contains("CONN")) {
+                    Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+                    if (!aClass.studentAlreadyInClass(student)) {
+                        student.openStreams();
+                        //aClass.addStudentIfNotInClass(student);
+                        //System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
+                        //mTableQuestionVsUser.addUser(arg_student.getAddress());
+                    } else {
+                        aClass.updateStudent(student);
+                        //listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                    }
                 }
             } else {
 
@@ -259,46 +275,29 @@ public class NetworkCommunication {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-        //}
-        //	}
-        //};
-        //listeningthread.start();
+        }
+        	}
+        };
+        listeningthread.start();
         //}
     }
 
-    private void SendNewConnectionResponse() throws IOException {
-        String response = "A PROBLEM OCCURED";
-        if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
-            response = "SERVR///OK///" + String.valueOf(MAX_NUMBER_OF_CLIENTS) + "///";
-            number_of_clients++;
-            //outstream_list.add(serverOutStream);
-            //instream_list.add(inStream);
-        } else {
+    private void SendNewConnectionResponse(OutputStream arg_outputStream, Boolean maximum) throws IOException {
+        String response;
+        if (maximum) {
             response = "SERVR///MAX///";
+        } else {
+            response = "SERVR///OK///";
         }
-
         byte[] bytes = new byte[20];
         int bytes_length = response.getBytes("UTF-8").length;
         for (int i = 0; i < bytes_length; i++) {
             bytes[i] = response.getBytes("UTF-8")[i];
         }
-        aClass.getStudents_array().get(aClass.getClassSize() - 1).getOutputStream().write(bytes, 0, bytes.length);
-        aClass.getStudents_array().get(aClass.getClassSize() - 1).getOutputStream().flush();
+        arg_outputStream.write(bytes, 0, bytes.length);
+        arg_outputStream.flush();
         //serverOutStream.write(bytes, 0, bytes.length);
         //serverOutStream.flush();
     }
 
-    private Boolean connectToSmartphone(RemoteDevice clientDevice) {
-        System.out.print("connectToSmartphone");
-        UUID[] uuidSet = new UUID[1];
-        uuidSet[0] = new UUID("4c98e69fb27e415ab3e4769cf2baf51e", false);
-        try {
-            streamConnection = (StreamConnection) Connector.open("btspp://" + clientDevice.getBluetoothAddress() + ":5;authenticate=false;encrypt=false;master=false");
-            serverOutStream = streamConnection.openOutputStream();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 }

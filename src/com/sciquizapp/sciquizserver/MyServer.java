@@ -46,14 +46,14 @@ public class MyServer {
         dao.getAllQuestions();
 
         //declares jpanels for different parts of the window
-        /*JPanel panel_for_questlist = new JPanel(); // useless now, do something later?
+        JPanel panel_for_questlist = new JPanel(); // useless now, do something later?
         JPanel panel_for_counter = new JPanel();
-        JPanel panel_for_disquest = new JPanel();*/
+        JPanel panel_for_disquest = new JPanel();
 
         //Setup the table
 
         //Create and set up the window.
-        /*JFrame frame = new JFrame("Learning Tracker");
+        JFrame frame = new JFrame("Learning Tracker");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Create and set up the content pane.
@@ -61,9 +61,9 @@ public class MyServer {
         TableUserVsQuest.setOpaque(true); //content panes must be opaque
         //frame.setContentPane(TableUserVsQuest);
 
-        */
+
         //start bluetooth network in new thread
-        NetworkCommunication CommunicationWithClients = new NetworkCommunication(/*TableUserVsQuest*/);
+        NetworkCommunication CommunicationWithClients = new NetworkCommunication(TableUserVsQuest);
 //        Thread networkThread = new Thread() {
 //            public void run() {
                 try {
@@ -74,18 +74,18 @@ public class MyServer {
 //            }
 //        };
 //        networkThread.start();
-        while (true) {
+        /*while (true) {
             Scanner reader = new Scanner(System.in);  // Reading from System.in
             System.out.println("Enter a number: ");
             int n = reader.nextInt(); // Scans the next token of the input as an int
             Question tempquest = new Question("chimie", "1", "question test", "rép1", "rép2", "rép3", "rép4", "rép2", "res/drawable/burette.jpg");
             CommunicationWithClients.SendQuestion(tempquest);
-        }
+        }*/
 
 
 
         //Turn off metal's use of bold fonts
-        /*ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame, panel_for_questlist, panel_for_disquest, CommunicationWithClients);
+        ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame, panel_for_questlist, panel_for_disquest, CommunicationWithClients);
         UIManager.put("swing.boldMetal", Boolean.FALSE);
 
 
@@ -109,7 +109,7 @@ public class MyServer {
         //frame.pack();
         frame.setContentPane(parent);
         frame.setBounds(0, 0, 1000, 500);
-        frame.setVisible(true);*/
+        frame.setVisible(true);
 //		//Sends question to clients
 //		ServerSocket serverSocket = null;
 //		Socket socket = null;

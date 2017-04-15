@@ -17,6 +17,7 @@ public class Student {
     private OutputStream mOutputStream = null;
     private InputStream mInputStream = null;
     private double overallPercentage = -1;
+    private Boolean mConnectedByBT = false;
 
     //constructors
     public Student() {
@@ -26,10 +27,11 @@ public class Student {
         mAddress = arg_address;
         mName = arg_name;
     }
-    public Student(String arg_address, String arg_name, StreamConnection arg_connection) {
+    public Student(String arg_address, String arg_name, StreamConnection arg_connection, Boolean connectedByBT) {
         mAddress = arg_address;
         mName = arg_name;
         mConnection = arg_connection;
+        mConnectedByBT = connectedByBT;
     }
     //setters
     public void setRemoteDevice(RemoteDevice arg_remoteDevice) {
@@ -43,6 +45,9 @@ public class Student {
     }
     public void setConnection(StreamConnection arg_connection) {
         mConnection = arg_connection;
+    }
+    public void setmConnectedByBT(Boolean connectedByBT) {
+        mConnectedByBT = connectedByBT;
     }
     //getters
     public RemoteDevice getRemoteDevice() {
@@ -62,6 +67,9 @@ public class Student {
     }
     public InputStream getInputStream() {
         return mInputStream;
+    }
+    public Boolean getmConnectedByBT() {
+        return mConnectedByBT;
     }
 
     /**
