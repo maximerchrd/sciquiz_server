@@ -94,7 +94,7 @@ public class MyServer {
 		//frame.getContentPane().add(splitPane);
 
 
-        AWTCounter app = new AWTCounter(TableUserVsQuest, frame, newChooseDropAction, panel_for_counter);
+        //AWTCounter app = new AWTCounter(TableUserVsQuest, frame, newChooseDropAction, panel_for_counter);
 
         //implement the division of the window with borderlayout
         JPanel parent = new JPanel();

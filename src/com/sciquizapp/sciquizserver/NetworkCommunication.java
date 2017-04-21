@@ -150,7 +150,8 @@ public class NetworkCommunication {
 
         //add a row in the table for the new question and answers
 
-        mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
+
+        //mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
         //make string and bytearray from question and answers
         String question_text = arg_quest.getQUESTION() + "///";
         question_text += arg_quest.getOPTA() + "///";
@@ -205,7 +206,10 @@ public class NetworkCommunication {
 //                        ex.printStackTrace();
                     OutputStream tempOutputStream = FirstLayerStudents.get(i).getOutputStream();
                         try {
-                            tempOutputStream.write(bytearray, 0, arraylength);
+                            //for ( int j = 0; j < arraylength; j++) {
+                                //tempOutputStream.write(bytearray[j]);
+                                tempOutputStream.write(bytearray, 0, arraylength);
+                            //}
                             //Thread.sleep(1000);     //wait to be sure that the smartphone has enough time to read
                             tempOutputStream.flush();
                         } catch (IOException ex2) {
@@ -254,7 +258,7 @@ public class NetworkCommunication {
                     //Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                     arg_student.setName(answerString.split("///")[2]);
                     //Student student = aClass.getStudents_array().get(j);
-                    mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
+                    //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
 
                 } else if (answerString.split("///")[0].contains("CONN")) {
                     Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);

@@ -54,6 +54,7 @@ public class ChooseDropActionDemo extends JFrame {
 	public JPanel panel_for_from;
 	public JPanel panel_for_copy;
 	List<Question> questionList = new ArrayList<Question>();
+	private Quiz quiz;
 
 	public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
 		super("ChooseDropActionDemo");
@@ -69,6 +70,8 @@ public class ChooseDropActionDemo extends JFrame {
 			from_questions.addElement(questionList.get(i).getQUESTION());
 			from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
 		}
+
+		quiz = new Quiz();
 
 		panel_for_from = new JPanel();
 		panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
@@ -173,6 +176,24 @@ public class ChooseDropActionDemo extends JFrame {
 		});
 		panel_for_from.add(send_quest_button);
 
+        //implement a button to send the highlighted question
+        JButton send_questions_button = new JButton("envoyer les questions");
+        send_questions_button.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                try {
+                	for (int i = 0; i < quiz.getmNumberOfQuestions(); i++) {
+						network_singleton.SendQuestion(quiz.getQuestionVector().elementAt(i));
+					}
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+        });
+        panel_for_copy.add(send_questions_button);
+
 		//parentFrame.add(panel_for_copy, BorderLayout.CENTER);
 
 		((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -197,6 +218,7 @@ public class ChooseDropActionDemo extends JFrame {
 		}
 
 		public void exportDone(JComponent comp, Transferable trans, int action) {
+			quiz.addQuestion(questionList.get(index));
 			if (action != MOVE) {
 				return;
 			}
