@@ -167,7 +167,7 @@ public class ChooseDropActionDemo extends JFrame {
 				Question question_to_send;
 				question_to_send = questionList.get(copyTo.getSelectedIndex());
 				try {
-					network_singleton.SendQuestion(question_to_send);
+					network_singleton.SendQuestion(question_to_send, false);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -176,7 +176,7 @@ public class ChooseDropActionDemo extends JFrame {
 		});
 		panel_for_from.add(send_quest_button);
 
-        //implement a button to send the highlighted question
+        //implement a button to send the questions from the panel for copy
         JButton send_questions_button = new JButton("envoyer les questions");
         send_questions_button.addActionListener(new ActionListener()
         {
@@ -184,7 +184,7 @@ public class ChooseDropActionDemo extends JFrame {
             {
                 try {
                 	for (int i = 0; i < quiz.getmNumberOfQuestions(); i++) {
-						network_singleton.SendQuestion(quiz.getQuestionVector().elementAt(i));
+						network_singleton.SendQuestion(quiz.getQuestionVector().elementAt(i), true);
 					}
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
@@ -193,6 +193,25 @@ public class ChooseDropActionDemo extends JFrame {
             }
         });
         panel_for_copy.add(send_questions_button);
+
+		//implement a button to send the highlighted question
+		JButton send_questID_button = new JButton("activer la question avec ID");
+		send_questID_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Question question_to_send;
+				question_to_send = questionList.get(copyTo.getSelectedIndex());
+				try {
+					System.out.println("sending question id");
+					network_singleton.SendQuestionID(question_to_send.getID());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		panel_for_copy.add(send_questID_button);
 
 		//parentFrame.add(panel_for_copy, BorderLayout.CENTER);
 

@@ -59,10 +59,13 @@ public class DBManager {
 
 		// Then store the questions into the table
 		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette.jpg");
+		q1.setID(100);
 		this.addQuestion(q1);
 		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/medium_pic.jpg");
+		q2.setID(101);
 		this.addQuestion(q2);
 		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
+		q3.setID(102);
 		this.addQuestion(q3);
 
 		//Create multiple choice questions table if it doesn't exist
@@ -146,9 +149,19 @@ public class DBManager {
 	}
 	// Adding new question to database
 	public void addQuestion(Question quest) throws Exception {
+		List<Question> tempQuestList  = new ArrayList<Question>();
+		tempQuestList = getAllQuestions();
+		if (tempQuestList.size() > 0) {
+			int i;
+			for (i = 0; i < tempQuestList.size() && tempQuestList.get(i).getID() != quest.getID(); i++) {	}
+			if (i >= tempQuestList.size()) {
+				quest.setID(tempQuestList.get(tempQuestList.size() - 1).getID() + 1);
+			} else {
+
+			}
+		}
 		Connection c = null;
 		Statement stmt = null;
-		stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");

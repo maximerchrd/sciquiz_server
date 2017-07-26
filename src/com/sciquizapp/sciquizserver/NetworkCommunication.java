@@ -145,7 +145,22 @@ public class NetworkCommunication {
         //streamConnNotifier.close();		//closed because connection problems occured suddenly
     }
 
-    public void SendQuestion(Question arg_quest) throws IOException {
+    public void SendQuestionID(int QuestID) throws IOException {
+        String questIDString = "QUEID///" + String.valueOf(QuestID) + "///";
+        byte[] bytearraystring = questIDString.getBytes(Charset.forName("UTF-8"));
+        ArrayList<Student> FirstLayerStudents = aClass.getmFirstLayerStudents();
+        System.out.println(FirstLayerStudents.size());
+        for (int i = 0; i < FirstLayerStudents.size(); i++) {
+            OutputStream tempOutputStream = FirstLayerStudents.get(i).getOutputStream();
+            try {
+                tempOutputStream.write(bytearraystring, 0, bytearraystring.length);
+                tempOutputStream.flush();
+            } catch (IOException ex2) {
+                ex2.printStackTrace();
+            }
+        }
+    }
+    public void SendQuestion(Question arg_quest, Boolean isQuiz) throws IOException {
         //send question to spp client
 
         //add a row in the table for the new question and answers
@@ -168,7 +183,12 @@ public class NetworkCommunication {
         int intfileLength = (int) myFile.length();
         int textbyteslength = bytearraytext.length;
         byte[] bytearray = new byte[20 + textbyteslength + intfileLength];
-        String fileLength = "QUEST";
+        String fileLength;
+        if (isQuiz) {
+            fileLength = "QUIZZ";
+        } else {
+            fileLength = "QUEST";
+        }
         fileLength += ":" + String.valueOf((int) myFile.length());
         fileLength += ":" + String.valueOf(textbyteslength);
         byte[] bytearraystring = fileLength.getBytes(Charset.forName("UTF-8"));

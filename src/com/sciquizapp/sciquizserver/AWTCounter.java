@@ -68,7 +68,7 @@ public class AWTCounter extends Frame implements ActionListener {
 		questionNumber = Integer.parseInt(tfCount.getText());
 		try {
 			NetworkCommunication new_send_question = new NetworkCommunication();
-			new_send_question.SendQuestion(questionList.get(drop_action_member.question_index));
+			new_send_question.SendQuestion(questionList.get(drop_action_member.question_index), false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
