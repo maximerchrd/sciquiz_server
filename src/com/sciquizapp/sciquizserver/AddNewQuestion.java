@@ -130,13 +130,13 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			{
 				Vector<String> options_vector = new Vector<String>();
 				for (int i = 0; i < 9; i++) options_vector.add(" ");
-				for (int i = 0; i < 9 && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).toString());
+				for (int i = 0; i < 9 && i < textfieldVector.size() && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).getText());
 				QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("chimie", "1", question_text.getText(), answer1_text.getText(),
 						options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2), options_vector.elementAt(3),
 						options_vector.elementAt(4), options_vector.elementAt(5), options_vector.elementAt(6), options_vector.elementAt(7),
 						options_vector.elementAt(8), mFilePath);
-				Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(), 
-						textfieldVector.elementAt(2).getText(), textfieldVector.elementAt(3).getText(), textfieldVector.elementAt(4).getText(),answer1_text.getText(),mFilePath);
+				Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
+						options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2),answer1_text.getText(),mFilePath);
 				try {
 					new_db_man.addQuestion(new_quest);
 				} catch (Exception e1) {

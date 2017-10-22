@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -48,7 +49,8 @@ public class DBManager {
 					" TRIAL2           TEXT    NOT NULL, " +
 					" TRIAL3           TEXT    NOT NULL, " +
 					" TRIAL4           TEXT    NOT NULL, " +
-					" IMAGE_PATH           TEXT    NOT NULL) "; 
+					" IMAGE_PATH           TEXT    NOT NULL, " +
+					" ID_GLOBAL      INT     NOT NULL) ";
 			stmt.executeUpdate(sql);
 			stmt.close();
 			c.close();
@@ -76,6 +78,7 @@ public class DBManager {
 			stmt = c.createStatement();
 			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
 					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" ID_GLOBAL      INT     NOT NULL, " +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
 					" QUESTION           TEXT    NOT NULL, " +
@@ -113,27 +116,9 @@ public class DBManager {
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 
 			stmt = c.createStatement();
-			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
-					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" SUBJECT           TEXT    NOT NULL, " +
-					" LEVEL      INT     NOT NULL, " +
-					" QUESTION           TEXT    NOT NULL, " +
-					" IMAGE_PATH           TEXT    NOT NULL) ";
-			stmt.executeUpdate(sql);
-			stmt.close();
-			c.close();
-		} catch ( Exception e ) {
-			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-			System.exit(0);
-		}
-		//Create short answer questions table if it doesn't exist
-		try {
-			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
-
-			stmt = c.createStatement();
 			String sql = "DROP TABLE IF EXISTS 'short_answers_questions'; CREATE TABLE IF NOT EXISTS short_answers_questions " +
 					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
+					" ID_GLOBAL      INT     NOT NULL, " +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
 					" QUESTION           TEXT    NOT NULL, " +
@@ -150,6 +135,7 @@ public class DBManager {
 	// Adding new question to database
 	public void addQuestion(Question quest) throws Exception {
 		List<Question> tempQuestList  = new ArrayList<Question>();
+		List<Integer> tempGlobalidList = new ArrayList<Integer>();
 		tempQuestList = getAllQuestions();
 		if (tempQuestList.size() > 0) {
 			int i;
@@ -159,6 +145,10 @@ public class DBManager {
 			} else {
 
 			}
+			for (i = 0; i < tempQuestList.size(); i++) {
+				tempGlobalidList.add(tempQuestList.get(i).getGLOBALID());
+			}
+			quest.setGLOBALID(Collections.max(tempGlobalidList) + 1);
 		}
 		Connection c = null;
 		Statement stmt = null;
@@ -168,10 +158,10 @@ public class DBManager {
 			c.setAutoCommit(false);
 			stmt = c.createStatement();
 			String sql = 	"INSERT INTO question (SUBJECT,LEVEL,QUESTION,ANSWER," +
-					"OPTIONA,OPTIONB,OPTIONC,OPTIOND,TRIAL1,TRIAL2,TRIAL3,TRIAL4,IMAGE_PATH) " +
+					"OPTIONA,OPTIONB,OPTIONC,OPTIOND,TRIAL1,TRIAL2,TRIAL3,TRIAL4,IMAGE_PATH,ID_GLOBAL) " +
 					"VALUES ('" +
-					quest.getSUBJECT() + "'," + 
-					quest.getLEVEL() + ",'" +
+					quest.getSUBJECT() + "','" +
+					quest.getLEVEL() + "','" +
 					quest.getQUESTION() + "','" +
 					quest.getANSWER() + "','" +
 					quest.getOPTA() + "','" +
@@ -182,7 +172,8 @@ public class DBManager {
 					quest.getTRIAL2() + "','" +
 					quest.getTRIAL3() + "','" +
 					quest.getTRIAL4() + "','" +
-					quest.getIMAGE() + "');"; 
+					quest.getIMAGE() + "','" +
+					quest.getGLOBALID() + "');";
 			stmt.executeUpdate(sql);
 			stmt.close();
 			c.commit();
@@ -269,6 +260,7 @@ public class DBManager {
 				quest.setTRIAL3(rs.getString(12));
 				quest.setTRIAL4(rs.getString(13));
 				quest.setIMAGE(rs.getString(14));  //13, because the trials are between OPTD and IMAGE
+				quest.setGLOBALID(rs.getInt(15));
 				quesList.add(quest);
 			}
 			rs.close();
