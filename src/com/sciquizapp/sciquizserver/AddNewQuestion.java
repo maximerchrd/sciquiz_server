@@ -9,18 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Vector;
 
-import javax.swing.Box;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 
 public class AddNewQuestion extends JPanel implements ActionListener{
@@ -28,6 +20,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	JLabel answer1_label;
 	JTextField question_text;
 	JTextField answer1_text;
+	JComboBox questiontype_list;
 	Vector<JLabel> labelVector;
 	Vector<JTextField> textfieldVector;
 	ImageIcon icon;
@@ -41,6 +34,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
 		Box box = Box.createVerticalBox();
 		new_question_frame.add( box );
+		Object[] questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
+		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
 		question_text = new JTextField("");
 		answer1_label = new JLabel("R?ponse 1:");
@@ -52,6 +47,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		//icon = new ImageIcon(image); 
 		thumb = new JLabel();
 		//thumb.setIcon(icon);
+		box.add(questiontype_list);
 		box.add(question_label);
 		box.add(question_text);
 		box.add(answer1_label);
@@ -65,8 +61,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			{
 				JLabel new_answer_label = new JLabel("R?ponse " + new_option_index + ":");
 				JTextField new_answer_text = new JTextField("");
-				box.add(new_answer_label,(new_option_index - 2)* 2 + 4);
-				box.add(new_answer_text,(new_option_index - 2) * 2 + 5);
+				box.add(new_answer_label,(new_option_index - 2)* 2 + 5);
+				box.add(new_answer_text,(new_option_index - 2) * 2 + 6);
 				labelVector.add(new_answer_label);
 				textfieldVector.add(new_answer_text);
 				new_question_frame.setSize(new_question_frame.getWidth(), new_question_frame.getHeight()+30);
@@ -75,6 +71,17 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		});
 		box.add(add_choice_button);
 
+		//implement an action listener for the JComboBox to chose the question type
+		questiontype_list.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (questiontype_list.getSelectedItem().toString().equals("question ? r?ponse br?ve")) {
+					add_choice_button.setText("ajouter une r?ponse alternative");
+				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
+					add_choice_button.setText("ajouter une option de r?ponse");
+				}
+			}
+		});
 		//implement a button to add a picture
 		JButton add_image_button = new JButton("ajouter une image");
 		add_image_button.addActionListener(new ActionListener()
@@ -123,7 +130,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		//implement a button to add a new question to the database
 		final DBManager new_db_man = new DBManager();
 		
-		JButton save_quest_button = new JButton("ajouter une question");
+		JButton save_quest_button = new JButton("ajouter la question");
 		save_quest_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -131,21 +138,36 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				Vector<String> options_vector = new Vector<String>();
 				for (int i = 0; i < 9; i++) options_vector.add(" ");
 				for (int i = 0; i < 9 && i < textfieldVector.size() && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).getText());
-				QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("chimie", "1", question_text.getText(), answer1_text.getText(),
-						options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2), options_vector.elementAt(3),
-						options_vector.elementAt(4), options_vector.elementAt(5), options_vector.elementAt(6), options_vector.elementAt(7),
-						options_vector.elementAt(8), mFilePath);
-				Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
-						options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2),answer1_text.getText(),mFilePath);
-				try {
-					new_db_man.addQuestion(new_quest);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+
+
+				//add question to database according to question type
+				if (questiontype_list.getSelectedItem().toString().equals("question ? r?ponse br?ve")) {
+					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), answer1_text.getText(), mFilePath);
+
+				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
+					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("chimie", "1", question_text.getText(), answer1_text.getText(),
+							options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2), options_vector.elementAt(3),
+							options_vector.elementAt(4), options_vector.elementAt(5), options_vector.elementAt(6), options_vector.elementAt(7),
+							options_vector.elementAt(8), mFilePath);
+					try {
+						new_db_man.addMultipleChoiceQuestion(new_questmultchoice);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+
+				} else {
+					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
+							options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2),answer1_text.getText(),mFilePath);
+					try {
+						new_db_man.addQuestion(new_quest);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					arg_questionList.add(new_quest);
+					arg_from_questions.addElement(new_quest.getQUESTION());
+					arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
 				}
-				arg_questionList.add(new_quest);
-				arg_from_questions.addElement(new_quest.getQUESTION());
-				arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
 //				DefaultListModel<String>  jlist_model = (DefaultListModel<String>) arg_dragFrom.getModel();
 //				arg_dragFrom.setModel(jlist_model);
 				new_question_frame.dispatchEvent(new WindowEvent(new_question_frame, WindowEvent.WINDOW_CLOSING));

@@ -78,7 +78,6 @@ public class DBManager {
 			stmt = c.createStatement();
 			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
 					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
-					" ID_GLOBAL      INT     NOT NULL, " +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
 					" QUESTION           TEXT    NOT NULL, " +
@@ -102,7 +101,8 @@ public class DBManager {
 					" TRIAL7           TEXT    NOT NULL, " +
 					" TRIAL8           TEXT    NOT NULL, " +
 					" TRIAL9           TEXT    NOT NULL, " +
-					" IMAGE_PATH           TEXT    NOT NULL) ";
+					" IMAGE_PATH           TEXT    NOT NULL, " +
+					" ID_GLOBAL      INT     NOT NULL) ";
 			stmt.executeUpdate(sql);
 			stmt.close();
 			c.close();
@@ -193,8 +193,9 @@ public class DBManager {
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 			c.setAutoCommit(false);
 			stmt = c.createStatement();
-			String sql = 	"INSERT INTO question (SUBJECT,LEVEL,QUESTION,ANSWER," +
-					"OPTIONA,OPTIONB,OPTIONC,OPTIOND,TRIAL1,TRIAL2,TRIAL3,TRIAL4,IMAGE_PATH) " +
+			String sql = 	"INSERT INTO multiple_choice_questions (SUBJECT,LEVEL,QUESTION,ANSWER," +
+					"OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,TRIAL0,TRIAL1,TRIAL2,TRIAL3,TRIAL4,TRIAL5,TRIAL6,TRIAL7," +
+					"TRIAL8,TRIAL9,IMAGE_PATH,ID_GLOBAL) " +
 					"VALUES ('" +
 					quest.getSUBJECT() + "'," +
 					quest.getLEVEL() + ",'" +
@@ -219,7 +220,8 @@ public class DBManager {
 					quest.getTRIAL7() + "','" +
 					quest.getTRIAL8() + "','" +
 					quest.getTRIAL9() + "','" +
-					quest.getIMAGE() + "');";
+					quest.getIMAGE() + "','" +
+					2000000 + "');";
 			stmt.executeUpdate(sql);
 			stmt.close();
 			c.commit();
