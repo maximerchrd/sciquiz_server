@@ -5,6 +5,7 @@ import javax.microedition.io.StreamConnection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 
 /**
  * Created by maximerichard on 14/02/17.
@@ -12,6 +13,7 @@ import java.io.OutputStream;
 public class Student {
     private RemoteDevice mRemoteDevice = null;
     private String mAddress = "no address";
+    private InetAddress mInetAddress = null;
     private String mName = "no name";
     private StreamConnection mConnection = null;
     private OutputStream mOutputStream = null;
@@ -19,9 +21,9 @@ public class Student {
     private double overallPercentage = -1;
     private Boolean mConnectedByBT = false;
 
+
     //constructors
     public Student() {
-
     }
     public Student(String arg_address, String arg_name) {
         mAddress = arg_address;
@@ -37,6 +39,9 @@ public class Student {
     public void setRemoteDevice(RemoteDevice arg_remoteDevice) {
         mRemoteDevice = arg_remoteDevice;
     }
+    public void setInetAddress(InetAddress arg_inetaddress) {
+        mInetAddress = arg_inetaddress;
+    }
     public void setAddress(String arg_address) {
         mAddress = arg_address;
     }
@@ -49,9 +54,18 @@ public class Student {
     public void setmConnectedByBT(Boolean connectedByBT) {
         mConnectedByBT = connectedByBT;
     }
+    public void setOutputStream(OutputStream arg_outputstream) {
+        mOutputStream = arg_outputstream;
+    }
+    public void setInputStream(InputStream arg_inputstream) {
+        mInputStream = arg_inputstream;
+    }
     //getters
     public RemoteDevice getRemoteDevice() {
         return mRemoteDevice;
+    }
+    public InetAddress getInetAddress() {
+        return mInetAddress;
     }
     public String getAddress() {
         return mAddress;

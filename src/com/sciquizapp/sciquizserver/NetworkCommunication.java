@@ -5,8 +5,12 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 import java.io.*;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.bluetooth.*;
 
@@ -26,7 +30,7 @@ public class NetworkCommunication {
     private ArrayList<OutputStream> outstream_list;
     private InputStream inStream = null;
     private ArrayList<InputStream> instream_list;
-    private static final int MAX_NUMBER_OF_CLIENTS = 1;
+    private static final int MAX_NUMBER_OF_CLIENTS = 40;
     private int number_of_clients = 0;
     private ArrayList<Student> students_array;
     private Classroom aClass = null;
@@ -36,6 +40,8 @@ public class NetworkCommunication {
     private LocalDevice localDevice = null;
     private StreamConnection streamConnection = null;
     private static Object lock = new Object();    //object used for waiting
+    private int network_solution = 0; //0: all devices connected to same wifi router
+
 
     public NetworkCommunication(Table TableQuestionVsUser) {
         mTableQuestionVsUser = TableQuestionVsUser;
@@ -50,108 +56,91 @@ public class NetworkCommunication {
      * @throws IOException
      */
     public void startServer() throws IOException {
-        localDevice = null;
 
-        try {
-            localDevice = LocalDevice.getLocalDevice();
-            localDevice.setDiscoverable(DiscoveryAgent.GIAC);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+        if (network_solution == 0) {
+            // First we create a server socket and bind it to port 9090.
+            ServerSocket myServerSocket = new ServerSocket(9090);
 
-        //Create a UUID for SPP
-        //uuid = new UUID("1101", true);
-        uuid = new UUID("d0c722b07e1511e1b0c40800200c9a66", false);
-        //uuid = new UUID("0000110100001000800000805f9b34fb", false);
 
-        //Create the servicve url
-        connectionString = "btspp://localhost:" + uuid.toString() + ";name=Sample SPP Server";
+            // wait for an incoming connection...
+            System.out.println("Server is waiting for an incoming connection on host="
+                    + InetAddress.getLocalHost().getHostAddress() + "; "
+                    + InetAddress.getLocalHost().getCanonicalHostName() + "; "
+                    + InetAddress.getLocalHost().getHostName()
+                    + " port=" + myServerSocket.getLocalPort());
 
-        //open server url
-        streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
 
-        //Wait for client connection
-        System.out.println("\nServer Started. Waiting for clients to connect...");
-        outstream_list = new ArrayList<OutputStream>();
-        instream_list = new ArrayList<InputStream>();
-        mClientsAddresses = new ArrayList<String>();
-        //students_array = new ArrayList<Student>();
-        aClass = new Classroom();
-        Thread connectionthread = new Thread() {
-            public void run() {
-                while (true) {
-                    try {
-                        System.out.println("waiting for next client to connect");
-                        Student student = new Student();
-                        student.setConnection(streamConnNotifier.acceptAndOpen());
+            //Wait for client connection
+            System.out.println("\nServer Started. Waiting for clients to connect...");
+            outstream_list = new ArrayList<OutputStream>();
+            instream_list = new ArrayList<InputStream>();
+            mClientsAddresses = new ArrayList<String>();
+            //students_array = new ArrayList<Student>();
+            aClass = new Classroom();
+            Thread connectionthread = new Thread() {
+                public void run() {
+                    while (true) {
+                        try {
+                            Socket skt = myServerSocket.accept();
+                            System.out.println("waiting for next client to connect");
+                            Student student = new Student();
+                            student.setInetAddress(skt.getInetAddress());
 
-                        if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
-                            try {
-                                number_of_clients++;
-                                RemoteDevice remoteDevice = RemoteDevice.getRemoteDevice(student.getConnection());
-                                student.setRemoteDevice(remoteDevice);
-                                student.setAddress(remoteDevice.getBluetoothAddress());
-                                student.setmConnectedByBT(true);
-                                if (!aClass.studentAlreadyInClass(student)) {
-                                    student.openStreams();
-                                    aClass.addStudentIfNotInClass(student);
-                                    System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
-                                    mTableQuestionVsUser.addUser(remoteDevice.getBluetoothAddress());
-                                    SendNewConnectionResponse(student.getOutputStream(), false);
-                                    listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
-                                } else {
-                                    aClass.updateStudent(student);
-                                    listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                            if (number_of_clients < MAX_NUMBER_OF_CLIENTS) {
+                                try {
+                                    number_of_clients++;
+                                    if (!aClass.studentAlreadyInClass(student)) {
+                                        student.setInputStream(skt.getInputStream());
+                                        student.setOutputStream(skt.getOutputStream());
+                                        aClass.addStudentIfNotInClass(student);
+                                        System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getInetAddress().toString());
+                                        mTableQuestionVsUser.addUser(student.getInetAddress().toString());
+                                        SendNewConnectionResponse(student.getOutputStream(), false);
+                                        listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                    } else {
+                                        aClass.updateStudent(student);
+                                        listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                    }
+
+                                    //open outputstream and instream
+                                    //aClass.getStudents_array().get(aClass.getClassSize() - 1).openStreams();
+                                    //serverOutStream = connection.openOutputStream();
+                                    //inStream = connection.openInputStream();
+
+
+                                    //SendNewConnectionResponse();
+                                    //while (true) {
+
+                                    //}
+
+
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
                                 }
-
-                                //open outputstream and instream
-                                //aClass.getStudents_array().get(aClass.getClassSize() - 1).openStreams();
-                                //serverOutStream = connection.openOutputStream();
-                                //inStream = connection.openInputStream();
-
-
-                                //SendNewConnectionResponse();
-                                //while (true) {
-
-                                //}
-
-
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
+                            } else {
+                                System.out.println("max clients reached");
                             }
-                        } else {
-                            student.openStreams();
-                            SendNewConnectionResponse(student.getOutputStream(), true);
+
+
+                        } catch (IOException e2) {
+                            // TODO Auto-generated catch block
+                            e2.printStackTrace();
                         }
 
-
-                    } catch (IOException e2) {
-                        // TODO Auto-generated catch block
-                        e2.printStackTrace();
                     }
-
                 }
-            }
-        };
-        connectionthread.start();
-
-        //send response to spp client
-        /*serverOutStream = connection.openOutputStream();
-        PrintWriter pWriter=new PrintWriter(new OutputStreamWriter(serverOutStream));
-		pWriter.write("un truc rigolo Response String from SPP Server\r\n");
-		pWriter.flush();*/
-
-
-        //streamConnNotifier.close();		//closed because connection problems occured suddenly
+            };
+            connectionthread.start();
+        }
     }
 
     public void SendQuestionID(int QuestID) throws IOException {
         String questIDString = "QUEID///" + String.valueOf(QuestID) + "///";
         byte[] bytearraystring = questIDString.getBytes(Charset.forName("UTF-8"));
-        ArrayList<Student> FirstLayerStudents = aClass.getmFirstLayerStudents();
-        System.out.println(FirstLayerStudents.size());
-        for (int i = 0; i < FirstLayerStudents.size(); i++) {
-            OutputStream tempOutputStream = FirstLayerStudents.get(i).getOutputStream();
+        ArrayList<Student> StudentsArray = aClass.getStudents_array();
+        System.out.println(StudentsArray.size());
+        for (int i = 0; i < StudentsArray.size(); i++) {
+            OutputStream tempOutputStream = StudentsArray.get(i).getOutputStream();
             try {
                 tempOutputStream.write(bytearraystring, 0, bytearraystring.length);
                 tempOutputStream.flush();
@@ -216,15 +205,15 @@ public class NetworkCommunication {
 
         //Thread sendingthread = new Thread() {
          //   public void run() {
-                ArrayList<Student> FirstLayerStudents = aClass.getmFirstLayerStudents();
-                System.out.println(FirstLayerStudents.size());
-                for (int i = 0; i < FirstLayerStudents.size(); i++) {
+                ArrayList<Student> StudentsArray = aClass.getStudents_array();
+                System.out.println(StudentsArray.size());
+                for (int i = 0; i < StudentsArray.size(); i++) {
 //                    try {
 //                        aClass.getStudents_array().get(i).getOutputStream().write(bytearray, 0, arraylength);
 //                        aClass.getStudents_array().get(i).getOutputStream().flush();
 //                    } catch (IOException ex) {
 //                        ex.printStackTrace();
-                    OutputStream tempOutputStream = FirstLayerStudents.get(i).getOutputStream();
+                    OutputStream tempOutputStream = StudentsArray.get(i).getOutputStream();
                         try {
                             //for ( int j = 0; j < arraylength; j++) {
                                 //tempOutputStream.write(bytearray[j]);

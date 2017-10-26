@@ -144,20 +144,6 @@ public class ChooseDropActionDemo extends JFrame {
 		panel_questlist.add(panel_for_from);
 		panel_questlist.add(panel_for_copy);
 
-		//start the server for sending the question
-		/*final SendQuestionBluetooth send_quest = new SendQuestionBluetooth();
-		Thread serverthread = new Thread() {
-			public void run() {
-				try {
-					send_quest.startServer();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}  
-		};
-
-		serverthread.start();*/
 		//implement a button to send the highlighted question
 		JButton send_quest_button = new JButton("activer la question");
 		send_quest_button.addActionListener(new ActionListener()

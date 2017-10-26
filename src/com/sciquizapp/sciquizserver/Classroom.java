@@ -11,12 +11,10 @@ import java.util.ArrayList;
 public class Classroom {
     private ArrayList<Student> students_array = null;
     private ArrayList<String> students_addresses = null;
-    private ArrayList<Student> mFirstLayerStudents = null;
 
     public Classroom() {
         students_array = new ArrayList<Student>();
         students_addresses = new ArrayList<String>();
-        mFirstLayerStudents = new ArrayList<Student>();
     }
 
     public void addStudent(Student student) {
@@ -44,10 +42,6 @@ public class Classroom {
     }
     public ArrayList<Student> getStudents_array() {
         return students_array;
-    }
-    public ArrayList<Student> getmFirstLayerStudents() {
-        makeFirstLayerClass();
-        return mFirstLayerStudents;
     }
 
     public void pruneLastStudentIfAlreadyInClass() {
@@ -102,16 +96,5 @@ public class Classroom {
             students_addresses.add(students_array.get(i).getAddress());
         }
         return students_addresses.size();
-    }
-
-    private void makeFirstLayerClass() {
-        for (int i = 0; i < mFirstLayerStudents.size(); i++) {
-            mFirstLayerStudents.remove(i);
-        }
-        for (int i = 0; i < students_array.size(); i++) {
-            if (students_array.get(i).getmConnectedByBT() == true) {
-                mFirstLayerStudents.add(students_array.get(i));
-            }
-        }
     }
 }
