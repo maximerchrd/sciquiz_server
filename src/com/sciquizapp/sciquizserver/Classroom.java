@@ -11,12 +11,19 @@ import java.util.ArrayList;
 public class Classroom {
     private ArrayList<Student> students_array = null;
     private ArrayList<String> students_addresses = null;
+    private ArrayList<QuestionMultipleChoice> current_set_quest_mult_choice = null;
 
     public Classroom() {
         students_array = new ArrayList<Student>();
         students_addresses = new ArrayList<String>();
+        current_set_quest_mult_choice = new ArrayList<QuestionMultipleChoice>();
     }
-
+    public void addQuestMultChoice(QuestionMultipleChoice questionMultipleChoice) {
+        current_set_quest_mult_choice.add(questionMultipleChoice);
+    }
+    public ArrayList<QuestionMultipleChoice> getCurrent_set_quest_mult_choice() {
+        return current_set_quest_mult_choice;
+    }
     public void addStudent(Student student) {
         students_array.add(student);
     }

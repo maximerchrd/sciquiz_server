@@ -232,7 +232,9 @@ public class DBManager {
 		}
 	}
 
-	// get a list of all questions in database
+	/**
+	 * get a List of all the Question in the database
+ 	 */
 	public List<Question> getAllQuestions() throws Exception{
 		List<Question> quesList = new ArrayList<Question>();
 		// Select All Query
@@ -274,5 +276,59 @@ public class DBManager {
 		}
 		System.out.println("Operation done successfully");
 		return quesList;
+	}
+	/**
+	 * get a List of all the QuestionMultipleChoice in the database
+	 */
+	public List<QuestionMultipleChoice> getAllMultipleChoiceQuestions() throws Exception{
+		List<QuestionMultipleChoice> multquestList = new ArrayList<QuestionMultipleChoice>();
+		// Select All Query
+		Connection c = null;
+		Statement stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+			c.setAutoCommit(false);
+			System.out.println("Opened database successfully");
+
+			stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery( "SELECT * FROM multiple_choice_questions;" );
+			while ( rs.next() ) {
+				QuestionMultipleChoice quest = new QuestionMultipleChoice();
+				quest.setSUBJECT(rs.getString(2));
+				quest.setLEVEL(rs.getString(3));
+				quest.setQUESTION(rs.getString(4));
+				quest.setANSWER(rs.getString(5));
+				quest.setOPT1(rs.getString(6));
+				quest.setOPT2(rs.getString(7));
+				quest.setOPT3(rs.getString(8));
+				quest.setOPT4(rs.getString(9));
+				quest.setOPT5(rs.getString(10));
+				quest.setOPT6(rs.getString(11));
+				quest.setOPT7(rs.getString(12));
+				quest.setOPT8(rs.getString(13));
+				quest.setOPT9(rs.getString(14));
+				quest.setTRIAL0(rs.getString(15));
+				quest.setTRIAL1(rs.getString(16));
+				quest.setTRIAL2(rs.getString(17));
+				quest.setTRIAL3(rs.getString(18));
+				quest.setTRIAL4(rs.getString(19));
+				quest.setTRIAL5(rs.getString(20));
+				quest.setTRIAL6(rs.getString(21));
+				quest.setTRIAL7(rs.getString(22));
+				quest.setTRIAL8(rs.getString(23));
+				quest.setTRIAL9(rs.getString(24));
+				quest.setID(rs.getInt(25));
+				multquestList.add(quest);
+			}
+			rs.close();
+			stmt.close();
+			c.close();
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		System.out.println("Operation done successfully");
+		return multquestList;
 	}
 } 

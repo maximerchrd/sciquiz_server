@@ -191,7 +191,7 @@ public class QuestionMultipleChoice {
 	public void setQUESTION(String qUESTION) {
 		QUESTION = qUESTION;
 	}
-public void setOPTIONSNUMBER(int oPTIONSNUMBER) {
+	public void setOPTIONSNUMBER(int oPTIONSNUMBER) {
 		OPTIONSNUMBER = oPTIONSNUMBER;
 	}
 	public void setOPT1(String oPT1) {

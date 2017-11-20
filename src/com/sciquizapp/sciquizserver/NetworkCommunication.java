@@ -96,6 +96,7 @@ public class NetworkCommunication {
                                         System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getInetAddress().toString());
                                         mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
+                                        SendQuestionList();
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
                                     } else {
                                         aClass.updateStudent(student);
@@ -244,6 +245,13 @@ public class NetworkCommunication {
     }
 
     /**
+     * method that sends the questions listed on the right panel to the clients
+     * @throws IOException
+     */
+    public void SendQuestionList() throws IOException {
+        
+    }
+    /**
      * method that listen for the client data transfers
      *
      * @throws IOException
@@ -312,5 +320,7 @@ public class NetworkCommunication {
         //serverOutStream.write(bytes, 0, bytes.length);
         //serverOutStream.flush();
     }
-
+    public Classroom getClassroom() {
+        return aClass;
+    }
 }

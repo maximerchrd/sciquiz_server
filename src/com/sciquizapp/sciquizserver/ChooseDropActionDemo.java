@@ -53,15 +53,19 @@ public class ChooseDropActionDemo extends JFrame {
 	JList<String> dragFrom;
 	public JPanel panel_for_from;
 	public JPanel panel_for_copy;
-	List<Question> questionList = new ArrayList<Question>();
+	private List<Question> questionList = new ArrayList<Question>();
+	private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
 	private Quiz quiz;
+	private NetworkCommunication own_networkcommunication = null;
 
 	public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
 		super("ChooseDropActionDemo");
 
+		own_networkcommunication = network_singleton;
 		DBManager database = new DBManager();
 		try {
 			questionList = database.getAllQuestions();
+			multipleChoicesQuestList = database.getAllMultipleChoiceQuestions();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,6 +73,10 @@ public class ChooseDropActionDemo extends JFrame {
 		for (int i = 0; i < questionList.size(); i++) {
 			from_questions.addElement(questionList.get(i).getQUESTION());
 			from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
+		}
+		for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
+			from_questions.addElement(multipleChoicesQuestList.get(i).getQUESTION());
+			from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
 		}
 
 		quiz = new Quiz();
@@ -93,7 +101,7 @@ public class ChooseDropActionDemo extends JFrame {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				AddNewQuestion new_quest = new AddNewQuestion(questionList, from_questions, from_IDs);
+				AddNewQuestion new_quest = new AddNewQuestion(questionList, multipleChoicesQuestList, from_questions, from_IDs);
 			}
 		});
 		panel_for_from.add(new_quest_button);
@@ -283,6 +291,7 @@ public class ChooseDropActionDemo extends JFrame {
 			JList list = (JList)support.getComponent();
 			DefaultListModel model = (DefaultListModel)list.getModel();
 			model.insertElementAt(data, index);
+			own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
 
 			Rectangle rect = list.getCellBounds(index, index);
 			list.scrollRectToVisible(rect);

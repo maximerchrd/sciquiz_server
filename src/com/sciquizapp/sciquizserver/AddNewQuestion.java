@@ -29,7 +29,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	private String mFilePath = "";
 	int new_option_index = 2;
 
-	public AddNewQuestion(final List<Question> arg_questionList, final DefaultListModel<String> arg_from_questions, 
+	public AddNewQuestion(final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList,final DefaultListModel<String> arg_from_questions,
 			final DefaultListModel<String> arg_from_IDs) {
 		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
 		Box box = Box.createVerticalBox();
@@ -154,6 +154,9 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
+					arg_multChoiceQuestionList.add(new_questmultchoice);
+					arg_from_questions.addElement(new_questmultchoice.getQUESTION());
+					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
 
 				} else {
 					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
