@@ -9,7 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 
-import com.sciquizapp.sciquizserver.Question;
+import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 public class DBManager {
 
@@ -76,7 +77,7 @@ public class DBManager {
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 
 			stmt = c.createStatement();
-			String sql = "DROP TABLE IF EXISTS 'multiple_choice_questions'; CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
+			String sql = "CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
 					"(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +

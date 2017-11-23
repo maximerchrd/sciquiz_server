@@ -31,10 +31,11 @@
 
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.DBManager;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
-import com.sciquizapp.sciquizserver.Question;
+import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,7 +56,8 @@ public class ChooseDropActionDemo extends JFrame {
 	public JPanel panel_for_copy;
 	private List<Question> questionList = new ArrayList<Question>();
 	private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
-	private Quiz quiz;
+	private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
+	private List<QuestionGeneric> quiz = new ArrayList<QuestionGeneric>();
 	private NetworkCommunication own_networkcommunication = null;
 
 	public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
@@ -73,13 +75,15 @@ public class ChooseDropActionDemo extends JFrame {
 		for (int i = 0; i < questionList.size(); i++) {
 			from_questions.addElement(questionList.get(i).getQUESTION());
 			from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
+			QuestionGeneric temp_generic_question = new QuestionGeneric("QUEST",i);
+			genericQuestionList.add(temp_generic_question);
 		}
 		for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
 			from_questions.addElement(multipleChoicesQuestList.get(i).getQUESTION());
 			from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
+			QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ",i);
+			genericQuestionList.add(temp_generic_question);
 		}
-
-		quiz = new Quiz();
 
 		panel_for_from = new JPanel();
 		panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
@@ -159,6 +163,7 @@ public class ChooseDropActionDemo extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				Question question_to_send;
+				System.out.println("copyTo.getSelectedIndex() =  " + copyTo.getSelectedIndex());
 				question_to_send = questionList.get(copyTo.getSelectedIndex());
 				try {
 					network_singleton.SendQuestion(question_to_send, false);
@@ -177,9 +182,7 @@ public class ChooseDropActionDemo extends JFrame {
             public void actionPerformed(ActionEvent e)
             {
                 try {
-                	for (int i = 0; i < quiz.getmNumberOfQuestions(); i++) {
-						network_singleton.SendQuestion(quiz.getQuestionVector().elementAt(i), true);
-					}
+					network_singleton.SendQuestionList(questionList, multipleChoicesQuestList);
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -231,11 +234,10 @@ public class ChooseDropActionDemo extends JFrame {
 		}
 
 		public void exportDone(JComponent comp, Transferable trans, int action) {
-			quiz.addQuestion(questionList.get(index));
+			quiz.add(genericQuestionList.get(index));
 			if (action != MOVE) {
 				return;
 			}
-
 			from_questions.removeElementAt(index);
 		}
 	}

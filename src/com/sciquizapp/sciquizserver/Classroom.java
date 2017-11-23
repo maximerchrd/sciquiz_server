@@ -1,6 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.Student;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 import java.io.IOException;
 import java.util.ArrayList;

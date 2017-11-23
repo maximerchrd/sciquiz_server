@@ -1,8 +1,8 @@
 package com.sciquizapp.sciquizserver;
 
 //graphics classes
-import java.awt.EventQueue;
-import java.awt.Graphics;
+import com.sciquizapp.sciquizserver.questions.Question;
+
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;

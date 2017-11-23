@@ -1,27 +1,24 @@
-package com.sciquizapp.sciquizserver;
+package com.sciquizapp.sciquizserver.questions;
 
-public class QuestionShortAnswer {
+public class QuestionFreeAnswer {
 	private int ID;
 	private String SUBJECT;
 	private String LEVEL;
 	private String QUESTION;
-	private String ANSWER;
 	private String IMAGE;
-	public QuestionShortAnswer()
+	public QuestionFreeAnswer()
 	{
 		ID=0;
 		SUBJECT="";
 		LEVEL="";
 		QUESTION="";
-		ANSWER="";
 		IMAGE="none";
 	}
-	public QuestionShortAnswer(String sUBJECT, String lEVEL, String qUESTION, String aNSWER, String iMAGE) {
+	public QuestionFreeAnswer(String sUBJECT, String lEVEL, String qUESTION, String iMAGE) {
 		
 		SUBJECT = sUBJECT;
 		LEVEL = lEVEL;
 		QUESTION = qUESTION;
-		ANSWER = aNSWER;
 		IMAGE = iMAGE;
 	}
 	public int getID()
@@ -36,9 +33,6 @@ public class QuestionShortAnswer {
 	}
 	public String getQUESTION() {
 		return QUESTION;
-	}
-	public String getANSWER() {
-		return ANSWER;
 	}
 	public String getIMAGE() {
 		return IMAGE;
@@ -55,9 +49,6 @@ public class QuestionShortAnswer {
 	}
 	public void setQUESTION(String qUESTION) {
 		QUESTION = qUESTION;
-	}
-	public void setANSWER(String aNSWER) {
-		ANSWER = aNSWER;
 	}
 	public void setIMAGE(String iMAGE) {
 		IMAGE = iMAGE;

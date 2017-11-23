@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.questions.Question;
+
 import java.util.Vector;
 
 /**

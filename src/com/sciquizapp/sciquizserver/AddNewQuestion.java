@@ -1,15 +1,17 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.awt.image.ImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -29,8 +31,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	private String mFilePath = "";
 	int new_option_index = 2;
 
-	public AddNewQuestion(final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList,final DefaultListModel<String> arg_from_questions,
-			final DefaultListModel<String> arg_from_IDs) {
+	public AddNewQuestion(final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
+						  final DefaultListModel<String> arg_from_IDs) {
 		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
 		Box box = Box.createVerticalBox();
 		new_question_frame.add( box );

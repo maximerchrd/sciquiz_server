@@ -1,4 +1,4 @@
-package com.sciquizapp.sciquizserver;
+package com.sciquizapp.sciquizserver.questions;
 
 public class Question {
 	private int ID;

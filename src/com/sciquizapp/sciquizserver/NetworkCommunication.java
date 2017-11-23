@@ -1,16 +1,16 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+
 import javax.bluetooth.UUID;
-import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 
 import javax.bluetooth.*;
 
@@ -96,7 +96,7 @@ public class NetworkCommunication {
                                         System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getInetAddress().toString());
                                         mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
-                                        SendQuestionList();
+                                        SendQuestionList(null, null);
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
                                     } else {
                                         aClass.updateStudent(student);
@@ -150,6 +150,7 @@ public class NetworkCommunication {
             }
         }
     }
+
     public void SendQuestion(Question arg_quest, Boolean isQuiz) throws IOException {
         //send question to spp client
 
@@ -196,48 +197,19 @@ public class NetworkCommunication {
         bis = new BufferedInputStream(fis);
         int arraylength = bytearray.length;
         bis.read(bytearray, 20 + textbyteslength, intfileLength);
-        //os = sock.getOutputStream();
         System.out.println("Sending " + arg_quest.getIMAGE() + "(" + (int) myFile.length() + " bytes)");
         System.out.println("Sending " + arraylength + " bytes in total");
-//			for (int i = 0; i < outstream_list.size(); i++) {
-//				outstream_list.get(i).write(bytearray,0,arraylength);
-//				outstream_list.get(i).flush();
-//			}
-
-        //Thread sendingthread = new Thread() {
-         //   public void run() {
-                ArrayList<Student> StudentsArray = aClass.getStudents_array();
-                System.out.println(StudentsArray.size());
-                for (int i = 0; i < StudentsArray.size(); i++) {
-//                    try {
-//                        aClass.getStudents_array().get(i).getOutputStream().write(bytearray, 0, arraylength);
-//                        aClass.getStudents_array().get(i).getOutputStream().flush();
-//                    } catch (IOException ex) {
-//                        ex.printStackTrace();
-                    OutputStream tempOutputStream = StudentsArray.get(i).getOutputStream();
-                        try {
-                            //for ( int j = 0; j < arraylength; j++) {
-                                //tempOutputStream.write(bytearray[j]);
-                                tempOutputStream.write(bytearray, 0, arraylength);
-                            //}
-                            //Thread.sleep(1000);     //wait to be sure that the smartphone has enough time to read
-                            tempOutputStream.flush();
-                        } catch (IOException ex2) {
-                            ex2.printStackTrace();
-                        }
-//                    }
-                /*try {
-					synchronized(lock){
-						lock.wait();
-					}
-				}
-				catch (InterruptedException e) {
-					e.printStackTrace();
-				}*/
-                }
-        //    }
-        //};
-        //sendingthread.start();
+        ArrayList<Student> StudentsArray = aClass.getStudents_array();
+        System.out.println(StudentsArray.size());
+        for (int i = 0; i < StudentsArray.size(); i++) {
+            OutputStream tempOutputStream = StudentsArray.get(i).getOutputStream();
+            try {
+                tempOutputStream.write(bytearray, 0, arraylength);
+                tempOutputStream.flush();
+            } catch (IOException ex2) {
+                ex2.printStackTrace();
+            }
+        }
         System.out.println("Done.");
         //} else {
         //	System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
@@ -246,11 +218,126 @@ public class NetworkCommunication {
 
     /**
      * method that sends the questions listed on the right panel to the clients
+     *
      * @throws IOException
      */
-    public void SendQuestionList() throws IOException {
-        
+    public void SendQuestionList(List<Question> questionList, List<QuestionMultipleChoice> multipleChoiceQuestionList) throws IOException {
+        if (questionList != null) {
+            for (int j = 0; j < questionList.size(); j++) {
+                String question_text = questionList.get(j).getQUESTION() + "///";
+                question_text += questionList.get(j).getOPTA() + "///";
+                question_text += questionList.get(j).getOPTB() + "///";
+                question_text += questionList.get(j).getOPTC() + "///";
+                question_text += questionList.get(j).getOPTD() + "///";
+                if (!questionList.get(j).getIMAGE().equals("none")) {
+                    question_text += questionList.get(j).getIMAGE().split("/")[2];
+                }
+                byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
+
+                // send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
+
+                //writing of the first 20 bytes
+                File myFile = new File(questionList.get(j).getIMAGE());
+                int intfileLength = (int) myFile.length();
+                int textbyteslength = bytearraytext.length;
+                byte[] bytearray = new byte[20 + textbyteslength + intfileLength];
+                String fileLength;
+                fileLength = "QUEST";
+                fileLength += ":" + String.valueOf((int) myFile.length());
+                fileLength += ":" + String.valueOf(textbyteslength);
+                byte[] bytearraystring = fileLength.getBytes(Charset.forName("UTF-8"));
+                for (int k = 0; k < bytearraystring.length; k++) {
+                    bytearray[k] = bytearraystring[k];
+                }
+
+                //copy the textbytes into the array which will be sent
+                for (int k = 0; k < bytearraytext.length; k++) {
+                    bytearray[k + 20] = bytearraytext[k];
+                }
+
+                //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
+                fis = new FileInputStream(myFile);
+                bis = new BufferedInputStream(fis);
+                int arraylength = bytearray.length;
+                bis.read(bytearray, 20 + textbyteslength, intfileLength);
+                System.out.println("Sending " + questionList.get(j).getIMAGE() + "(" + (int) myFile.length() + " bytes)");
+                System.out.println("Sending " + arraylength + " bytes in total");
+                for (int i = 0; i < aClass.getClassSize(); i++) {
+                    OutputStream tempOutputStream = aClass.getStudents_array().get(i).getOutputStream();
+                    try {
+                        tempOutputStream.write(bytearray, 0, arraylength);
+                        tempOutputStream.flush();
+                    } catch (IOException ex2) {
+                        ex2.printStackTrace();
+                    }
+                }
+                System.out.println("Done.");
+            }
+        }
+        if (multipleChoiceQuestionList != null) {
+            for (int j = 0; j < multipleChoiceQuestionList.size(); j++) {
+                String question_text = multipleChoiceQuestionList.get(j).getQUESTION() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getANSWER() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT1() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT2() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT3() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT4() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT5() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT6() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT7() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT8() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT9() + "///";
+
+                // send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
+                int intfileLength = 0;
+                File myFile = null;
+                if (!multipleChoiceQuestionList.get(j).getIMAGE().equals("none")) {
+                    question_text += multipleChoiceQuestionList.get(j).getIMAGE().split("/")[2];
+                    myFile = new File(multipleChoiceQuestionList.get(j).getIMAGE());
+                    intfileLength = (int) myFile.length();
+                }
+
+                //writing of the first 20 bytes
+                byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
+                int textbyteslength = bytearraytext.length;
+                byte[] bytearray = new byte[20 + textbyteslength + intfileLength];
+                String fileLength;
+                fileLength = "MULTQ";
+                fileLength += ":" + String.valueOf(intfileLength);
+                fileLength += ":" + String.valueOf(textbyteslength);
+                byte[] bytearraystring = fileLength.getBytes(Charset.forName("UTF-8"));
+                for (int k = 0; k < bytearraystring.length; k++) {
+                    bytearray[k] = bytearraystring[k];
+                }
+
+                //copy the textbytes into the array which will be sent
+                for (int k = 0; k < bytearraytext.length; k++) {
+                    bytearray[k + 20] = bytearraytext[k];
+                }
+
+                //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
+                if (!multipleChoiceQuestionList.get(j).getIMAGE().equals("none")) {
+                    fis = new FileInputStream(myFile);
+                    bis = new BufferedInputStream(fis);
+                    bis.read(bytearray, 20 + textbyteslength, intfileLength);
+                }
+                System.out.println("Sending " + multipleChoiceQuestionList.get(j).getIMAGE() + "(" + intfileLength + " bytes)");
+                int arraylength = bytearray.length;
+                System.out.println("Sending " + arraylength + " bytes in total");
+                for (int i = 0; i < aClass.getClassSize(); i++) {
+                    OutputStream tempOutputStream = aClass.getStudents_array().get(i).getOutputStream();
+                    try {
+                        tempOutputStream.write(bytearray, 0, arraylength);
+                        tempOutputStream.flush();
+                    } catch (IOException ex2) {
+                        ex2.printStackTrace();
+                    }
+                    System.out.println("Done.");
+                }
+            }
+        }
     }
+
     /**
      * method that listen for the client data transfers
      *
@@ -260,44 +347,44 @@ public class NetworkCommunication {
         //for (int i = 0; i < aClass.getClassSize(); i++) {
         final InputStream answerInStream = arg_student.getInputStream();
         Thread listeningthread = new Thread() {
-        	public void run() {
-        while(true) {
-        try {
-            byte[] in_bytearray = new byte[1000];
-            //System.out.println("listening to " + aClass.getStudents_array().get(j).getAddress());
-            int bytesread = answerInStream.read(in_bytearray);
-            System.out.println(bytesread + " bytes read");
-            if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
-            if (bytesread >= 0) {
-                String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
-                System.out.println(answerString);
-                if (answerString.split("///")[0].contains("ANSW")) {
-                    //Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
-                    arg_student.setName(answerString.split("///")[2]);
-                    //Student student = aClass.getStudents_array().get(j);
-                    //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
+            public void run() {
+                while (true) {
+                    try {
+                        byte[] in_bytearray = new byte[1000];
+                        //System.out.println("listening to " + aClass.getStudents_array().get(j).getAddress());
+                        int bytesread = answerInStream.read(in_bytearray);
+                        System.out.println(bytesread + " bytes read");
+                        if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
+                        if (bytesread >= 0) {
+                            String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
+                            System.out.println(answerString);
+                            if (answerString.split("///")[0].contains("ANSW")) {
+                                //Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+                                arg_student.setName(answerString.split("///")[2]);
+                                //Student student = aClass.getStudents_array().get(j);
+                                //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
 
-                } else if (answerString.split("///")[0].contains("CONN")) {
-                    Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
-                    if (!aClass.studentAlreadyInClass(student)) {
-                        student.openStreams();
-                        //aClass.addStudentIfNotInClass(student);
-                        //System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
-                        //mTableQuestionVsUser.addUser(arg_student.getAddress());
-                    } else {
-                        aClass.updateStudent(student);
-                        //listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                            } else if (answerString.split("///")[0].contains("CONN")) {
+                                Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+                                if (!aClass.studentAlreadyInClass(student)) {
+                                    student.openStreams();
+                                    //aClass.addStudentIfNotInClass(student);
+                                    //System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
+                                    //mTableQuestionVsUser.addUser(arg_student.getAddress());
+                                } else {
+                                    aClass.updateStudent(student);
+                                    //listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                }
+                            }
+                        } else {
+
+                        }
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
                     }
                 }
-            } else {
-
             }
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        }
-        	}
         };
         listeningthread.start();
         //}
@@ -320,6 +407,7 @@ public class NetworkCommunication {
         //serverOutStream.write(bytes, 0, bytes.length);
         //serverOutStream.flush();
     }
+
     public Classroom getClassroom() {
         return aClass;
     }
