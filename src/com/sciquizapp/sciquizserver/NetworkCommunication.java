@@ -277,7 +277,7 @@ public class NetworkCommunication {
         if (multipleChoiceQuestionList != null) {
             for (int j = 0; j < multipleChoiceQuestionList.size(); j++) {
                 String question_text = multipleChoiceQuestionList.get(j).getQUESTION() + "///";
-                question_text += multipleChoiceQuestionList.get(j).getANSWER() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getOPT0() + "///";
                 question_text += multipleChoiceQuestionList.get(j).getOPT1() + "///";
                 question_text += multipleChoiceQuestionList.get(j).getOPT2() + "///";
                 question_text += multipleChoiceQuestionList.get(j).getOPT3() + "///";
@@ -295,6 +295,8 @@ public class NetworkCommunication {
                     question_text += multipleChoiceQuestionList.get(j).getIMAGE().split("/")[2];
                     myFile = new File(multipleChoiceQuestionList.get(j).getIMAGE());
                     intfileLength = (int) myFile.length();
+                } else {
+                    question_text += multipleChoiceQuestionList.get(j).getIMAGE() + "///";
                 }
 
                 //writing of the first 20 bytes

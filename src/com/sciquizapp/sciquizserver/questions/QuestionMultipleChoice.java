@@ -7,9 +7,14 @@ public class QuestionMultipleChoice {
 	private String QUESTION;
 
 	/**
-	 * OPTIONSNUMBER: number of alternative choices counting the correct answer
+	 * OPTIONSNUMBER: total number of choices for the answer
 	 */
 	private int OPTIONSNUMBER;
+	/**
+	 * CORRECTANSWERSNUMBER: number of correct answers
+	 */
+	private int CORRECTANSWERSNUMBER;
+	private String OPT0;
 	private String OPT1;
 	private String OPT2;
 	private String OPT3;
@@ -19,7 +24,6 @@ public class QuestionMultipleChoice {
 	private String OPT7;
 	private String OPT8;
 	private String OPT9;
-	private String ANSWER;
 	private String IMAGE;
 	private String TRIAL0;
 	private String TRIAL1;
@@ -37,6 +41,8 @@ public class QuestionMultipleChoice {
 		LEVEL="";
 		QUESTION="";
 		OPTIONSNUMBER=0;
+		CORRECTANSWERSNUMBER=1;
+		OPT0="";
 		OPT1="";
 		OPT2="";
 		OPT3="";
@@ -46,7 +52,6 @@ public class QuestionMultipleChoice {
 		OPT7="";
 		OPT8="";
 		OPT9="";
-		ANSWER="";
 		TRIAL0 = "0";
 		TRIAL1 = "0";
 		TRIAL2 = "0";
@@ -59,13 +64,13 @@ public class QuestionMultipleChoice {
 		TRIAL9 = "0";
 		IMAGE="none";
 	}
-	public QuestionMultipleChoice(String sUBJECT, String lEVEL, String qUESTION, String oPT1, String oPT2, String oPT3, String oPT4,
-								  String oPT5, String oPT6, String oPT7, String oPT8, String oPT9,
-                                  String aNSWER, String iMAGE) {
+	public QuestionMultipleChoice(String sUBJECT, String lEVEL, String qUESTION, String oPT0, String oPT1, String oPT2, String oPT3, String oPT4,
+								  String oPT5, String oPT6, String oPT7, String oPT8, String oPT9, String iMAGE) {
 		
 		SUBJECT = sUBJECT;
 		LEVEL = lEVEL;
 		QUESTION = qUESTION;
+		OPT0 = oPT0;
 		OPT1 = oPT1;
 		OPT2 = oPT2;
 		OPT3 = oPT3;
@@ -75,7 +80,6 @@ public class QuestionMultipleChoice {
 		OPT7 = oPT7;
 		OPT8 = oPT8;
 		OPT9 = oPT9;
-		ANSWER = aNSWER;
 		TRIAL0 = "0";
 		TRIAL1 = "0";
 		TRIAL2 = "0";
@@ -115,6 +119,12 @@ public class QuestionMultipleChoice {
 	public int getOPTIONSNUMBER() {
 		return OPTIONSNUMBER;
 	}
+	public int getCORRECTANSWERSNUMBER() {
+		return CORRECTANSWERSNUMBER;
+	}
+	public String getOPT0() {
+		return OPT0;
+	}
 	public String getOPT1() {
 		return OPT1;
 	}
@@ -141,9 +151,6 @@ public class QuestionMultipleChoice {
 	}
 	public String getOPT9() {
 		return OPT9;
-	}
-	public String getANSWER() {
-		return ANSWER;
 	}
 	public String getTRIAL0() {
 		return TRIAL0;
@@ -194,6 +201,12 @@ public class QuestionMultipleChoice {
 	public void setOPTIONSNUMBER(int oPTIONSNUMBER) {
 		OPTIONSNUMBER = oPTIONSNUMBER;
 	}
+	public void setCORRECTANSWERSNUMBER(int cORRECTANSWERSNUMBER) {
+		this.CORRECTANSWERSNUMBER = cORRECTANSWERSNUMBER;
+	}
+	public void setOPT0(String oPT0) {
+		OPT0 = oPT0;
+	}
 	public void setOPT1(String oPT1) {
 		OPT1 = oPT1;
 	}
@@ -221,11 +234,8 @@ public class QuestionMultipleChoice {
 	public void setOPT9(String oPT9) {
 		OPT9 = oPT9;
 	}
-	public void setANSWER(String aNSWER) {
-		ANSWER = aNSWER;
-	}
 	public void setTRIAL0(String tRIAL0) {
-		TRIAL1 = tRIAL0;
+		TRIAL0 = tRIAL0;
 	}
 	public void setTRIAL1(String tRIAL1) {
 		TRIAL1 = tRIAL1;
@@ -240,19 +250,19 @@ public class QuestionMultipleChoice {
 		TRIAL4 = tRIAL4;
 	}
 	public void setTRIAL5(String tRIAL5) {
-		TRIAL1 = tRIAL5;
+		TRIAL5 = tRIAL5;
 	}
 	public void setTRIAL6(String tRIAL6) {
-		TRIAL1 = tRIAL6;
+		TRIAL6 = tRIAL6;
 	}
 	public void setTRIAL7(String tRIAL7) {
-		TRIAL1 = tRIAL7;
+		TRIAL7 = tRIAL7;
 	}
 	public void setTRIAL8(String tRIAL8) {
-		TRIAL1 = tRIAL8;
+		TRIAL8 = tRIAL8;
 	}
 	public void setTRIAL9(String tRIAL9) {
-		TRIAL1 = tRIAL9;
+		TRIAL9 = tRIAL9;
 	}
 	public void setIMAGE(String iMAGE) {
 		IMAGE = iMAGE;

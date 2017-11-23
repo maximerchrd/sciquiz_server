@@ -82,7 +82,7 @@ public class DBManager {
 					" SUBJECT           TEXT    NOT NULL, " +
 					" LEVEL      INT     NOT NULL, " +
 					" QUESTION           TEXT    NOT NULL, " +
-					" ANSWER           TEXT    NOT NULL, " +
+					" OPTION0           TEXT    NOT NULL, " +
 					" OPTION1           TEXT    NOT NULL, " +
 					" OPTION2           TEXT    NOT NULL, " +
 					" OPTION3           TEXT    NOT NULL, " +
@@ -194,14 +194,14 @@ public class DBManager {
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 			c.setAutoCommit(false);
 			stmt = c.createStatement();
-			String sql = 	"INSERT INTO multiple_choice_questions (SUBJECT,LEVEL,QUESTION,ANSWER," +
+			String sql = 	"INSERT INTO multiple_choice_questions (SUBJECT,LEVEL,QUESTION,OPTION0," +
 					"OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,TRIAL0,TRIAL1,TRIAL2,TRIAL3,TRIAL4,TRIAL5,TRIAL6,TRIAL7," +
 					"TRIAL8,TRIAL9,IMAGE_PATH,ID_GLOBAL) " +
 					"VALUES ('" +
 					quest.getSUBJECT() + "'," +
 					quest.getLEVEL() + ",'" +
 					quest.getQUESTION() + "','" +
-					quest.getANSWER() + "','" +
+					quest.getOPT0() + "','" +
 					quest.getOPT1() + "','" +
 					quest.getOPT2() + "','" +
 					quest.getOPT3() + "','" +
@@ -299,7 +299,7 @@ public class DBManager {
 				quest.setSUBJECT(rs.getString(2));
 				quest.setLEVEL(rs.getString(3));
 				quest.setQUESTION(rs.getString(4));
-				quest.setANSWER(rs.getString(5));
+				quest.setOPT0(rs.getString(5));
 				quest.setOPT1(rs.getString(6));
 				quest.setOPT2(rs.getString(7));
 				quest.setOPT3(rs.getString(8));
