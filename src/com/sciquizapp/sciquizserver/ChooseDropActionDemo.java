@@ -130,7 +130,7 @@ public class ChooseDropActionDemo extends JFrame {
 					int indexOfQuestion = copyTo.getSelectedIndex();
 					question_index = indexOfQuestion;
 					Question questionToDisplay;
-					questionToDisplay = questionList.get(indexOfQuestion);					//needs to be fixed; the index is the one in the database
+					questionToDisplay = questionList.get(indexOfQuestion);					//once db updated, fix this to display question according to index
 					dis_question.ShowQuestion(questionToDisplay, parentFrame, panel_disquest);
 					dis_question.repaint();
 				}

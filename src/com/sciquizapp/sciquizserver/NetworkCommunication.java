@@ -157,7 +157,7 @@ public class NetworkCommunication {
         //add a row in the table for the new question and answers
 
 
-        //mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
+        mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
         //make string and bytearray from question and answers
         String question_text = arg_quest.getQUESTION() + "///";
         question_text += arg_quest.getOPTA() + "///";
@@ -272,6 +272,7 @@ public class NetworkCommunication {
                     }
                 }
                 System.out.println("Done.");
+                mTableQuestionVsUser.addQuestion(questionList.get(j).getQUESTION());
             }
         }
         if (multipleChoiceQuestionList != null) {
@@ -334,8 +335,9 @@ public class NetworkCommunication {
                     } catch (IOException ex2) {
                         ex2.printStackTrace();
                     }
-                    System.out.println("Done.");
                 }
+                System.out.println("Done.");
+                mTableQuestionVsUser.addQuestion(multipleChoiceQuestionList.get(j).getQUESTION());
             }
         }
     }
@@ -365,7 +367,7 @@ public class NetworkCommunication {
                                 arg_student.setName(answerString.split("///")[2]);
                                 //Student student = aClass.getStudents_array().get(j);
                                 //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
-
+                                mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4]);
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                                 if (!aClass.studentAlreadyInClass(student)) {
