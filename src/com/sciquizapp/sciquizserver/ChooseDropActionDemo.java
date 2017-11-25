@@ -33,6 +33,8 @@ package com.sciquizapp.sciquizserver;
 
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+
+import com.sciquizapp.sciquizserver.database_management.DBManager;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;

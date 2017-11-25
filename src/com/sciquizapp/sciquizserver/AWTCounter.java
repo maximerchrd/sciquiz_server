@@ -1,4 +1,5 @@
 package com.sciquizapp.sciquizserver;
+import com.sciquizapp.sciquizserver.database_management.DBManager;
 import com.sciquizapp.sciquizserver.questions.Question;
 
 import java.awt.*;        // Using AWT container and component classes

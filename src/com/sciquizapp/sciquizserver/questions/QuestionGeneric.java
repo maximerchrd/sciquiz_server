@@ -4,20 +4,27 @@ package com.sciquizapp.sciquizserver.questions;
  * Created by maximerichard on 22.11.17.
  */
 public class QuestionGeneric {
-    private String typeOfList;
+    private String typeOfQuestion;
     private int indexInList;
+    private int globalID;
     public QuestionGeneric(String typeoflist, int indexinlist) {
-        typeOfList = typeoflist;
+        typeOfQuestion = typeoflist;
         indexInList = indexinlist;
     }
-    public void setTypeOfList(String typeoflist) {
-        typeOfList = typeoflist;
+    public int getGlobalID() {
+        return globalID;
+    }
+    public void setGlobalID(int globalID) {
+        this.globalID = globalID;
+    }
+    public void setTypeOfList(String typeofquestion) {
+        typeOfQuestion = typeofquestion;
     }
     public void setIndexInList(int indexinlist) {
         indexInList = indexinlist;
     }
     public String getTypeOfList() {
-        return typeOfList;
+        return typeOfQuestion;
     }
     public int getIndexInList() {
         return indexInList;

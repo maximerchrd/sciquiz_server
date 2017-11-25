@@ -13,27 +13,14 @@
 
 package com.sciquizapp.sciquizserver;
 
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
-import javafx.scene.layout.BorderPane;
-
-import com.sciquizapp.sciquizserver.ChooseDropActionDemo;
-import com.sciquizapp.sciquizserver.AWTCounter;
-import com.sciquizapp.sciquizserver.DBManager;
-import com.sciquizapp.sciquizserver.DisplayQuestion;
+import com.sciquizapp.sciquizserver.database_management.DBManager;
 
 public class MyServer {
 
@@ -42,7 +29,7 @@ public class MyServer {
         //does db stuffs
         DBManager dao = new DBManager();
         dao.createDBIfNotExists();
-        dao.createQuestionsTableIfNotExists();
+        dao.createTablesIfNotExists();
         dao.getAllQuestions();
 
         //declares jpanels for different parts of the window

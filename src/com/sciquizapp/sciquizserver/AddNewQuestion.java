@@ -1,5 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.database_management.DBManager;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
