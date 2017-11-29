@@ -42,6 +42,20 @@ public class DBManager {
 		DbTableQuestionGeneric.createTableQuestionGeneric(c,stmt);
 		DbTableQuestionMultipleChoice.createTableQuestionMultipleChoice(c,stmt);
 		DbTableQuestionShortAnswer.createTableQuestionShortAnswer(c,stmt);
+		DbTableQuestionIntermediateAnswers.createTableQuestionIntermediateAnswers(c,stmt);
+		DbTableDirectEvaluationOfObjective.createTableDirectEvaluationOfObjective(c,stmt);
+		DbTableLearningObjectives.createTableSubject(c,stmt);
+		DbTableClasses.createTableSubject(c,stmt);
+		DbTableSubject.createTableSubject(c,stmt);
+		DbTableStudents.createTableSubject(c,stmt);
+		DbTableTests.createTableSubject(c,stmt);
+		DbTableIndividualObjectiveForStudentResult.createTableDirectEvaluationOfObjective(c,stmt);
+		DbTableIndividualQuestionForStudentResult.createTableDirectEvaluationOfObjective(c,stmt);
+		DbTableRelationClassObjective.createTableSubject(c,stmt);
+		DbTableRelationClassTest.createTableSubject(c,stmt);
+		DbTableRelationQuestionSubject.createTableSubject(c,stmt);
+		DbTableRelationQuestionObjective.createTableSubject(c,stmt);
+		DbTableRelationStudentObjective.createTableSubject(c,stmt);
 
 		try {
 			String sql = "DROP TABLE IF EXISTS 'question'; CREATE TABLE IF NOT EXISTS question " +

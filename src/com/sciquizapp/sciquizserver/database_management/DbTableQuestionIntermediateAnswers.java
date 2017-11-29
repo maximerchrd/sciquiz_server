@@ -25,8 +25,6 @@ public class DbTableQuestionIntermediateAnswers {
                     " OPTION9           TEXT    NOT NULL, " +
                     " INTERMEDIATE_ANSWERS           TEXT    NOT NULL, " +
                     " IMAGE_PATH                     TEXT    NOT NULL, " +
-                    " SUBJECTS                       TEXT    NOT NULL, " +
-                    " OBJECTIVES                     TEXT    NOT NULL, " +
                     " LEVEL_COGNITIVE_ABILITY        INT    NOT NULL, " +
                     " ID_GLOBAL                      INT     NOT NULL) ";
             statement.executeUpdate(sql);

@@ -12,7 +12,6 @@ public class DbTableQuestionMultipleChoice {
             statement = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS multiple_choice_questions " +
                     "(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    " SUBJECT           TEXT    NOT NULL, " +
                     " LEVEL      INT     NOT NULL, " +
                     " QUESTION           TEXT    NOT NULL, " +
                     " OPTION0           TEXT    NOT NULL, " +
