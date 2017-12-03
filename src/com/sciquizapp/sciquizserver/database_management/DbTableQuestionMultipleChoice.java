@@ -34,6 +34,8 @@ public class DbTableQuestionMultipleChoice {
                     " TRIAL7           TEXT    NOT NULL, " +
                     " TRIAL8           TEXT    NOT NULL, " +
                     " TRIAL9           TEXT    NOT NULL, " +
+                    " NB_CORRECT_ANS        INT     NOT NULL, " +
+                    " IMAGE_PATH           TEXT    NOT NULL, " +
                     " IMAGE_PATH           TEXT    NOT NULL, " +
                     " ID_GLOBAL      INT     NOT NULL) ";
             statement.executeUpdate(sql);

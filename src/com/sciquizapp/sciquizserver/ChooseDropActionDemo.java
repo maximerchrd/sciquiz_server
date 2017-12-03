@@ -107,7 +107,7 @@ public class ChooseDropActionDemo extends JFrame {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				AddNewQuestion new_quest = new AddNewQuestion(questionList, multipleChoicesQuestList, from_questions, from_IDs);
+				AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs);
 			}
 		});
 		panel_for_from.add(new_quest_button);

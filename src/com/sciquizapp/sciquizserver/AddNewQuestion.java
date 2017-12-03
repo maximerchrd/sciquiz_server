@@ -2,6 +2,7 @@ package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.database_management.DBManager;
 import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 
@@ -32,7 +33,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	private String mFilePath = "";
 	int new_option_index = 2;
 
-	public AddNewQuestion(final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
+	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
 						  final DefaultListModel<String> arg_from_IDs) {
 		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
 		Box box = Box.createVerticalBox();
@@ -158,6 +159,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						e1.printStackTrace();
 					}
 					arg_multChoiceQuestionList.add(new_questmultchoice);
+					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
 					arg_from_questions.addElement(new_questmultchoice.getQUESTION());
 					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
 
