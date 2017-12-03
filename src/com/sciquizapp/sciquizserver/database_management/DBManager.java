@@ -285,7 +285,8 @@ public class DBManager {
 				quest.setTRIAL7(rs.getString(22));
 				quest.setTRIAL8(rs.getString(23));
 				quest.setTRIAL9(rs.getString(24));
-				quest.setID(rs.getInt(25));
+				quest.setIMAGE(rs.getString(25));
+				quest.setID(rs.getInt(26));
 				multquestList.add(quest);
 			}
 			rs.close();

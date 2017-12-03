@@ -90,7 +90,11 @@ public class QuestionMultipleChoice {
 		TRIAL7 = "0";
 		TRIAL8 = "0";
 		TRIAL9 = "0";
-		IMAGE = iMAGE;
+		if (iMAGE.length() == 0) {
+			IMAGE = "none";
+		} else {
+			IMAGE = iMAGE;
+		}
 		int i = 1;
 		if (oPT1.length() > 0) i++;
 		if (oPT2.length() > 0) i++;
@@ -265,7 +269,11 @@ public class QuestionMultipleChoice {
 		TRIAL9 = tRIAL9;
 	}
 	public void setIMAGE(String iMAGE) {
-		IMAGE = iMAGE;
+		if (iMAGE.length() == 0) {
+			IMAGE = "none";
+		} else {
+			IMAGE = iMAGE;
+		}
 	}
 	
 }
