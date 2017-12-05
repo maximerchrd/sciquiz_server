@@ -63,11 +63,11 @@ public class NetworkCommunication {
 
 
             // wait for an incoming connection...
-            System.out.println("Server is waiting for an incoming connection on host="
+            /*System.out.println("Server is waiting for an incoming connection on host="
                     + InetAddress.getLocalHost().getHostAddress() + "; "
                     + InetAddress.getLocalHost().getCanonicalHostName() + "; "
                     + InetAddress.getLocalHost().getHostName()
-                    + " port=" + myServerSocket.getLocalPort());
+                    + " port=" + myServerSocket.getLocalPort());*/
 
 
             //Wait for client connection
@@ -99,6 +99,8 @@ public class NetworkCommunication {
                                         SendQuestionList(null, null);
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
                                     } else {
+                                        student.setInputStream(skt.getInputStream());
+                                        student.setOutputStream(skt.getOutputStream());
                                         aClass.updateStudent(student);
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
                                     }
@@ -352,11 +354,12 @@ public class NetworkCommunication {
         final InputStream answerInStream = arg_student.getInputStream();
         Thread listeningthread = new Thread() {
             public void run() {
-                while (true) {
+                int bytesread = 0;
+                while (bytesread >= 0) {
                     try {
                         byte[] in_bytearray = new byte[1000];
                         //System.out.println("listening to " + aClass.getStudents_array().get(j).getAddress());
-                        int bytesread = answerInStream.read(in_bytearray);
+                        bytesread = answerInStream.read(in_bytearray);
                         System.out.println(bytesread + " bytes read");
                         if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
                         if (bytesread >= 0) {

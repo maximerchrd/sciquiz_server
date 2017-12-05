@@ -74,14 +74,10 @@ public class Classroom {
     }
 
     public void updateStudent (Student student) {
-        int i = indexOfStudentWithAddress(student.getAddress());
-        if (i >= 0) {
-            students_array.get(i).setConnection(student.getConnection());
-            try {
-                students_array.get(i).openStreams();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        int index = indexOfStudentWithAddress(student.getAddress());
+        if (index >= 0) {
+            students_array.remove(index);
+            students_array.add(student);
         } else {
             System.out.println("A problem occured: student not in class when trying to update infos");
         }
