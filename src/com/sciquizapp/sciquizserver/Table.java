@@ -1,14 +1,12 @@
 package com.sciquizapp.sciquizserver;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
+import javax.swing.border.MatteBorder;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.TableView.TableRow;
 
@@ -33,6 +31,8 @@ public class Table extends JPanel {
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
+
+		table.setGridColor(Color.lightGray);
 
 		if (DEBUG) {
 			table.addMouseListener(new MouseAdapter() {
