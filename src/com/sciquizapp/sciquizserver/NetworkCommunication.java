@@ -97,12 +97,12 @@ public class NetworkCommunication {
                                         mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
                                         SendQuestionList(null, null);
-                                        listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                        listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getInetAddress().toString())));
                                     } else {
                                         student.setInputStream(skt.getInputStream());
                                         student.setOutputStream(skt.getOutputStream());
                                         aClass.updateStudent(student);
-                                        listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
+                                        listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getInetAddress().toString())));
                                     }
 
                                     //open outputstream and instream

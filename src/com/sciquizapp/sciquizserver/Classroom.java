@@ -63,7 +63,7 @@ public class Classroom {
     public Boolean studentAlreadyInClass (Student student) {
         int students_addresses_size = readStudents_addresses();
         if (students_addresses_size > 0) {
-            if (!students_addresses.contains(student.getAddress())) {
+            if (!students_addresses.contains(student.getInetAddress().toString())) {
                 return false;
             } else {
                 return true;
@@ -74,7 +74,7 @@ public class Classroom {
     }
 
     public void updateStudent (Student student) {
-        int index = indexOfStudentWithAddress(student.getAddress());
+        int index = indexOfStudentWithAddress(student.getInetAddress().toString());
         if (index >= 0) {
             students_array.remove(index);
             students_array.add(student);
@@ -86,7 +86,7 @@ public class Classroom {
     public int indexOfStudentWithAddress (String address) {
         int index = -1;
         for (int i = 0;i < students_array.size(); i++) {
-            if (students_array.get(i).getAddress().equals(address)) {
+            if (students_array.get(i).getInetAddress().toString().equals(address)) {
                 index = i;
             }
         }
@@ -96,7 +96,7 @@ public class Classroom {
     private int readStudents_addresses() {
         students_addresses.clear();
         for (int i = 0; i < students_array.size(); i++) {
-            students_addresses.add(students_array.get(i).getAddress());
+            students_addresses.add(students_array.get(i).getInetAddress().toString());
         }
         return students_addresses.size();
     }
