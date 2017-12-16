@@ -13,7 +13,9 @@ public class DbTableRelationStudentObjective {
             String sql = "CREATE TABLE IF NOT EXISTS student_objective_relation " +
                     "(ID_ST_OBJ_REL       INTEGER PRIMARY KEY AUTOINCREMENT," +
                     " ID_STUDENT      INT     NOT NULL, " +
-                    " ID_INDIV_OBJ_STUDENT_RES      INT     NOT NULL) ";
+                    " ID_INDIV_OBJ_STUDENT_RES      INT     NOT NULL, " +
+                    " QUANTITATIVE_EVAL      TEXT     NOT NULL, " +
+                    " QUALITATIVE_EVAL      TEXT     NOT NULL) ";
             statement.executeUpdate(sql);
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );

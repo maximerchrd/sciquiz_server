@@ -13,7 +13,8 @@ public class DbTableRelationQuestionSubject {
             String sql = "CREATE TABLE IF NOT EXISTS question_subject_relation " +
                     "(ID_SUBJ_REL       INTEGER PRIMARY KEY AUTOINCREMENT," +
                     " ID_GLOBAL      INT     NOT NULL, " +
-                    " ID_SUBJECT      INT     NOT NULL) ";
+                    " ID_SUBJECT      INT     NOT NULL, " +
+                    " SUBJECT_LEVET      INT     NOT NULL) ";
             statement.executeUpdate(sql);
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
