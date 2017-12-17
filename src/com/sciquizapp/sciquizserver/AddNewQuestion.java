@@ -33,26 +33,33 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	private JFileChooser mFileChooser;
 	private String mFilePath = "";
 	int new_correct_answer_index = 0;
-	int new_incorrect_option_index = 0;
+	int new_subject_index = 0;
+	int new_objective_index = 0;
 	int bottom_index = 7;
 	final int MAX_ANSWERS = 10;
+	JPanel panel;
+	final JFrame new_question_frame;
+	int window_width;
+	int window_height;
+	GridBagLayout columnsLayout;
+
 
 	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
 						  final DefaultListModel<String> arg_from_IDs) {
-		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
-		int window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.4);
-		int window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
-		JPanel panel = new JPanel();
+		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
+		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
+		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
+		panel = new JPanel();
 		new_question_frame.add( panel );
 		panel.setAutoscrolls(true);
 		new_question_frame.pack();
 		Object[] questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
 		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
-		question_text = new JTextArea("");
+		question_text = new JTextArea("	");
 		answer1_checkbox = new JCheckBox();
 		answer1_label = new JLabel("R?ponse 1:");
-		answer1_text = new JTextArea("");
+		answer1_text = new JTextArea("	");
 		labelVector = new Vector<>();
 		textfieldVector = new Vector<>();
 		GridBagConstraints add_image_button_constraints = new GridBagConstraints();
@@ -61,8 +68,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		JButton save_quest_button = new JButton("ajouter la question");
 
 
-		GridBagLayout twoColLayout = new GridBagLayout();
-		panel.setLayout(twoColLayout);
+		columnsLayout = new GridBagLayout();
+		panel.setLayout(columnsLayout);
 
 
 		GridBagConstraints questiontype_list_constraints = new GridBagConstraints();
@@ -100,8 +107,6 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		GridBagConstraints answer1_text_constraints = new GridBagConstraints();
 		answer1_text_constraints.fill = GridBagConstraints.HORIZONTAL;
 		answer1_text_constraints.gridwidth = 1;
-		answer1_text_constraints.ipadx = (int) (window_width * 0.5);
-		answer1_text_constraints.ipady = (int) (window_height * 0.7);
 		answer1_text_constraints.gridx = 1;
 		answer1_text_constraints.gridy = 5;
 		panel.add(answer1_text,answer1_text_constraints);
@@ -132,7 +137,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			{
 				JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
 				JCheckBox new_correct_checkbox = new JCheckBox();
-				JTextArea new_answer_text = new JTextArea("");
+				JTextArea new_answer_text = new JTextArea("	");
 				JButton new_delete_answer_button = new JButton("x");
 				new_delete_answer_button.addActionListener(new ActionListener() {
 					@Override
@@ -161,8 +166,6 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				GridBagConstraints new_answer_text_constraints = new GridBagConstraints();
 				new_answer_text_constraints.fill = GridBagConstraints.HORIZONTAL;
 				new_answer_text_constraints.gridwidth = 1;
-				new_answer_text_constraints.ipadx = (int) (window_width * 0.5);
-				new_answer_text_constraints.ipady = (int) (window_height * 0.07);
 				new_answer_text_constraints.gridx = 1;
 				new_answer_text_constraints.gridy = new_correct_answer_index * 2 + 7;
 				panel.add(new_answer_text,new_answer_text_constraints);
@@ -178,14 +181,13 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				new_question_frame.setSize(new_question_frame.getWidth(), new_question_frame.getHeight()+30);
 				new_correct_answer_index++;
 
-				if (new_correct_answer_index >= new_incorrect_option_index) {
-					add_image_button_constraints.gridy += 2;
-					save_quest_button_constraints.gridy += 2;
-					twoColLayout.setConstraints(add_image_button, add_image_button_constraints);
-					twoColLayout.setConstraints(save_quest_button, save_quest_button_constraints);
-					panel.revalidate();
-					panel.repaint();
-				}
+
+				add_image_button_constraints.gridy += 2;
+				save_quest_button_constraints.gridy += 2;
+				columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
+				columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
+				panel.revalidate();
+				panel.repaint();
 			}
 		});
 		GridBagConstraints add_correct_answer_button_constraints = new GridBagConstraints();
@@ -193,6 +195,10 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		add_correct_answer_button_constraints.gridx = 0;
 		add_correct_answer_button_constraints.gridy = 3;
 		panel.add(add_correct_answer_button, add_correct_answer_button_constraints);
+
+		addSubjectUI();
+		addObjectiveUI();
+
 
 		//implement a button to add a picture
 		add_image_button.addActionListener(new ActionListener()
@@ -297,6 +303,95 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 		new_question_frame.setBounds(0, 0, window_width, window_height);
 		new_question_frame.setVisible(true);
+	}
+
+	private void addObjectiveUI() {
+		//implement a button to add an objective
+		JButton add_objective_button = new JButton(Language.translate(Language.ADDOBJECTIVEBUTTON));
+		add_objective_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e1)
+			{
+				JTextArea new_objective_text = new JTextArea("	");
+				JButton new_delete_objective_button = new JButton("x");
+				new_delete_objective_button.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e2) {
+						panel.remove(new_objective_text);
+						panel.remove(new_delete_objective_button);
+						panel.validate();
+						panel.repaint();
+					}
+				});
+
+				GridBagConstraints new_objective_text_constraints = new GridBagConstraints();
+				new_objective_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+				new_objective_text_constraints.gridwidth = 1;
+				new_objective_text_constraints.gridx = 5;
+				new_objective_text_constraints.gridy = new_objective_index + 4;
+				panel.add(new_objective_text,new_objective_text_constraints);
+
+				GridBagConstraints new_delete_objective_button_constraints = new GridBagConstraints();
+				new_delete_objective_button_constraints.gridwidth = 1;
+				new_delete_objective_button_constraints.gridx = 6;
+				new_delete_objective_button_constraints.gridy = new_objective_index + 4;
+				panel.add(new_delete_objective_button,new_delete_objective_button_constraints);
+				panel.validate();
+				panel.repaint();
+
+				new_objective_index++;
+			}
+		});
+		GridBagConstraints add_objective_button_constraints = new GridBagConstraints();
+		add_objective_button_constraints.gridwidth = 2;
+		add_objective_button_constraints.gridx = 5;
+		add_objective_button_constraints.gridy = 3;
+		panel.add(add_objective_button, add_objective_button_constraints);
+	}
+
+	private void addSubjectUI() {
+		//implement a button to add a subject
+		JButton add_subject_button = new JButton(Language.translate(Language.ADDSUBJECTBUTTON));
+		add_subject_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e1)
+			{
+				JTextArea new_subject_text = new JTextArea("	");
+				JButton new_delete_subject_button = new JButton("x");
+				new_delete_subject_button.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e2) {
+						panel.remove(new_subject_text);
+						panel.remove(new_delete_subject_button);
+						panel.validate();
+						panel.repaint();
+					}
+				});
+
+				GridBagConstraints new_subject_text_constraints = new GridBagConstraints();
+				new_subject_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+				new_subject_text_constraints.gridwidth = 1;
+
+				new_subject_text_constraints.gridx = 3;
+				new_subject_text_constraints.gridy = new_subject_index + 4;
+				panel.add(new_subject_text,new_subject_text_constraints);
+
+				GridBagConstraints new_delete_subject_button_constraints = new GridBagConstraints();
+				new_delete_subject_button_constraints.gridwidth = 1;
+				new_delete_subject_button_constraints.gridx = 4;
+				new_delete_subject_button_constraints.gridy = new_subject_index + 4;
+				panel.add(new_delete_subject_button,new_delete_subject_button_constraints);
+				panel.validate();
+				panel.repaint();
+
+				new_subject_index++;
+			}
+		});
+		GridBagConstraints add_subject_button_constraints = new GridBagConstraints();
+		add_subject_button_constraints.gridwidth = 2;
+		add_subject_button_constraints.gridx = 3;
+		add_subject_button_constraints.gridy = 3;
+		panel.add(add_subject_button, add_subject_button_constraints);
 	}
 
 	@Override
