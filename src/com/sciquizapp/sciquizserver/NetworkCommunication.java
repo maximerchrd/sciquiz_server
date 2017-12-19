@@ -1,5 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
@@ -30,7 +31,7 @@ public class NetworkCommunication {
     private ArrayList<OutputStream> outstream_list;
     private InputStream inStream = null;
     private ArrayList<InputStream> instream_list;
-    private static final int MAX_NUMBER_OF_CLIENTS = 40;
+    private static final int MAX_NUMBER_OF_CLIENTS = 1000000;
     private int number_of_clients = 0;
     private ArrayList<Student> students_array;
     private Classroom aClass = null;
@@ -373,15 +374,16 @@ public class NetworkCommunication {
                                 mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4]);
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
-                                if (!aClass.studentAlreadyInClass(student)) {
-                                    student.openStreams();
+                                //if (!aClass.studentAlreadyInClass(student)) {
+                                    DbTableStudents.addStudent(answerString.split("///")[1], answerString.split("///")[2]);
+                                    //student.openStreams();
                                     //aClass.addStudentIfNotInClass(student);
                                     //System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
                                     //mTableQuestionVsUser.addUser(arg_student.getAddress());
-                                } else {
-                                    aClass.updateStudent(student);
+                                //} else {
+                                //    aClass.updateStudent(student);
                                     //listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
-                                }
+                                //}
                             }
                         } else {
 
