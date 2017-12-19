@@ -1,6 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.database_management.DBManager;
+import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
@@ -30,6 +30,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	JComboBox questiontype_list;
 	Vector<JLabel> labelVector;
 	Vector<JTextArea> textfieldVector;
+	final Vector<JTextArea> subjectsVector;
+	final Vector<JTextArea> objectivesVector;
 	private JFileChooser mFileChooser;
 	private String mFilePath = "";
 	int new_correct_answer_index = 0;
@@ -42,6 +44,9 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	int window_width;
 	int window_height;
 	GridBagLayout columnsLayout;
+	Object[] questiontypes;
+	JButton save_quest_button;
+	JButton add_image_button;
 
 
 	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
@@ -53,7 +58,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		new_question_frame.add( panel );
 		panel.setAutoscrolls(true);
 		new_question_frame.pack();
-		Object[] questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
+		questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
 		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
 		question_text = new JTextArea("	");
@@ -62,10 +67,12 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		answer1_text = new JTextArea("	");
 		labelVector = new Vector<>();
 		textfieldVector = new Vector<>();
+		subjectsVector = new Vector<>();
+		objectivesVector = new Vector<>();
 		GridBagConstraints add_image_button_constraints = new GridBagConstraints();
 		GridBagConstraints save_quest_button_constraints = new GridBagConstraints();
-		JButton add_image_button = new JButton("ajouter une image");
-		JButton save_quest_button = new JButton("ajouter la question");
+		add_image_button = new JButton("ajouter une image");
+		save_quest_button = new JButton("ajouter la question");
 
 
 		columnsLayout = new GridBagLayout();
@@ -133,61 +140,64 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		JButton add_correct_answer_button = new JButton("Ajouter une r?ponse");
 		add_correct_answer_button.addActionListener(new ActionListener()
 		{
-			public void actionPerformed(ActionEvent e1)
-			{
-				JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
-				JCheckBox new_correct_checkbox = new JCheckBox();
-				JTextArea new_answer_text = new JTextArea("	");
-				JButton new_delete_answer_button = new JButton("x");
-				new_delete_answer_button.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e2) {
-						panel.remove(new_answer_label);
-						panel.remove(new_correct_checkbox);
-						panel.remove(new_answer_text);
-						panel.remove(new_delete_answer_button);
-						panel.validate();
-						panel.repaint();
-					}
-				});
+			public void actionPerformed(ActionEvent e1) {
+				if (new_correct_answer_index < MAX_ANSWERS - 1) {
+					JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
+					JCheckBox new_correct_checkbox = new JCheckBox();
+					JTextArea new_answer_text = new JTextArea("	");
+					JButton new_delete_answer_button = new JButton("x");
+					new_delete_answer_button.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e2) {
+							panel.remove(new_answer_label);
+							panel.remove(new_correct_checkbox);
+							panel.remove(new_answer_text);
+							panel.remove(new_delete_answer_button);
+							panel.validate();
+							panel.repaint();
+						}
+					});
 
-				GridBagConstraints new_answer_label_constraints = new GridBagConstraints();
-				new_answer_label_constraints.gridwidth = 3;
-				new_answer_label_constraints.gridx = 0;
-				new_answer_label_constraints.gridy = new_correct_answer_index * 2 + 6;
-				panel.add(new_answer_label,new_answer_label_constraints);
+					GridBagConstraints new_answer_label_constraints = new GridBagConstraints();
+					new_answer_label_constraints.gridwidth = 3;
+					new_answer_label_constraints.gridx = 0;
+					new_answer_label_constraints.gridy = new_correct_answer_index * 2 + 6;
+					panel.add(new_answer_label, new_answer_label_constraints);
 
-				GridBagConstraints new_correct_checkbox_constraints = new GridBagConstraints();
-				new_correct_checkbox_constraints.gridwidth = 1;
-				new_correct_checkbox_constraints.gridx = 0;
-				new_correct_checkbox_constraints.gridy = new_correct_answer_index * 2 + 7;
-				panel.add(new_correct_checkbox,new_correct_checkbox_constraints);
+					GridBagConstraints new_correct_checkbox_constraints = new GridBagConstraints();
+					new_correct_checkbox_constraints.gridwidth = 1;
+					new_correct_checkbox_constraints.gridx = 0;
+					new_correct_checkbox_constraints.gridy = new_correct_answer_index * 2 + 7;
+					panel.add(new_correct_checkbox, new_correct_checkbox_constraints);
 
-				GridBagConstraints new_answer_text_constraints = new GridBagConstraints();
-				new_answer_text_constraints.fill = GridBagConstraints.HORIZONTAL;
-				new_answer_text_constraints.gridwidth = 1;
-				new_answer_text_constraints.gridx = 1;
-				new_answer_text_constraints.gridy = new_correct_answer_index * 2 + 7;
-				panel.add(new_answer_text,new_answer_text_constraints);
+					GridBagConstraints new_answer_text_constraints = new GridBagConstraints();
+					new_answer_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+					new_answer_text_constraints.gridwidth = 1;
+					new_answer_text_constraints.gridx = 1;
+					new_answer_text_constraints.gridy = new_correct_answer_index * 2 + 7;
+					panel.add(new_answer_text, new_answer_text_constraints);
 
-				GridBagConstraints new_delete_answer_button_constraints = new GridBagConstraints();
-				new_delete_answer_button_constraints.gridwidth = 1;
-				new_delete_answer_button_constraints.gridx = 2;
-				new_delete_answer_button_constraints.gridy = new_correct_answer_index * 2 + 7;
-				panel.add(new_delete_answer_button,new_delete_answer_button_constraints);
+					GridBagConstraints new_delete_answer_button_constraints = new GridBagConstraints();
+					new_delete_answer_button_constraints.gridwidth = 1;
+					new_delete_answer_button_constraints.gridx = 2;
+					new_delete_answer_button_constraints.gridy = new_correct_answer_index * 2 + 7;
+					panel.add(new_delete_answer_button, new_delete_answer_button_constraints);
 
-				labelVector.add(new_answer_label);
-				textfieldVector.add(new_answer_text);
-				new_question_frame.setSize(new_question_frame.getWidth(), new_question_frame.getHeight()+30);
-				new_correct_answer_index++;
+					labelVector.add(new_answer_label);
+					textfieldVector.add(new_answer_text);
+					new_question_frame.setSize(new_question_frame.getWidth(), new_question_frame.getHeight() + 30);
+					new_correct_answer_index++;
 
 
-				add_image_button_constraints.gridy += 2;
-				save_quest_button_constraints.gridy += 2;
-				columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
-				columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
-				panel.revalidate();
-				panel.repaint();
+					add_image_button_constraints.gridy += 2;
+					save_quest_button_constraints.gridy += 2;
+					columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
+					columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
+					panel.revalidate();
+					panel.repaint();
+				} else {
+					System.out.println("maximum answers number reached");
+				}
 			}
 		});
 		GridBagConstraints add_correct_answer_button_constraints = new GridBagConstraints();
@@ -259,18 +269,32 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				for (int i = 0; i < 9; i++) options_vector.add(" ");
 				for (int i = 0; i < 9 && i < textfieldVector.size() && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).getText());
 
+				for (int i = 0; i < subjectsVector.size(); i++) {
+					try {
+						DbTableSubject.addSubject(subjectsVector.get(i).getText());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+				for (int i = 0; i < objectivesVector.size(); i++) {
+					try {
+						DbTableLearningObjectives.addObjective(objectivesVector.get(i).getText(),1);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
 
 				//add question to database according to question type
 				if (questiontype_list.getSelectedItem().toString().equals("question ? r?ponse br?ve")) {
 					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), answer1_text.getText(), mFilePath);
 
 				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
-					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("chimie", "1", question_text.getText(), answer1_text.getText(),
+					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText(), answer1_text.getText(),
 							options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2), options_vector.elementAt(3),
 							options_vector.elementAt(4), options_vector.elementAt(5), options_vector.elementAt(6), options_vector.elementAt(7),
 							options_vector.elementAt(8), mFilePath);
 					try {
-						new_db_man.addMultipleChoiceQuestion(new_questmultchoice);
+						DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -278,6 +302,21 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
 					arg_from_questions.addElement(new_questmultchoice.getQUESTION());
 					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
+
+					for (int i = 0; i < subjectsVector.size(); i++) {
+						try {
+							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+					for (int i = 0; i < objectivesVector.size(); i++) {
+						try {
+							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
 
 				} else {
 					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
@@ -313,6 +352,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			public void actionPerformed(ActionEvent e1)
 			{
 				JTextArea new_objective_text = new JTextArea("	");
+				objectivesVector.add(new_objective_text);
 				JButton new_delete_objective_button = new JButton("x");
 				new_delete_objective_button.addActionListener(new ActionListener() {
 					@Override
@@ -321,6 +361,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						panel.remove(new_delete_objective_button);
 						panel.validate();
 						panel.repaint();
+						objectivesVector.remove(new_objective_text);
 					}
 				});
 
@@ -357,6 +398,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			public void actionPerformed(ActionEvent e1)
 			{
 				JTextArea new_subject_text = new JTextArea("	");
+				subjectsVector.add(new_subject_text);
 				JButton new_delete_subject_button = new JButton("x");
 				new_delete_subject_button.addActionListener(new ActionListener() {
 					@Override
@@ -365,6 +407,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						panel.remove(new_delete_subject_button);
 						panel.validate();
 						panel.repaint();
+						subjectsVector.remove(new_subject_text);
 					}
 				});
 

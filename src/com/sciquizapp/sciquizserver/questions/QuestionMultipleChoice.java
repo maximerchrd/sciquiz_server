@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver.questions;
 
+import java.util.Vector;
+
 public class QuestionMultipleChoice {
 	private int ID;
 	private String SUBJECT;
@@ -11,9 +13,9 @@ public class QuestionMultipleChoice {
 	 */
 	private int OPTIONSNUMBER;
 	/**
-	 * CORRECTANSWERSNUMBER: number of correct answers
+	 * NB_CORRECT_ANS: number of correct answers
 	 */
-	private int CORRECTANSWERSNUMBER;
+	private int NB_CORRECT_ANS;
 	private String OPT0;
 	private String OPT1;
 	private String OPT2;
@@ -35,13 +37,15 @@ public class QuestionMultipleChoice {
 	private String TRIAL7;
 	private String TRIAL8;
 	private String TRIAL9;
+	private Vector<String> subjects;
+	private Vector<String> objectives;
 	public QuestionMultipleChoice()	{
 		ID=0;
 		SUBJECT="";
 		LEVEL="";
 		QUESTION="";
 		OPTIONSNUMBER=0;
-		CORRECTANSWERSNUMBER=1;
+		NB_CORRECT_ANS=1;
 		OPT0="";
 		OPT1="";
 		OPT2="";
@@ -64,10 +68,9 @@ public class QuestionMultipleChoice {
 		TRIAL9 = "0";
 		IMAGE="none";
 	}
-	public QuestionMultipleChoice(String sUBJECT, String lEVEL, String qUESTION, String oPT0, String oPT1, String oPT2, String oPT3, String oPT4,
+	public QuestionMultipleChoice(String lEVEL, String qUESTION, String oPT0, String oPT1, String oPT2, String oPT3, String oPT4,
 								  String oPT5, String oPT6, String oPT7, String oPT8, String oPT9, String iMAGE) {
 		
-		SUBJECT = sUBJECT;
 		LEVEL = lEVEL;
 		QUESTION = qUESTION;
 		OPT0 = oPT0;
@@ -123,9 +126,7 @@ public class QuestionMultipleChoice {
 	public int getOPTIONSNUMBER() {
 		return OPTIONSNUMBER;
 	}
-	public int getCORRECTANSWERSNUMBER() {
-		return CORRECTANSWERSNUMBER;
-	}
+
 	public String getOPT0() {
 		return OPT0;
 	}
@@ -186,8 +187,17 @@ public class QuestionMultipleChoice {
 	public String getTRIAL9() {
 		return TRIAL9;
 	}
+	public int getNB_CORRECT_ANS() {
+		return NB_CORRECT_ANS;
+	}
 	public String getIMAGE() {
 		return IMAGE;
+	}
+	public Vector<String> getSubjects() {
+		return subjects;
+	}
+	public Vector<String> getObjectives() {
+		return objectives;
 	}
 	public void setID(int id)
 	{
@@ -204,9 +214,6 @@ public class QuestionMultipleChoice {
 	}
 	public void setOPTIONSNUMBER(int oPTIONSNUMBER) {
 		OPTIONSNUMBER = oPTIONSNUMBER;
-	}
-	public void setCORRECTANSWERSNUMBER(int cORRECTANSWERSNUMBER) {
-		this.CORRECTANSWERSNUMBER = cORRECTANSWERSNUMBER;
 	}
 	public void setOPT0(String oPT0) {
 		OPT0 = oPT0;
@@ -268,6 +275,9 @@ public class QuestionMultipleChoice {
 	public void setTRIAL9(String tRIAL9) {
 		TRIAL9 = tRIAL9;
 	}
+	public void setNB_CORRECT_ANS(int NB_CORRECT_ANS) {
+		this.NB_CORRECT_ANS = NB_CORRECT_ANS;
+	}
 	public void setIMAGE(String iMAGE) {
 		if (iMAGE.length() == 0) {
 			IMAGE = "none";
@@ -275,5 +285,10 @@ public class QuestionMultipleChoice {
 			IMAGE = iMAGE;
 		}
 	}
-	
+	public void setSubjects(Vector<String> subjects) {
+		this.subjects = subjects;
+	}
+	public void setObjectives(Vector<String> objectives) {
+		this.objectives = objectives;
+	}
 }

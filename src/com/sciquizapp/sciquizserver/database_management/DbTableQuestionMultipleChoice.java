@@ -1,6 +1,9 @@
 package com.sciquizapp.sciquizserver.database_management;
 
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.Statement;
 
 /**
@@ -38,6 +41,61 @@ public class DbTableQuestionMultipleChoice {
                     " IMAGE_PATH           TEXT    NOT NULL, " +
                     " ID_GLOBAL      INT     NOT NULL) ";
             statement.executeUpdate(sql);
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    /**
+     * method for inserting new question into table multiple_choice_question
+     * @param quest
+     * @throws Exception
+     */
+    static public void addMultipleChoiceQuestion(QuestionMultipleChoice quest) throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"INSERT INTO multiple_choice_questions (LEVEL,QUESTION,OPTION0," +
+                    "OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,TRIAL0,TRIAL1,TRIAL2,TRIAL3,TRIAL4,TRIAL5,TRIAL6,TRIAL7," +
+                    "TRIAL8,TRIAL9,NB_CORRECT_ANS,IMAGE_PATH,ID_GLOBAL) " +
+                    "VALUES ('" +
+                    quest.getLEVEL() + "','" +
+                    quest.getQUESTION() + "','" +
+                    quest.getOPT0() + "','" +
+                    quest.getOPT1() + "','" +
+                    quest.getOPT2() + "','" +
+                    quest.getOPT3() + "','" +
+                    quest.getOPT4() + "','" +
+                    quest.getOPT5() + "','" +
+                    quest.getOPT6() + "','" +
+                    quest.getOPT7() + "','" +
+                    quest.getOPT8() + "','" +
+                    quest.getOPT9() + "','" +
+                    quest.getTRIAL0() + "','" +
+                    quest.getTRIAL1() + "','" +
+                    quest.getTRIAL2() + "','" +
+                    quest.getTRIAL3() + "','" +
+                    quest.getTRIAL4() + "','" +
+                    quest.getTRIAL5() + "','" +
+                    quest.getTRIAL6() + "','" +
+                    quest.getTRIAL7() + "','" +
+                    quest.getTRIAL8() + "','" +
+                    quest.getTRIAL9() + "','" +
+                    quest.getNB_CORRECT_ANS() + "','" +
+                    quest.getIMAGE() + "','" +
+                    2000000 +"');";
+            stmt.executeUpdate(sql);
+            sql = "UPDATE multiple_choice_questions SET ID_GLOBAL = ID_GLOBAL + ID_QUESTION WHERE ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM multiple_choice_questions)";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
