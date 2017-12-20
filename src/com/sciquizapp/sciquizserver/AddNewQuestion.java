@@ -29,6 +29,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	JButton answer1_delete_button;
 	JComboBox questiontype_list;
 	Vector<JLabel> labelVector;
+	Vector<JCheckBox> checkboxVector;
 	Vector<JTextArea> textfieldVector;
 	final Vector<JTextArea> subjectsVector;
 	final Vector<JTextArea> objectivesVector;
@@ -65,6 +66,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		answer1_checkbox = new JCheckBox();
 		answer1_label = new JLabel("R?ponse 1:");
 		answer1_text = new JTextArea("	");
+		checkboxVector = new Vector<>();
 		labelVector = new Vector<>();
 		textfieldVector = new Vector<>();
 		subjectsVector = new Vector<>();
@@ -110,6 +112,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		answer1_checkbox_constraints.gridx = 0;
 		answer1_checkbox_constraints.gridy = 5;
 		panel.add(answer1_checkbox,answer1_checkbox_constraints);
+		checkboxVector.add(answer1_checkbox);
 
 		GridBagConstraints answer1_text_constraints = new GridBagConstraints();
 		answer1_text_constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -117,6 +120,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		answer1_text_constraints.gridx = 1;
 		answer1_text_constraints.gridy = 5;
 		panel.add(answer1_text,answer1_text_constraints);
+		textfieldVector.add(answer1_text);
 
 		JButton answer1_delete_button = new JButton("x");
 		answer1_delete_button.addActionListener(new ActionListener() {
@@ -143,14 +147,15 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			public void actionPerformed(ActionEvent e1) {
 				if (new_correct_answer_index < MAX_ANSWERS - 1) {
 					JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
-					JCheckBox new_correct_checkbox = new JCheckBox();
+					JCheckBox new_checkbox = new JCheckBox();
+					checkboxVector.add(new_checkbox);
 					JTextArea new_answer_text = new JTextArea("	");
 					JButton new_delete_answer_button = new JButton("x");
 					new_delete_answer_button.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e2) {
 							panel.remove(new_answer_label);
-							panel.remove(new_correct_checkbox);
+							panel.remove(new_checkbox);
 							panel.remove(new_answer_text);
 							panel.remove(new_delete_answer_button);
 							panel.validate();
@@ -168,7 +173,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					new_correct_checkbox_constraints.gridwidth = 1;
 					new_correct_checkbox_constraints.gridx = 0;
 					new_correct_checkbox_constraints.gridy = new_correct_answer_index * 2 + 7;
-					panel.add(new_correct_checkbox, new_correct_checkbox_constraints);
+					panel.add(new_checkbox, new_correct_checkbox_constraints);
 
 					GridBagConstraints new_answer_text_constraints = new GridBagConstraints();
 					new_answer_text_constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -266,8 +271,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 			public void actionPerformed(ActionEvent e)
 			{
 				Vector<String> options_vector = new Vector<String>();
-				for (int i = 0; i < 9; i++) options_vector.add(" ");
-				for (int i = 0; i < 9 && i < textfieldVector.size() && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).getText());
+				for (int i = 0; i < 10; i++) options_vector.add(" ");
+				for (int i = 0; i < 10 && i < textfieldVector.size() && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).getText());
 
 				for (int i = 0; i < subjectsVector.size(); i++) {
 					try {
@@ -289,10 +294,21 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), answer1_text.getText(), mFilePath);
 
 				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
-					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText(), answer1_text.getText(),
-							options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2), options_vector.elementAt(3),
-							options_vector.elementAt(4), options_vector.elementAt(5), options_vector.elementAt(6), options_vector.elementAt(7),
-							options_vector.elementAt(8), mFilePath);
+					int number_correct_answers = 0;
+					String temp_option;
+					for (int i = 0; i < checkboxVector.size(); i++) {
+						if (checkboxVector.get(i).isSelected()) {
+							temp_option = options_vector.get(number_correct_answers);
+							options_vector.set(number_correct_answers,options_vector.get(i));
+							options_vector.set(i,temp_option);
+							number_correct_answers++;
+						}
+					}
+					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText(), options_vector.get(0),
+							options_vector.get(1), options_vector.get(2), options_vector.get(3), options_vector.get(4),
+							options_vector.get(5), options_vector.get(6), options_vector.get(7), options_vector.get(8),
+							options_vector.get(9), mFilePath);
+					new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
 					try {
 						DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
 					} catch (Exception e1) {
@@ -320,7 +336,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 				} else {
 					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
-							options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2),answer1_text.getText(),mFilePath);
+							options_vector.get(1), options_vector.get(2), options_vector.get(3),options_vector.get(0),mFilePath);
 					try {
 						new_db_man.addQuestion(new_quest);
 					} catch (Exception e1) {

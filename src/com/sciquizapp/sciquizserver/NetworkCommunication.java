@@ -1,5 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.database_management.DbTableIndividualQuestionForStudentResult;
 import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
@@ -291,6 +292,7 @@ public class NetworkCommunication {
                 question_text += multipleChoiceQuestionList.get(j).getOPT7() + "///";
                 question_text += multipleChoiceQuestionList.get(j).getOPT8() + "///";
                 question_text += multipleChoiceQuestionList.get(j).getOPT9() + "///";
+                question_text += multipleChoiceQuestionList.get(j).getID() + "///";
 
                 // send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
                 int intfileLength = 0;
@@ -371,6 +373,7 @@ public class NetworkCommunication {
                                 arg_student.setName(answerString.split("///")[2]);
                                 //Student student = aClass.getStudents_array().get(j);
                                 //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
+                                DbTableIndividualQuestionForStudentResult.addIndividualQuestionForStudentResult(Integer.valueOf(answerString.split("///")[5]),answerString.split("///")[2],answerString.split("///")[3]);
                                 mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4]);
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
