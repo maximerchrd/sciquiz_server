@@ -57,7 +57,7 @@ public class DbTableIndividualQuestionForStudentResult {
             ResultSet rs = stmt.executeQuery(query);
             Vector<String> all_options_vector = new Vector<>();
             for (int i = 1; i < 11; i++) {
-                if (rs.getString(i).length() > 0) {
+                if (!rs.getString(i).equals(" ")) {
                     all_options_vector.add(rs.getString(i));
                     number_answers++;
                 }
