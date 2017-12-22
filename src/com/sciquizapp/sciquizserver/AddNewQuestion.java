@@ -314,6 +314,11 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
+					try {
+						new_questmultchoice.setID(DbTableQuestionMultipleChoice.getLastIDGlobal());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 					arg_multChoiceQuestionList.add(new_questmultchoice);
 					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
 					arg_from_questions.addElement(new_questmultchoice.getQUESTION());

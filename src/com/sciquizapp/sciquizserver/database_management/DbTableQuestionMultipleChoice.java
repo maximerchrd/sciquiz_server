@@ -4,6 +4,7 @@ import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 
 /**
@@ -100,5 +101,27 @@ public class DbTableQuestionMultipleChoice {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+    }
+    static public int getLastIDGlobal() throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        int last_id_global = 0;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"SELECT  ID_GLOBAL FROM multiple_choice_questions WHERE ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM multiple_choice_questions);";
+            ResultSet result_query = stmt.executeQuery(sql);
+            last_id_global = Integer.parseInt(result_query.getString(1));
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return last_id_global;
     }
 }
