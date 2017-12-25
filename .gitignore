@@ -1,0 +1,16 @@
+
+*.db
+
+learning_tracker.db
+
+*.class
+
+out/production/sciquiz_server/com/sciquizapp/sciquizserver/AddNewQuestion$3.class
+
+out/production/sciquiz_server/com/sciquizapp/sciquizserver/AddNewQuestion$3.class
+
+.idea/workspace.xml
+
+res/drawable/IMG_0029.JPG
+
+res/drawable/Scan 6.jpeg

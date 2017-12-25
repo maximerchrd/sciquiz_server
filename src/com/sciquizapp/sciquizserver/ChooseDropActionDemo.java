@@ -31,10 +31,13 @@
 
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.DBManager;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
-import com.sciquizapp.sciquizserver.Question;
+
+import com.sciquizapp.sciquizserver.database_management.DBManager;
+import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,14 +56,20 @@ public class ChooseDropActionDemo extends JFrame {
 	JList<String> dragFrom;
 	public JPanel panel_for_from;
 	public JPanel panel_for_copy;
-	List<Question> questionList = new ArrayList<Question>();
+	private List<Question> questionList = new ArrayList<Question>();
+	private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
+	private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
+	private List<QuestionGeneric> quiz = new ArrayList<QuestionGeneric>();
+	private NetworkCommunication own_networkcommunication = null;
 
 	public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
 		super("ChooseDropActionDemo");
 
+		own_networkcommunication = network_singleton;
 		DBManager database = new DBManager();
 		try {
 			questionList = database.getAllQuestions();
+			multipleChoicesQuestList = database.getAllMultipleChoiceQuestions();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,6 +77,14 @@ public class ChooseDropActionDemo extends JFrame {
 		for (int i = 0; i < questionList.size(); i++) {
 			from_questions.addElement(questionList.get(i).getQUESTION());
 			from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
+			QuestionGeneric temp_generic_question = new QuestionGeneric("QUEST",i);
+			genericQuestionList.add(temp_generic_question);
+		}
+		for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
+			from_questions.addElement(multipleChoicesQuestList.get(i).getQUESTION());
+			from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
+			QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ",i);
+			genericQuestionList.add(temp_generic_question);
 		}
 
 		panel_for_from = new JPanel();
@@ -90,7 +107,7 @@ public class ChooseDropActionDemo extends JFrame {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				AddNewQuestion new_quest = new AddNewQuestion(questionList, from_questions, from_IDs);
+				AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs);
 			}
 		});
 		panel_for_from.add(new_quest_button);
@@ -114,8 +131,8 @@ public class ChooseDropActionDemo extends JFrame {
 					//display question
 					int indexOfQuestion = copyTo.getSelectedIndex();
 					question_index = indexOfQuestion;
-					Question questionToDisplay = new Question();
-					questionToDisplay = questionList.get(indexOfQuestion);					//needs to be fixed; the index is the one in the database
+					Question questionToDisplay;
+					questionToDisplay = questionList.get(indexOfQuestion);					//once db updated, fix this to display question according to index
 					dis_question.ShowQuestion(questionToDisplay, parentFrame, panel_disquest);
 					dis_question.repaint();
 				}
@@ -141,30 +158,17 @@ public class ChooseDropActionDemo extends JFrame {
 		panel_questlist.add(panel_for_from);
 		panel_questlist.add(panel_for_copy);
 
-		//start the server for sending the question
-		final SendQuestionBluetooth send_quest = new SendQuestionBluetooth();
-		Thread serverthread = new Thread() {
-			public void run() {
-				try {
-					send_quest.startServer();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}  
-		};
-
-		serverthread.start();
 		//implement a button to send the highlighted question
 		JButton send_quest_button = new JButton("activer la question");
 		send_quest_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				Question question_to_send = new Question();
+				Question question_to_send;
+				System.out.println("copyTo.getSelectedIndex() =  " + copyTo.getSelectedIndex());
 				question_to_send = questionList.get(copyTo.getSelectedIndex());
 				try {
-					network_singleton.SendQuestion(question_to_send);
+					network_singleton.SendQuestion(question_to_send, false);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -172,6 +176,41 @@ public class ChooseDropActionDemo extends JFrame {
 			}
 		});
 		panel_for_from.add(send_quest_button);
+
+        //implement a button to send the questions from the panel for copy
+        JButton send_questions_button = new JButton("envoyer les questions");
+        send_questions_button.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                try {
+					network_singleton.SendQuestionList(questionList, multipleChoicesQuestList);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+        });
+        panel_for_copy.add(send_questions_button);
+
+		//implement a button to send the highlighted question
+		JButton send_questID_button = new JButton("activer la question avec ID");
+		send_questID_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Question question_to_send;
+				question_to_send = questionList.get(copyTo.getSelectedIndex());
+				try {
+					System.out.println("sending question id");
+					network_singleton.SendQuestionID(question_to_send.getID());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		panel_for_copy.add(send_questID_button);
 
 		//parentFrame.add(panel_for_copy, BorderLayout.CENTER);
 
@@ -197,10 +236,10 @@ public class ChooseDropActionDemo extends JFrame {
 		}
 
 		public void exportDone(JComponent comp, Transferable trans, int action) {
+			quiz.add(genericQuestionList.get(index));
 			if (action != MOVE) {
 				return;
 			}
-
 			from_questions.removeElementAt(index);
 		}
 	}
@@ -256,6 +295,7 @@ public class ChooseDropActionDemo extends JFrame {
 			JList list = (JList)support.getComponent();
 			DefaultListModel model = (DefaultListModel)list.getModel();
 			model.insertElementAt(data, index);
+			own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
 
 			Rectangle rect = list.getCellBounds(index, index);
 			list.scrollRectToVisible(rect);

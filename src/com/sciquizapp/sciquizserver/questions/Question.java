@@ -1,7 +1,8 @@
-package com.sciquizapp.sciquizserver;
+package com.sciquizapp.sciquizserver.questions;
 
 public class Question {
 	private int ID;
+	private int GLOBALID;
 	private String SUBJECT;
 	private String LEVEL;
 	private String QUESTION;
@@ -18,6 +19,7 @@ public class Question {
 	public Question()
 	{
 		ID=0;
+		GLOBALID=2000000000;
 		SUBJECT="";
 		LEVEL="";
 		QUESTION="";
@@ -34,7 +36,7 @@ public class Question {
 	}
 	public Question(String sUBJECT, String lEVEL, String qUESTION, String oPTA, String oPTB, String oPTC, String oPTD,
 			String aNSWER, String iMAGE) {
-		
+		GLOBALID = 2000000000;
 		SUBJECT = sUBJECT;
 		LEVEL = lEVEL;
 		QUESTION = qUESTION;
@@ -53,6 +55,7 @@ public class Question {
 	{
 		return ID;
 	}
+	public int getGLOBALID() { return GLOBALID; }
 	public String getSUBJECT() {
 		return SUBJECT;
 	}
@@ -96,6 +99,7 @@ public class Question {
 	{
 		ID=id;
 	}
+	public void setGLOBALID(int gLOBALID) { GLOBALID = gLOBALID; }
 	public void setSUBJECT(String sUBJECT) {
 		SUBJECT = sUBJECT;
 	}

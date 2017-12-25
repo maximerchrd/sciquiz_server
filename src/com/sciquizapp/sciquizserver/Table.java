@@ -1,14 +1,12 @@
 package com.sciquizapp.sciquizserver;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
+import javax.swing.border.MatteBorder;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.TableView.TableRow;
 
@@ -20,19 +18,21 @@ public class Table extends JPanel {
 	public Table() {
 		super(new GridLayout(1,0));
 
-		model = new DefaultTableModel(); 
+		model = new DefaultTableModel();
 		table = new JTable(model);
 
-		// Create a couple of columns 
-		model.addColumn("Utilisateurs"); 
-		model.addColumn("Score"); 
+		// Create a couple of columns
+		model.addColumn("Utilisateurs");
+		model.addColumn("Score");
 
-		// Append a row 
+		// Append a row
 		model.addRow(new Object[]{"/192.168.43.3"});
 		model.addRow(new Object[]{"/192.168.43.5"});
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
+
+		table.setGridColor(Color.lightGray);
 
 		if (DEBUG) {
 			table.addMouseListener(new MouseAdapter() {
@@ -88,7 +88,7 @@ public class Table extends JPanel {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int i = 0;
 		//System.out.println("rowcount:" + model2.getRowCount());
-		while (i < model2.getRowCount() && !String.valueOf(model2.getValueAt(i, 0)).equals(User)) { 
+		while (i < model2.getRowCount() && !String.valueOf(model2.getValueAt(i, 0)).equals(User)) {
 			//System.out.println("model2.getValueAt(i, 0)  :" + model2.getValueAt(i, 0));
 			//System.out.println("User  :" + User);
 			i++;
@@ -103,17 +103,21 @@ public class Table extends JPanel {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
 	}
-	public void addAnswerForUser(Student student, String answer) {
+	public void addAnswerForUser(Student student, String answer, String Question) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int rowNumber = 0;
-		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getAddress().replace(":",""))) {
+		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getInetAddress().toString())) {
 			rowNumber++;
 		}
-		
+		int columnNumber = 0;
+		while (!model2.getColumnName(columnNumber).contains(Question) && columnNumber < model2.getColumnCount()) {
+			columnNumber++;
+		}
+
 		//if statement to prevent from answering more than once to the current question
-		if (model2.getValueAt(rowNumber, model2.getColumnCount() - 1) == null) {
-			model2.setValueAt(answer, rowNumber, model2.getColumnCount() - 1);
-			
+		if (model2.getValueAt(rowNumber, columnNumber)== null) {
+			model2.setValueAt(answer, rowNumber, columnNumber);
+
 			// increases score if answer right
 //			if (UserAndAnswer.split(";")[3].toString().matches("right")) {
 //				int score = (int)model2.getValueAt(rowNumber, 1);
@@ -127,10 +131,10 @@ public class Table extends JPanel {
 		while (rowNumber < model2.getRowCount() && !(model2.getValueAt(rowNumber, 0).toString().matches(UserAndAnswer.split(";")[0]))) {
 			rowNumber++;
 		}
-		
+
 		if (rowNumber >= model2.getRowCount()) {
 			return false;
 		} else { return true; }
-		
+
 	}
 }

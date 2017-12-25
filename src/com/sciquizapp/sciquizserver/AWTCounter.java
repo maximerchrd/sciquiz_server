@@ -1,4 +1,7 @@
 package com.sciquizapp.sciquizserver;
+import com.sciquizapp.sciquizserver.database_management.DBManager;
+import com.sciquizapp.sciquizserver.questions.Question;
+
 import java.awt.*;        // Using AWT container and component classes
 import java.awt.event.*;  // Using AWT event classes and listener interfaces
 import java.util.ArrayList;
@@ -68,7 +71,7 @@ public class AWTCounter extends Frame implements ActionListener {
 		questionNumber = Integer.parseInt(tfCount.getText());
 		try {
 			NetworkCommunication new_send_question = new NetworkCommunication();
-			new_send_question.SendQuestion(questionList.get(drop_action_member.question_index));
+			new_send_question.SendQuestion(questionList.get(drop_action_member.question_index), false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

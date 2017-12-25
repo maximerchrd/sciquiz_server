@@ -1,9 +1,15 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.database_management.*;
+import com.sciquizapp.sciquizserver.questions.Question;
+import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.awt.image.ImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,72 +17,205 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.Box;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 
 public class AddNewQuestion extends JPanel implements ActionListener{
 	JLabel question_label;
 	JLabel answer1_label;
-	JTextField question_text;
-	JTextField answer1_text;
+	JTextArea question_text;
+	JCheckBox answer1_checkbox;
+	JTextArea answer1_text;
+	JButton answer1_delete_button;
+	JComboBox questiontype_list;
 	Vector<JLabel> labelVector;
-	Vector<JTextField> textfieldVector;
-	ImageIcon icon;
-	JLabel thumb;
+	Vector<JCheckBox> checkboxVector;
+	Vector<JTextArea> textfieldVector;
+	final Vector<JTextArea> subjectsVector;
+	final Vector<JTextArea> objectivesVector;
 	private JFileChooser mFileChooser;
 	private String mFilePath = "";
-	int new_option_index = 2;
+	int new_correct_answer_index = 0;
+	int new_subject_index = 0;
+	int new_objective_index = 0;
+	int bottom_index = 7;
+	final int MAX_ANSWERS = 10;
+	JPanel panel;
+	final JFrame new_question_frame;
+	int window_width;
+	int window_height;
+	GridBagLayout columnsLayout;
+	Object[] questiontypes;
+	JButton save_quest_button;
+	JButton add_image_button;
 
-	public AddNewQuestion(final List<Question> arg_questionList, final DefaultListModel<String> arg_from_questions, 
-			final DefaultListModel<String> arg_from_IDs) {
-		final JFrame new_question_frame = new JFrame("Ajouter une nouvelle question");
-		Box box = Box.createVerticalBox();
-		new_question_frame.add( box );
+
+	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
+						  final DefaultListModel<String> arg_from_IDs) {
+		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
+		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
+		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
+		panel = new JPanel();
+		new_question_frame.add( panel );
+		panel.setAutoscrolls(true);
+		new_question_frame.pack();
+		questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
+		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
-		question_text = new JTextField("");
+		question_text = new JTextArea("	");
+		answer1_checkbox = new JCheckBox();
 		answer1_label = new JLabel("R?ponse 1:");
-		answer1_text = new JTextField("");
+		answer1_text = new JTextArea("	");
+		checkboxVector = new Vector<>();
 		labelVector = new Vector<>();
 		textfieldVector = new Vector<>();
+		subjectsVector = new Vector<>();
+		objectivesVector = new Vector<>();
+		GridBagConstraints add_image_button_constraints = new GridBagConstraints();
+		GridBagConstraints save_quest_button_constraints = new GridBagConstraints();
+		add_image_button = new JButton("ajouter une image");
+		save_quest_button = new JButton("ajouter la question");
 
-		//Image image=GenerateImage.toImage(true);  //this generates an image file
-		//icon = new ImageIcon(image); 
-		thumb = new JLabel();
-		//thumb.setIcon(icon);
-		box.add(question_label);
-		box.add(question_text);
-		box.add(answer1_label);
-		box.add(answer1_text);
 
-		//implement a button to add a choice
-		JButton add_choice_button = new JButton("ajouter une option de r?ponse");
-		add_choice_button.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				JLabel new_answer_label = new JLabel("R?ponse " + new_option_index + ":");
-				JTextField new_answer_text = new JTextField("");
-				box.add(new_answer_label,(new_option_index - 2)* 2 + 4);
-				box.add(new_answer_text,(new_option_index - 2) * 2 + 5);
-				labelVector.add(new_answer_label);
-				textfieldVector.add(new_answer_text);
-				new_question_frame.setSize(new_question_frame.getWidth(), new_question_frame.getHeight()+30);
-				new_option_index++;
+		columnsLayout = new GridBagLayout();
+		panel.setLayout(columnsLayout);
+
+
+		GridBagConstraints questiontype_list_constraints = new GridBagConstraints();
+		questiontype_list_constraints.gridwidth = 3;
+		questiontype_list_constraints.gridx = 0;
+		questiontype_list_constraints.gridy = 0;
+		panel.add(questiontype_list,questiontype_list_constraints);
+
+		GridBagConstraints question_label_constraints = new GridBagConstraints();
+		question_label_constraints.gridwidth = 3;
+		question_label_constraints.gridx = 0;
+		question_label_constraints.gridy = 1;
+		panel.add(question_label,question_label_constraints);
+
+		GridBagConstraints question_text_constraints = new GridBagConstraints();
+		question_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+		question_text_constraints.gridwidth = 3;
+		question_text_constraints.gridx = 0;
+		question_text_constraints.gridy = 2;
+		panel.add(question_text,question_text_constraints);
+
+		GridBagConstraints answer1_label_constraints = new GridBagConstraints();
+		answer1_label_constraints.gridwidth = 3;
+		answer1_label_constraints.gridx = 0;
+		answer1_label_constraints.gridy = 4;
+		panel.add(answer1_label,answer1_label_constraints);
+
+		GridBagConstraints answer1_checkbox_constraints = new GridBagConstraints();
+		answer1_checkbox_constraints.fill = GridBagConstraints.HORIZONTAL;
+		answer1_checkbox_constraints.gridwidth = 1;
+		answer1_checkbox_constraints.gridx = 0;
+		answer1_checkbox_constraints.gridy = 5;
+		panel.add(answer1_checkbox,answer1_checkbox_constraints);
+		checkboxVector.add(answer1_checkbox);
+
+		GridBagConstraints answer1_text_constraints = new GridBagConstraints();
+		answer1_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+		answer1_text_constraints.gridwidth = 1;
+		answer1_text_constraints.gridx = 1;
+		answer1_text_constraints.gridy = 5;
+		panel.add(answer1_text,answer1_text_constraints);
+		textfieldVector.add(answer1_text);
+
+		JButton answer1_delete_button = new JButton("x");
+		answer1_delete_button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				panel.remove(answer1_checkbox);
+				panel.remove(answer1_label);
+				panel.remove(answer1_text);
+				panel.remove(answer1_delete_button);
+				panel.validate();
+				panel.repaint();
 			}
 		});
-		box.add(add_choice_button);
+		GridBagConstraints answer1_delete_button_constraints = new GridBagConstraints();
+		answer1_delete_button_constraints.gridwidth = 1;
+		answer1_delete_button_constraints.gridx = 2;
+		answer1_delete_button_constraints.gridy = 5;
+		panel.add(answer1_delete_button,answer1_delete_button_constraints);
+
+		//implement a button to add a correct answer
+		JButton add_correct_answer_button = new JButton("Ajouter une r?ponse");
+		add_correct_answer_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e1) {
+				if (new_correct_answer_index < MAX_ANSWERS - 1) {
+					JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
+					JCheckBox new_checkbox = new JCheckBox();
+					checkboxVector.add(new_checkbox);
+					JTextArea new_answer_text = new JTextArea("	");
+					JButton new_delete_answer_button = new JButton("x");
+					new_delete_answer_button.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e2) {
+							panel.remove(new_answer_label);
+							panel.remove(new_checkbox);
+							panel.remove(new_answer_text);
+							panel.remove(new_delete_answer_button);
+							panel.validate();
+							panel.repaint();
+						}
+					});
+
+					GridBagConstraints new_answer_label_constraints = new GridBagConstraints();
+					new_answer_label_constraints.gridwidth = 3;
+					new_answer_label_constraints.gridx = 0;
+					new_answer_label_constraints.gridy = new_correct_answer_index * 2 + 6;
+					panel.add(new_answer_label, new_answer_label_constraints);
+
+					GridBagConstraints new_correct_checkbox_constraints = new GridBagConstraints();
+					new_correct_checkbox_constraints.gridwidth = 1;
+					new_correct_checkbox_constraints.gridx = 0;
+					new_correct_checkbox_constraints.gridy = new_correct_answer_index * 2 + 7;
+					panel.add(new_checkbox, new_correct_checkbox_constraints);
+
+					GridBagConstraints new_answer_text_constraints = new GridBagConstraints();
+					new_answer_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+					new_answer_text_constraints.gridwidth = 1;
+					new_answer_text_constraints.gridx = 1;
+					new_answer_text_constraints.gridy = new_correct_answer_index * 2 + 7;
+					panel.add(new_answer_text, new_answer_text_constraints);
+
+					GridBagConstraints new_delete_answer_button_constraints = new GridBagConstraints();
+					new_delete_answer_button_constraints.gridwidth = 1;
+					new_delete_answer_button_constraints.gridx = 2;
+					new_delete_answer_button_constraints.gridy = new_correct_answer_index * 2 + 7;
+					panel.add(new_delete_answer_button, new_delete_answer_button_constraints);
+
+					labelVector.add(new_answer_label);
+					textfieldVector.add(new_answer_text);
+					new_question_frame.setSize(new_question_frame.getWidth(), new_question_frame.getHeight() + 30);
+					new_correct_answer_index++;
+
+
+					add_image_button_constraints.gridy += 2;
+					save_quest_button_constraints.gridy += 2;
+					columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
+					columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
+					panel.revalidate();
+					panel.repaint();
+				} else {
+					System.out.println("maximum answers number reached");
+				}
+			}
+		});
+		GridBagConstraints add_correct_answer_button_constraints = new GridBagConstraints();
+		add_correct_answer_button_constraints.gridwidth = 3;
+		add_correct_answer_button_constraints.gridx = 0;
+		add_correct_answer_button_constraints.gridy = 3;
+		panel.add(add_correct_answer_button, add_correct_answer_button_constraints);
+
+		addSubjectUI();
+		addObjectiveUI();
+
 
 		//implement a button to add a picture
-		JButton add_image_button = new JButton("ajouter une image");
 		add_image_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -118,43 +257,205 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				mFileChooser.setSelectedFile(null);
 			}
 		});
-		box.add(add_image_button);
+		add_image_button_constraints.gridwidth = 3;
+		add_image_button_constraints.gridx = 0;
+		add_image_button_constraints.gridy = bottom_index - 1;
+		panel.add(add_image_button, add_image_button_constraints);
 
 		//implement a button to add a new question to the database
 		final DBManager new_db_man = new DBManager();
 		
-		JButton save_quest_button = new JButton("ajouter une question");
+
 		save_quest_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				Vector<String> options_vector = new Vector<String>();
-				for (int i = 0; i < 9; i++) options_vector.add(" ");
-				for (int i = 0; i < 9 && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).toString());
-				QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("chimie", "1", question_text.getText(), answer1_text.getText(),
-						options_vector.elementAt(0), options_vector.elementAt(1), options_vector.elementAt(2), options_vector.elementAt(3),
-						options_vector.elementAt(4), options_vector.elementAt(5), options_vector.elementAt(6), options_vector.elementAt(7),
-						options_vector.elementAt(8), mFilePath);
-				Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(), 
-						textfieldVector.elementAt(2).getText(), textfieldVector.elementAt(3).getText(), textfieldVector.elementAt(4).getText(),answer1_text.getText(),mFilePath);
-				try {
-					new_db_man.addQuestion(new_quest);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				for (int i = 0; i < 10; i++) options_vector.add(" ");
+				for (int i = 0; i < 10 && i < textfieldVector.size() && !textfieldVector.elementAt(i).equals(" "); i++) options_vector.set(i,textfieldVector.elementAt(i).getText());
+
+				for (int i = 0; i < subjectsVector.size(); i++) {
+					try {
+						DbTableSubject.addSubject(subjectsVector.get(i).getText());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 				}
-				arg_questionList.add(new_quest);
-				arg_from_questions.addElement(new_quest.getQUESTION());
-				arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
+				for (int i = 0; i < objectivesVector.size(); i++) {
+					try {
+						DbTableLearningObjectives.addObjective(objectivesVector.get(i).getText(),1);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+
+				//add question to database according to question type
+				if (questiontype_list.getSelectedItem().toString().equals("question ? r?ponse br?ve")) {
+					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), answer1_text.getText(), mFilePath);
+
+				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
+					int number_correct_answers = 0;
+					String temp_option;
+					for (int i = 0; i < checkboxVector.size(); i++) {
+						if (checkboxVector.get(i).isSelected()) {
+							temp_option = options_vector.get(number_correct_answers);
+							options_vector.set(number_correct_answers,options_vector.get(i));
+							options_vector.set(i,temp_option);
+							number_correct_answers++;
+						}
+					}
+					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText(), options_vector.get(0),
+							options_vector.get(1), options_vector.get(2), options_vector.get(3), options_vector.get(4),
+							options_vector.get(5), options_vector.get(6), options_vector.get(7), options_vector.get(8),
+							options_vector.get(9), mFilePath);
+					new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
+					try {
+						DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					try {
+						new_questmultchoice.setID(DbTableQuestionMultipleChoice.getLastIDGlobal());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					arg_multChoiceQuestionList.add(new_questmultchoice);
+					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
+					arg_from_questions.addElement(new_questmultchoice.getQUESTION());
+					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
+
+					for (int i = 0; i < subjectsVector.size(); i++) {
+						try {
+							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+					for (int i = 0; i < objectivesVector.size(); i++) {
+						try {
+							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+
+				} else {
+					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
+							options_vector.get(1), options_vector.get(2), options_vector.get(3),options_vector.get(0),mFilePath);
+					try {
+						new_db_man.addQuestion(new_quest);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					arg_questionList.add(new_quest);
+					arg_from_questions.addElement(new_quest.getQUESTION());
+					arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
+				}
 //				DefaultListModel<String>  jlist_model = (DefaultListModel<String>) arg_dragFrom.getModel();
 //				arg_dragFrom.setModel(jlist_model);
 				new_question_frame.dispatchEvent(new WindowEvent(new_question_frame, WindowEvent.WINDOW_CLOSING));
 			}
 		});
-		box.add(save_quest_button);
+		save_quest_button_constraints.gridy = bottom_index;
+		save_quest_button_constraints.gridwidth = 3;
+		panel.add(save_quest_button, save_quest_button_constraints);
 
-		new_question_frame.setBounds(0, 0, 500, 500);
+		new_question_frame.setBounds(0, 0, window_width, window_height);
 		new_question_frame.setVisible(true);
+	}
+
+	private void addObjectiveUI() {
+		//implement a button to add an objective
+		JButton add_objective_button = new JButton(Language.translate(Language.ADDOBJECTIVEBUTTON));
+		add_objective_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e1)
+			{
+				JTextArea new_objective_text = new JTextArea("	");
+				objectivesVector.add(new_objective_text);
+				JButton new_delete_objective_button = new JButton("x");
+				new_delete_objective_button.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e2) {
+						panel.remove(new_objective_text);
+						panel.remove(new_delete_objective_button);
+						panel.validate();
+						panel.repaint();
+						objectivesVector.remove(new_objective_text);
+					}
+				});
+
+				GridBagConstraints new_objective_text_constraints = new GridBagConstraints();
+				new_objective_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+				new_objective_text_constraints.gridwidth = 1;
+				new_objective_text_constraints.gridx = 5;
+				new_objective_text_constraints.gridy = new_objective_index + 4;
+				panel.add(new_objective_text,new_objective_text_constraints);
+
+				GridBagConstraints new_delete_objective_button_constraints = new GridBagConstraints();
+				new_delete_objective_button_constraints.gridwidth = 1;
+				new_delete_objective_button_constraints.gridx = 6;
+				new_delete_objective_button_constraints.gridy = new_objective_index + 4;
+				panel.add(new_delete_objective_button,new_delete_objective_button_constraints);
+				panel.validate();
+				panel.repaint();
+
+				new_objective_index++;
+			}
+		});
+		GridBagConstraints add_objective_button_constraints = new GridBagConstraints();
+		add_objective_button_constraints.gridwidth = 2;
+		add_objective_button_constraints.gridx = 5;
+		add_objective_button_constraints.gridy = 3;
+		panel.add(add_objective_button, add_objective_button_constraints);
+	}
+
+	private void addSubjectUI() {
+		//implement a button to add a subject
+		JButton add_subject_button = new JButton(Language.translate(Language.ADDSUBJECTBUTTON));
+		add_subject_button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e1)
+			{
+				JTextArea new_subject_text = new JTextArea("	");
+				subjectsVector.add(new_subject_text);
+				JButton new_delete_subject_button = new JButton("x");
+				new_delete_subject_button.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e2) {
+						panel.remove(new_subject_text);
+						panel.remove(new_delete_subject_button);
+						panel.validate();
+						panel.repaint();
+						subjectsVector.remove(new_subject_text);
+					}
+				});
+
+				GridBagConstraints new_subject_text_constraints = new GridBagConstraints();
+				new_subject_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+				new_subject_text_constraints.gridwidth = 1;
+
+				new_subject_text_constraints.gridx = 3;
+				new_subject_text_constraints.gridy = new_subject_index + 4;
+				panel.add(new_subject_text,new_subject_text_constraints);
+
+				GridBagConstraints new_delete_subject_button_constraints = new GridBagConstraints();
+				new_delete_subject_button_constraints.gridwidth = 1;
+				new_delete_subject_button_constraints.gridx = 4;
+				new_delete_subject_button_constraints.gridy = new_subject_index + 4;
+				panel.add(new_delete_subject_button,new_delete_subject_button_constraints);
+				panel.validate();
+				panel.repaint();
+
+				new_subject_index++;
+			}
+		});
+		GridBagConstraints add_subject_button_constraints = new GridBagConstraints();
+		add_subject_button_constraints.gridwidth = 2;
+		add_subject_button_constraints.gridx = 3;
+		add_subject_button_constraints.gridy = 3;
+		panel.add(add_subject_button, add_subject_button_constraints);
 	}
 
 	@Override
