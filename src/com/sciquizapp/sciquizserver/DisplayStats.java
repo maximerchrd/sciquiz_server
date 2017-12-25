@@ -31,12 +31,7 @@ public class DisplayStats extends JPanel {
 
     private JFXPanel fxPanel;
 
-    String austria = "Austria";
-    String brazil = "Brazil";
-    String france = "France";
-    String italy = "Italy";
     String usa = "";
-    int bla = 0;
     DisplayStats displayStats_singleton;
 
     public DisplayStats() {
