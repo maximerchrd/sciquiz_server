@@ -373,8 +373,8 @@ public class NetworkCommunication {
                                 arg_student.setName(answerString.split("///")[2]);
                                 //Student student = aClass.getStudents_array().get(j);
                                 //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
-                                DbTableIndividualQuestionForStudentResult.addIndividualQuestionForStudentResult(Integer.valueOf(answerString.split("///")[5]),answerString.split("///")[2],answerString.split("///")[3]);
-                                mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4]);
+                                double eval = DbTableIndividualQuestionForStudentResult.addIndividualQuestionForStudentResult(Integer.valueOf(answerString.split("///")[5]),answerString.split("///")[2],answerString.split("///")[3]);
+                                mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                                 //if (!aClass.studentAlreadyInClass(student)) {

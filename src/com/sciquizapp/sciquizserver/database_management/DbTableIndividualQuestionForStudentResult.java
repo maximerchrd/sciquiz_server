@@ -33,7 +33,8 @@ public class DbTableIndividualQuestionForStudentResult {
             System.exit(0);
         }
     }
-    static public void addIndividualQuestionForStudentResult(int id_global, String student_name, String answers) {
+    static public double addIndividualQuestionForStudentResult(int id_global, String student_name, String answers) {
+        double quantitative_evaluation = -1;
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -78,7 +79,8 @@ public class DbTableIndividualQuestionForStudentResult {
                     number_right_unchecked_answers_from_student++;
                 }
             }
-            double quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
+            quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
+
             System.out.println("student result: " + quantitative_evaluation);
             sql = "UPDATE individual_question_for_student_result SET QUANTITATIVE_EVAL = '" + quantitative_evaluation + "' WHERE ID_DIRECT_EVAL = (SELECT MAX(ID_DIRECT_EVAL) FROM individual_question_for_student_result);";
             stmt.executeUpdate(sql);
@@ -89,5 +91,6 @@ public class DbTableIndividualQuestionForStudentResult {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+        return quantitative_evaluation;
     }
 }

@@ -3,11 +3,14 @@ package com.sciquizapp.sciquizserver;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.text.TableView.TableRow;
 
 
@@ -15,19 +18,45 @@ public class Table extends JPanel {
 	private boolean DEBUG = false;
 	DefaultTableModel model;
 	JTable table;
+	private Vector<Vector<String>> policeColor = new Vector<Vector<String>>();
+	int numberUsers = 0;
+	int numberQuestions = 0;
 	public Table() {
 		super(new GridLayout(1,0));
 
 		model = new DefaultTableModel();
-		table = new JTable(model);
+		table = new JTable(model) {
+			DefaultTableCellRenderer colorred=new DefaultTableCellRenderer();
+			{
+				colorred.setForeground(Color.RED);
+			}
+			DefaultTableCellRenderer colorgreen=new DefaultTableCellRenderer();
+			{
+				colorgreen.setForeground(Color.GREEN);
+			}
+			DefaultTableCellRenderer colorblack=new DefaultTableCellRenderer();
+			{
+				colorblack.setForeground(Color.BLACK);
+			}
+			@Override
+			public TableCellRenderer getCellRenderer(int arg0, int arg1) {
+				if(policeColor.get(arg1).get(arg0).contains("black")) {
+					return colorblack;
+				} else if (policeColor.get(arg1).get(arg0).contains("red")) {
+					return colorred;
+				} else if (policeColor.get(arg1).get(arg0).contains("green")) {
+					return colorgreen;
+				} else {
+					return colorblack;
+				}
+			}
+		};
 
 		// Create a couple of columns
 		model.addColumn("Utilisateurs");
+		policeColor.add(new Vector<>());
 		model.addColumn("Score");
-
-		// Append a row
-		model.addRow(new Object[]{"/192.168.43.3"});
-		model.addRow(new Object[]{"/192.168.43.5"});
+		policeColor.add(new Vector<>());
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
@@ -85,6 +114,9 @@ public class Table extends JPanel {
 		frame.setVisible(true);
 	}*/
 	public void addUser(String User) {
+		for (int i = 0; i < policeColor.size(); i++) {
+			policeColor.get(i).add("black");
+		}
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int i = 0;
 		//System.out.println("rowcount:" + model2.getRowCount());
@@ -98,12 +130,18 @@ public class Table extends JPanel {
 			model2.addRow(new Object[]{User});
 		}
 		model2.setValueAt(0, model2.getRowCount() - 1, 1);
+		numberUsers++;
 	}
 	public void addQuestion(String Question) {
+		policeColor.add(new Vector<>());
+		for (int i = 0; i < numberUsers; i++) {
+			policeColor.get(policeColor.size() - 1).add("black");
+		}
+
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
 	}
-	public void addAnswerForUser(Student student, String answer, String Question) {
+	public void addAnswerForUser(Student student, String answer, String Question, double evaluation) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int rowNumber = 0;
 		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getInetAddress().toString())) {
@@ -116,6 +154,13 @@ public class Table extends JPanel {
 
 		//if statement to prevent from answering more than once to the current question
 		if (model2.getValueAt(rowNumber, columnNumber)== null) {
+			System.out.println("evaluation: " + evaluation);
+			if (evaluation == 100) {
+				policeColor.get(columnNumber).set(rowNumber,"green");
+			} else {
+				policeColor.get(columnNumber).set(rowNumber,"red");
+			}
+			table.getCellRenderer(rowNumber,columnNumber);
 			model2.setValueAt(answer, rowNumber, columnNumber);
 
 			// increases score if answer right
