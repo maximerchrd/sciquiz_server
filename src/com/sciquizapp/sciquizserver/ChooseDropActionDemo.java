@@ -31,6 +31,9 @@
 
 package com.sciquizapp.sciquizserver;
 
+import tools.ListEntry;
+import tools.ListEntryCellRenderer;
+import tools.Scalr;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 
@@ -53,10 +56,10 @@ public class ChooseDropActionDemo extends JFrame {
     //DefaultListModel<String> from_questions = new DefaultListModel<String>();
     DefaultListModel from_questions = new DefaultListModel();
     DefaultListModel<String> from_IDs = new DefaultListModel<String>();
-    DefaultListModel<String> copy_question = new DefaultListModel<String>();
+    DefaultListModel copy_question = new DefaultListModel<String>();
     DefaultListModel<String> copy_IDs = new DefaultListModel<String>();
-    private JList<String> copyFromList;
-    final private JList<String> copyToList;
+    private JList<ListEntry> copyFromList;
+    final private JList<ListEntry> copyToList;
     public JPanel panel_for_from;
     public JPanel panel_for_copy;
     public JSplitPane splitPane;
@@ -91,12 +94,22 @@ public class ChooseDropActionDemo extends JFrame {
             QuestionGeneric temp_generic_question = new QuestionGeneric("QUEST", i);
             genericQuestionList.add(temp_generic_question);
         }
-//        for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
-//            from_questions.addElement(multipleChoicesQuestList.get(i).getQUESTION());
-//            from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
-//            QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
-//            genericQuestionList.add(temp_generic_question);
-//        }
+        for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
+            ImageIcon newIcon = null;
+            ImageIcon icon = new ImageIcon(multipleChoicesQuestList.get(i).getIMAGE());
+            Image img = icon.getImage();
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
+            }
+            from_questions.addElement(new ListEntry(multipleChoicesQuestList.get(i).getQUESTION(), newIcon));
+            from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
+            QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
+            genericQuestionList.add(temp_generic_question);
+        }
 
         panel_for_from = new JPanel();
         panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
@@ -125,9 +138,10 @@ public class ChooseDropActionDemo extends JFrame {
         parentFrame.add(panel_for_from, BorderLayout.WEST);
 
 
-        copyToList = new JList<String>(copy_question);
+        copyToList = new JList<ListEntry>(copy_question);
         copyToList.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
         copyToList.setDropMode(DropMode.INSERT);
+        copyToList.setCellRenderer(new ListEntryCellRenderer());
 
         //listener for when highlighted line changed
         final DisplayQuestion dis_question = new DisplayQuestion(panel_disquest);
@@ -223,11 +237,12 @@ public class ChooseDropActionDemo extends JFrame {
 
         public Transferable createTransferable(JComponent comp) {
             index = copyFromList.getSelectedIndex();
+            copy_IDs.addElement(from_IDs.get(index));
             if (index < 0 || index >= from_questions.getSize()) {
                 return null;
             }
-
-            return new StringSelection((String) copyFromList.getSelectedValue());
+            ListEntry tempEntry = copyFromList.getSelectedValue();
+            return new StringSelection(tempEntry.getValue());
         }
 
         public void exportDone(JComponent comp, Transferable trans, int action) {
@@ -273,9 +288,9 @@ public class ChooseDropActionDemo extends JFrame {
             }
 
             // fetch the drop location
-            JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
+            //JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
 
-            int index = dl.getIndex();
+            //int index = dl.getIndex();
 
             // fetch the data and bail if this fails
             String data;
@@ -289,7 +304,21 @@ public class ChooseDropActionDemo extends JFrame {
 
             JList list = (JList) support.getComponent();
             DefaultListModel model = (DefaultListModel) list.getModel();
-            model.insertElementAt(data, index);
+            int index = model.size();
+
+            //resize image from db to icon size
+            ImageIcon icon = new ImageIcon(multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))).getIMAGE());
+            Image img = icon.getImage();
+            ImageIcon newIcon = null;
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
+            }
+            ListEntry newListEntry = new ListEntry(multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))).getQUESTION(), newIcon);
+            model.insertElementAt(newListEntry, index);
             own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
 
             Rectangle rect = list.getCellBounds(index, index);
@@ -309,53 +338,5 @@ public class ChooseDropActionDemo extends JFrame {
         }
     }
 
-    class ListEntry {
-        private String value;
-        private ImageIcon icon;
 
-        public ListEntry(String value, ImageIcon icon) {
-            this.value = value;
-            this.icon = icon;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public ImageIcon getIcon() {
-            return icon;
-        }
-
-        public String toString() {
-            return value;
-        }
-    }
-
-    class ListEntryCellRenderer
-            extends JLabel implements ListCellRenderer {
-        private JLabel label;
-
-        public Component getListCellRendererComponent(JList list, Object value,
-                                                      int index, boolean isSelected,
-                                                      boolean cellHasFocus) {
-            ListEntry entry = (ListEntry) value;
-
-            setText(value.toString());
-            setIcon(entry.getIcon());
-
-            if (isSelected) {
-                setBackground(list.getSelectionBackground());
-                setForeground(list.getSelectionForeground());
-            } else {
-                setBackground(list.getBackground());
-                setForeground(list.getForeground());
-            }
-
-            setEnabled(list.isEnabled());
-            setFont(list.getFont());
-            setOpaque(true);
-
-            return this;
-        }
-    }
 }
