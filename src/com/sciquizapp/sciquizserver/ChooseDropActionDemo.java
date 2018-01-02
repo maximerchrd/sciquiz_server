@@ -53,9 +53,11 @@ public class ChooseDropActionDemo extends JFrame {
 	DefaultListModel<String> from_IDs = new DefaultListModel<String>();
 	DefaultListModel<String> copy_question = new DefaultListModel<String>();
 	DefaultListModel<String> copy_IDs = new DefaultListModel<String>();
-	JList<String> dragFrom;
+	private JList<String> copyFromList;
+	final private JList<String> copyToList;
 	public JPanel panel_for_from;
 	public JPanel panel_for_copy;
+	public JSplitPane splitPane;
 	private List<Question> questionList = new ArrayList<Question>();
 	private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
 	private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
@@ -89,15 +91,15 @@ public class ChooseDropActionDemo extends JFrame {
 
 		panel_for_from = new JPanel();
 		panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
-		dragFrom = new JList<String>(from_questions);
-		dragFrom.setTransferHandler(new FromTransferHandler());
-		dragFrom.setPrototypeCellValue("List Item WWWWWW");
-		dragFrom.setDragEnabled(true);
-		dragFrom.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		copyFromList = new JList<String>(from_questions);
+		copyFromList.setTransferHandler(new FromTransferHandler());
+		copyFromList.setPrototypeCellValue("List Item WWWWWW");
+		copyFromList.setDragEnabled(true);
+		copyFromList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JLabel label = new JLabel("Drag from here:");
 		label.setAlignmentX(0f);
 		panel_for_from.add(label);
-		JScrollPane sp = new JScrollPane(dragFrom);
+		JScrollPane sp = new JScrollPane(copyFromList);
 		sp.setAlignmentX(0f);
 		panel_for_from.add(sp);
 
@@ -114,22 +116,19 @@ public class ChooseDropActionDemo extends JFrame {
 
 		parentFrame.add(panel_for_from, BorderLayout.WEST);
 
-		/*JList moveTo = new JList(move);
-        moveTo.setTransferHandler(new ToTransferHandler(TransferHandler.MOVE));
-        moveTo.setDropMode(DropMode.INSERT);*/
 
-		final JList<String> copyTo = new JList<String>(copy_question);
-		copyTo.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
-		copyTo.setDropMode(DropMode.INSERT);
+		copyToList = new JList<String>(copy_question);
+		copyToList.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
+		copyToList.setDropMode(DropMode.INSERT);
 
 		//listener for when highlighted line changed
 		final DisplayQuestion dis_question = new DisplayQuestion(panel_disquest);
-		copyTo.addListSelectionListener(new ListSelectionListener() {
+		copyToList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()) {
 					//display question
-					int indexOfQuestion = copyTo.getSelectedIndex();
+					int indexOfQuestion = copyToList.getSelectedIndex();
 					question_index = indexOfQuestion;
 					Question questionToDisplay;
 					questionToDisplay = questionList.get(indexOfQuestion);					//once db updated, fix this to display question according to index
@@ -141,20 +140,16 @@ public class ChooseDropActionDemo extends JFrame {
 
 		panel_for_copy = new JPanel();
 		panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
-		/*label = new JLabel("Drop to MOVE to here:");
-        label.setAlignmentX(0f);
-        panel_for_copy.add(label);
-        sp = new JScrollPane(moveTo);
-        sp.setAlignmentX(0f);
-        panel_for_copy.add(sp);*/
 		label = new JLabel("Drop to COPY to here:");
 		label.setAlignmentX(0f);
 		panel_for_copy.add(label);
-		sp = new JScrollPane(copyTo);
-		sp.setAlignmentX(0f);
-		panel_for_copy.add(sp);
+		JScrollPane sp2 = new JScrollPane(copyToList);
+		sp2.setAlignmentX(0f);
+		panel_for_copy.add(sp2);
 		panel_for_copy.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
 		panel_questlist.setLayout(new FlowLayout());
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp,sp2);
+		panel_questlist.add(splitPane);
 		panel_questlist.add(panel_for_from);
 		panel_questlist.add(panel_for_copy);
 
@@ -165,8 +160,8 @@ public class ChooseDropActionDemo extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				Question question_to_send;
-				System.out.println("copyTo.getSelectedIndex() =  " + copyTo.getSelectedIndex());
-				question_to_send = questionList.get(copyTo.getSelectedIndex());
+				System.out.println("copyToList.getSelectedIndex() =  " + copyToList.getSelectedIndex());
+				question_to_send = questionList.get(copyToList.getSelectedIndex());
 				try {
 					network_singleton.SendQuestion(question_to_send, false);
 				} catch (IOException e1) {
@@ -200,7 +195,7 @@ public class ChooseDropActionDemo extends JFrame {
 			public void actionPerformed(ActionEvent e)
 			{
 				Question question_to_send;
-				question_to_send = questionList.get(copyTo.getSelectedIndex());
+				question_to_send = questionList.get(copyToList.getSelectedIndex());
 				try {
 					System.out.println("sending question id");
 					network_singleton.SendQuestionID(question_to_send.getID());
@@ -211,8 +206,6 @@ public class ChooseDropActionDemo extends JFrame {
 			}
 		});
 		panel_for_copy.add(send_questID_button);
-
-		//parentFrame.add(panel_for_copy, BorderLayout.CENTER);
 
 		((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
@@ -227,12 +220,12 @@ public class ChooseDropActionDemo extends JFrame {
 		private int index = 0;
 
 		public Transferable createTransferable(JComponent comp) {
-			index = dragFrom.getSelectedIndex();
+			index = copyFromList.getSelectedIndex();
 			if (index < 0 || index >= from_questions.getSize()) {
 				return null;
 			}
 
-			return new StringSelection((String)dragFrom.getSelectedValue());
+			return new StringSelection((String) copyFromList.getSelectedValue());
 		}
 
 		public void exportDone(JComponent comp, Transferable trans, int action) {
