@@ -57,7 +57,7 @@ public class ChooseDropActionDemo extends JFrame {
     DefaultListModel from_questions = new DefaultListModel();
     DefaultListModel<String> from_IDs = new DefaultListModel<String>();
     DefaultListModel copy_question = new DefaultListModel<String>();
-    DefaultListModel<String> copy_IDs = new DefaultListModel<String>();
+    ArrayList<String> copy_IDs = new ArrayList<>();
     private JList<ListEntry> copyFromList;
     final private JList<ListEntry> copyToList;
     public JPanel panel_for_from;
@@ -197,7 +197,7 @@ public class ChooseDropActionDemo extends JFrame {
         send_questions_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    network_singleton.SendQuestionList(questionList, multipleChoicesQuestList);
+                    network_singleton.SendQuestionList(questionList, multipleChoicesQuestList, copy_IDs);
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -210,11 +210,10 @@ public class ChooseDropActionDemo extends JFrame {
         JButton send_questID_button = new JButton("activer la question avec ID");
         send_questID_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Question question_to_send;
-                question_to_send = questionList.get(copyToList.getSelectedIndex());
+                int id_to_send = Integer.valueOf(copy_IDs.get(copyToList.getSelectedIndex()));
                 try {
                     System.out.println("sending question id");
-                    network_singleton.SendQuestionID(question_to_send.getID());
+                    network_singleton.SendQuestionID(id_to_send);
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -237,7 +236,7 @@ public class ChooseDropActionDemo extends JFrame {
 
         public Transferable createTransferable(JComponent comp) {
             index = copyFromList.getSelectedIndex();
-            copy_IDs.addElement(from_IDs.get(index));
+            copy_IDs.add(from_IDs.get(index));
             if (index < 0 || index >= from_questions.getSize()) {
                 return null;
             }
