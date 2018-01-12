@@ -31,6 +31,7 @@
 
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.database_management.DbTableQuestionMultipleChoice;
 import tools.ListEntry;
 import tools.ListEntryCellRenderer;
 import tools.Scalr;
@@ -174,6 +175,23 @@ public class ChooseDropActionDemo extends JFrame {
             }
         });
         panel_for_from.add(send_quest_button);
+
+        //implement a button to remove a question from the panel for from
+        JButton delete_question_from_button = new JButton("remove the selected question");
+        delete_question_from_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int index = copyFromList.getSelectedIndex();
+                try {
+                    DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(from_IDs.get(index));
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                from_questions.remove(index);
+                from_IDs.remove(index);
+                multipleChoicesQuestList.remove(index);
+            }
+        });
+        panel_for_from.add(delete_question_from_button);
 
         //implement a button to send the questions from the panel for copy
         JButton send_questions_button = new JButton("envoyer les questions");

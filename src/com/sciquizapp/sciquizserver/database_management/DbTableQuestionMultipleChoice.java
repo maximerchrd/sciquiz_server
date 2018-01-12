@@ -124,4 +124,24 @@ public class DbTableQuestionMultipleChoice {
         }
         return last_id_global;
     }
+    static public void removeMultipleChoiceQuestionWithID(String ID) throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        int last_id_global = 0;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"DELETE FROM multiple_choice_questions WHERE ID_GLOBAL = '" + ID + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
 }
