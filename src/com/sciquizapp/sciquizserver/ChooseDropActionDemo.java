@@ -143,23 +143,6 @@ public class ChooseDropActionDemo extends JFrame {
         copyToList.setDropMode(DropMode.INSERT);
         copyToList.setCellRenderer(new ListEntryCellRenderer());
 
-        //listener for when highlighted line changed
-        final DisplayQuestion dis_question = new DisplayQuestion(panel_disquest);
-        copyToList.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent arg0) {
-                if (!arg0.getValueIsAdjusting()) {
-                    //display question
-                    int indexOfQuestion = copyToList.getSelectedIndex();
-                    question_index = indexOfQuestion;
-                    Question questionToDisplay;
-                    questionToDisplay = questionList.get(indexOfQuestion);                    //once db updated, fix this to display question according to index
-                    dis_question.ShowQuestion(questionToDisplay, parentFrame, panel_disquest);
-                    dis_question.repaint();
-                }
-            }
-        });
-
         panel_for_copy = new JPanel();
         panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
         label = new JLabel("Drop to COPY to here:");
@@ -221,6 +204,17 @@ public class ChooseDropActionDemo extends JFrame {
             }
         });
         panel_for_copy.add(send_questID_button);
+
+        //implement a button to remove a question from the panel for copy
+        JButton delete_question_button = new JButton("remove the selected question");
+        delete_question_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int index = copyToList.getSelectedIndex();
+                copy_question.remove(index);
+                copy_IDs.remove(index);
+            }
+        });
+        panel_for_copy.add(delete_question_button);
 
         ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
