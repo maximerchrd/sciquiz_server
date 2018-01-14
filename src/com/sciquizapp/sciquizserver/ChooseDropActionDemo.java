@@ -44,6 +44,12 @@ import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
@@ -53,12 +59,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseDropActionDemo extends JFrame {
+    private int splitpaneWidth = 500;
+    private int splitpaneHeight = 200;
     public int question_index = 0;
     //DefaultListModel<String> from_questions = new DefaultListModel<String>();
     DefaultListModel from_questions = new DefaultListModel();
     DefaultListModel<String> from_IDs = new DefaultListModel<String>();
     DefaultListModel copy_question = new DefaultListModel<String>();
     ArrayList<String> copy_IDs = new ArrayList<>();
+    private QuestionMultipleChoice questionSelectedNodeTreeFrom;
+    private DefaultMutableTreeNode selectedNodeTreeFrom;
+    private JTree TreeFromQuestions;
+    private DefaultMutableTreeNode topTreeNode = new DefaultMutableTreeNode("Questions");
+    private List<DefaultMutableTreeNode> TreeNodeQuestions;
     private JList<ListEntry> copyFromList;
     final private JList<ListEntry> copyToList;
     public JPanel panel_for_from;
@@ -107,6 +120,8 @@ public class ChooseDropActionDemo extends JFrame {
                 newIcon = new ImageIcon(scaledImage);
             }
             from_questions.addElement(new ListEntry(multipleChoicesQuestList.get(i).getQUESTION(), newIcon));
+            DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
+            topTreeNode.add(newTreeNode);
             from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
             QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
             genericQuestionList.add(temp_generic_question);
@@ -123,7 +138,91 @@ public class ChooseDropActionDemo extends JFrame {
         JLabel label = new JLabel("Drag from here:");
         label.setAlignmentX(0f);
         panel_for_from.add(label);
-        JScrollPane sp = new JScrollPane(copyFromList);
+        //JScrollPane sp = new JScrollPane(copyFromList);
+        TreeFromQuestions = new JTree(topTreeNode);
+        TreeFromQuestions.setRootVisible(false);
+        TreeFromQuestions.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        TreeFromQuestions.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                //Returns the last path element of the selection.
+                //This method is useful only when the selection model allows a single selection.
+                selectedNodeTreeFrom = (DefaultMutableTreeNode) TreeFromQuestions.getLastSelectedPathComponent();
+
+                if (selectedNodeTreeFrom == null)
+                    //Nothing is selected.
+                    return;
+
+                Object nodeInfo = selectedNodeTreeFrom.getUserObject();
+
+                if (selectedNodeTreeFrom.isLeaf()) {
+                    questionSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                } else {
+                }
+            }
+        });
+        TreeFromQuestions.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    if (questionSelectedNodeTreeFrom != null) {
+                        JList list = copyToList;
+                        DefaultListModel model = (DefaultListModel) list.getModel();
+                        int index = model.size();
+
+                        //resize image from db to icon size
+                        ImageIcon icon = new ImageIcon(questionSelectedNodeTreeFrom.getIMAGE());
+                        Image img = icon.getImage();
+                        ImageIcon newIcon = null;
+                        if (img.getWidth(null) > 0) {
+                            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                            Graphics2D g = bi.createGraphics();
+                            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                            BufferedImage scaledImage = Scalr.resize(bi, 40);
+                            newIcon = new ImageIcon(scaledImage);
+                        }
+                        ListEntry newListEntry = new ListEntry(questionSelectedNodeTreeFrom.getQUESTION(), newIcon);
+                        model.insertElementAt(newListEntry, index);
+                        own_networkcommunication.getClassroom().addQuestMultChoice(questionSelectedNodeTreeFrom);
+
+                        Rectangle rect = list.getCellBounds(index, index);
+                        list.scrollRectToVisible(rect);
+                        list.setSelectedIndex(index);
+                        list.requestFocusInWindow();
+                    }
+                }
+            }
+        });
+        TreeFromQuestions.setCellRenderer(new DefaultTreeCellRenderer() {
+            private JLabel label;
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree,
+                                                          Object value, boolean selected, boolean expanded,
+                                                          boolean isLeaf, int row, boolean focused) {
+                label=(JLabel)super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
+                Object o = ((DefaultMutableTreeNode) value).getUserObject();
+                if (o instanceof QuestionMultipleChoice) {
+                    QuestionMultipleChoice question = (QuestionMultipleChoice) o;
+                    ImageIcon newIcon = null;
+                    ImageIcon icon = new ImageIcon(question.getIMAGE());
+                    Image img = icon.getImage();
+                    if (img.getWidth(null) > 0) {
+                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D g = bi.createGraphics();
+                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                        BufferedImage scaledImage = Scalr.resize(bi, 40);
+                        newIcon = new ImageIcon(scaledImage);
+                        label.setIcon(newIcon);
+                    }
+                    label.setText(question.getQUESTION());
+                } else {
+                    label.setIcon(null);
+                    label.setText("" + value);
+                }
+                return label;
+            }
+        });
+        JScrollPane sp = new JScrollPane(TreeFromQuestions);
         sp.setAlignmentX(0f);
         panel_for_from.add(sp);
 
@@ -131,7 +230,7 @@ public class ChooseDropActionDemo extends JFrame {
         JButton new_quest_button = new JButton("ajouter une question");
         new_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs);
+                AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs, TreeFromQuestions);
             }
         });
         panel_for_from.add(new_quest_button);
@@ -156,6 +255,9 @@ public class ChooseDropActionDemo extends JFrame {
         panel_questlist.setLayout(new FlowLayout());
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, sp2);
         panel_questlist.add(splitPane);
+        System.out.println("width: " + splitpaneWidth + "; height: " + splitpaneHeight);
+        splitPane.setPreferredSize(new Dimension(splitpaneWidth,splitpaneHeight));
+        splitPane.setDividerLocation(splitpaneWidth / 2);
         panel_questlist.add(panel_for_from);
         panel_questlist.add(panel_for_copy);
 
@@ -180,15 +282,16 @@ public class ChooseDropActionDemo extends JFrame {
         JButton delete_question_from_button = new JButton("remove the selected question");
         delete_question_from_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int index = copyFromList.getSelectedIndex();
-                try {
-                    DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(from_IDs.get(index));
-                } catch (Exception e1) {
-                    e1.printStackTrace();
+                if (selectedNodeTreeFrom != null) {
+                    try {
+                        DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionSelectedNodeTreeFrom.getID()));
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                    DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
+                    model.removeNodeFromParent(selectedNodeTreeFrom);
+                    multipleChoicesQuestList.remove(questionSelectedNodeTreeFrom);
                 }
-                from_questions.remove(index);
-                from_IDs.remove(index);
-                multipleChoicesQuestList.remove(index);
             }
         });
         panel_for_from.add(delete_question_from_button);

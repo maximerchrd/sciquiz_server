@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 
 public class AddNewQuestion extends JPanel implements ActionListener{
@@ -55,7 +57,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList,
 						  final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel arg_from_questions,
-						  final DefaultListModel<String> arg_from_IDs) {
+						  final DefaultListModel<String> arg_from_IDs, final JTree tree) {
 		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
@@ -63,7 +65,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		new_question_frame.add( panel );
 		panel.setAutoscrolls(true);
 		new_question_frame.pack();
-		questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
+		questiontypes = new Object[]{"question ? choix multiples","question ? r?ponse br?ve"};
 		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
 		question_text = new JTextArea("	");
@@ -338,6 +340,10 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						newIcon = new ImageIcon(scaledImage);
 					}
 					arg_from_questions.addElement(new ListEntry(new_questmultchoice.getQUESTION(),newIcon));
+
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+					model.insertNodeInto(new DefaultMutableTreeNode(new_questmultchoice), root, root.getChildCount());
 					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
 
 					for (int i = 0; i < subjectsVector.size(); i++) {
