@@ -56,6 +56,8 @@ import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +91,15 @@ public class ChooseDropActionDemo extends JFrame {
 
     public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
         super("ChooseDropActionDemo");
+
+        String ip_address = "";
+        try {
+            ip_address = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        JLabel ipLabel = new JLabel("students should connect to the following address: " + ip_address);
+        panel_questlist.add(ipLabel);
 
         own_networkcommunication = network_singleton;
         DBManager database = new DBManager();
