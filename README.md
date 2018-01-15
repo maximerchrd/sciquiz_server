@@ -7,12 +7,15 @@
     - implement listener for db change
 - manage classes
 - browsing and sending questions
-    - implement test/quiz
+    - fix removing test/quiz
 - display ip address
+- modify UI
+- translate
 ####TO DO _(For Alpha Version - Android)_
-- fix bug when sending question
+- fix bug when sending answer
 - remove "play mode"
 - display statistics
+- translate
 ####TO DO _(For Alpha+ Version)_
 - synchronize questions with server
 - manage short answer questions
