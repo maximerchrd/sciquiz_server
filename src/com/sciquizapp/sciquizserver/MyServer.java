@@ -13,15 +13,12 @@
 
 package com.sciquizapp.sciquizserver;
 
-import java.awt.GridLayout;
+import java.awt.*;
 import java.io.IOException;
 
 import javax.swing.*;
 
 import com.sciquizapp.sciquizserver.database_management.DBManager;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
 
 public class MyServer {
 
@@ -71,24 +68,37 @@ public class MyServer {
 
 
         //Turn off metal's use of bold fonts
-        ChooseDropActionDemo newChooseDropAction = new ChooseDropActionDemo(frame, panel_for_questlist, panel_for_displayquest, CommunicationWithClients);
+        QuestionsBrowser newChooseDropAction = new QuestionsBrowser(frame, panel_for_questlist, panel_for_displayquest, CommunicationWithClients);
         UIManager.put("swing.boldMetal", Boolean.FALSE);
 
 
 
 
         //implement the division of the window with borderlayout
-        JPanel parent = new JPanel();
-        parent.setLayout(new GridLayout(0, 2));
-        parent.add(panel_for_questlist);
+        JPanel parent = new JPanel(new GridBagLayout());
+        panel_for_questlist.setPreferredSize(new Dimension(520,600));
+        GridBagConstraints questionsBrowserConstraints = new GridBagConstraints();
+        questionsBrowserConstraints.gridheight = 2;
+        questionsBrowserConstraints.gridx = 0;
+        questionsBrowserConstraints.gridy = 0;
+        parent.add(panel_for_questlist,questionsBrowserConstraints);
+        //parent.setLayout(new GridLayout(0, 2));
+        //parent.add(panel_for_questlist);
         //parent.add(newChooseDropAction.panel_for_copy);
-        parent.add(TableUserVsQuest);
+        GridBagConstraints tableConstraints = new GridBagConstraints();
+        tableConstraints.gridx = 1;
+        tableConstraints.gridy = 0;
+        parent.add(TableUserVsQuest, tableConstraints);
         DisplayStats displayStats = new DisplayStats();
-        parent.add(displayStats);
+        GridBagConstraints displayStatsConstraints = new GridBagConstraints();
+        displayStatsConstraints.gridx = 1;
+        displayStatsConstraints.gridy = 1;
+        parent.add(displayStats,displayStatsConstraints);
         //parent.add(app.btnSetQuestNumber, BorderLayout.EAST);
         //Display the window.
-        frame.pack();
+
         frame.setContentPane(parent);
+        frame.pack();
         frame.setBounds(0, 0, 1200, 700);
         frame.setVisible(true);
 

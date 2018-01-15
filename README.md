@@ -8,7 +8,6 @@
 - manage classes
 - browsing and sending questions
     - fix removing test/quiz
-- display ip address
 - modify UI
 - translate
 ####TO DO _(For Alpha Version - Android)_

@@ -19,10 +19,10 @@ public class AWTCounter extends Frame implements ActionListener {
 	private int questionNumber = 0;     // Counter's value
 	private Question current_question = null; //active question (highlighted when button pressed)
 	private Table UVsQ;
-	private ChooseDropActionDemo drop_action_member = null;
+	private QuestionsBrowser drop_action_member = null;
 	private List<Question> questionList = new ArrayList<Question>();
 	/** Constructor to setup GUI components and event handling */
-	public AWTCounter (Table UsersVsQuestions, JFrame parentFrame, ChooseDropActionDemo dropaction, JPanel panel_counter) {
+	public AWTCounter (Table UsersVsQuestions, JFrame parentFrame, QuestionsBrowser dropaction, JPanel panel_counter) {
 		UVsQ = UsersVsQuestions;
 		drop_action_member = dropaction;
 		setLayout(new FlowLayout());

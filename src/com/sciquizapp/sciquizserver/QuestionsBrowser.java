@@ -61,7 +61,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChooseDropActionDemo extends JFrame {
+public class QuestionsBrowser extends JFrame {
     private int splitpaneWidth = 500;
     private int splitpaneHeight = 200;
     public int question_index = 0;
@@ -89,8 +89,8 @@ public class ChooseDropActionDemo extends JFrame {
     private List<QuestionGeneric> quiz = new ArrayList<QuestionGeneric>();
     private NetworkCommunication own_networkcommunication = null;
 
-    public ChooseDropActionDemo(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
-        super("ChooseDropActionDemo");
+    public QuestionsBrowser(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
+        super("QuestionsBrowser");
 
         String ip_address = "";
         try {
@@ -419,9 +419,9 @@ public class ChooseDropActionDemo extends JFrame {
         });
         panel_for_copy.add(delete_question_button);
 
-        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        //((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
-        getContentPane().setPreferredSize(new Dimension(320, 315));
+        //getContentPane().setPreferredSize(new Dimension(320, 315));
     }
 
     class FromTransferHandler extends TransferHandler {
