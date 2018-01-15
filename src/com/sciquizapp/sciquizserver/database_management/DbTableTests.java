@@ -1,21 +1,144 @@
 package com.sciquizapp.sciquizserver.database_management;
 
-import java.sql.Connection;
-import java.sql.Statement;
+import com.sciquizapp.sciquizserver.Test;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * Created by maximerichard on 24.11.17.
  */
 public class DbTableTests {
-    static public void createTableSubject(Connection connection, Statement statement) {
+    static public void createTableTest(Connection connection, Statement statement) {
         try {
             statement = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS tests " +
                     "(ID_TEST       INTEGER PRIMARY KEY AUTOINCREMENT," +
                     " ID_TEST_GLOBAL      INT     NOT NULL, " +
                     " NAME      TEXT     NOT NULL, " +
-                    " QUALITATIVE_EVAL           TEXT    NOT NULL) ";
+                    " QUANTITATIVE_EVAL           TEXT    NOT NULL) ";
             statement.executeUpdate(sql);
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+    static public ArrayList<Test> getAllTests() {
+        ArrayList<Test> tests = new ArrayList<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = "SELECT ID_TEST_GLOBAL,NAME FROM tests;";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                Test newTest = new Test();
+                newTest.setTestName(rs.getString("NAME"));
+                newTest.setIdTest(Integer.parseInt(rs.getString("ID_TEST_GLOBAL")));
+                ArrayList<Integer> newQuestionList = DbTableRelationQuestionMultipleChoiceTest.getQuestionIdsFromTestId(String.valueOf(newTest.getIdTest()));
+                newTest.setIdsQuestions(newQuestionList);
+                tests.add(newTest);
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
+        return tests;
+    }
+    static public Test getLastTests() {
+        Test newTest = null;
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = "SELECT ID_TEST_GLOBAL,NAME FROM tests WHERE ID_TEST = (SELECT MAX(ID_TEST) FROM tests);";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                newTest = new Test();
+                newTest.setTestName(rs.getString("NAME"));
+                newTest.setIdTest(Integer.parseInt(rs.getString("ID_TEST_GLOBAL")));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
+        return newTest;
+    }
+    static public void addTest(String name) {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = "INSERT INTO tests (ID_TEST_GLOBAL,NAME,QUANTITATIVE_EVAL)" +
+                    "VALUES ('" +
+                    2000000 + "','" +
+                    name + "','-1');";
+            stmt.executeUpdate(sql);
+            sql = "UPDATE tests SET ID_TEST_GLOBAL = 2000000 + ID_TEST WHERE ID_TEST = (SELECT MAX(ID_TEST) FROM tests)";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+    static public void removeTestWithID(String ID) {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = "DELETE FROM tests WHERE ID_TEST_GLOBAL = '" + ID + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+    static public void renameTest(int global_id, String name) {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = "UPDATE tests SET NAME = '" + name + "' " +
+                    "WHERE ID_TEST_GLOBAL = '" + global_id + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);

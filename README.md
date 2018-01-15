@@ -1,9 +1,27 @@
 ##README
-####TO DO _(For Beta Version)_
-- Implement a robust way to send questions from server to all clients in a reasonable amount of time and to get answers form all clients to the server as soon as possible
-- Let clients connect to server without previously knowing the mac address
-- Resolve the problem of question highlighted/question sent to clients (sending function uses the index of the database)
-- add the possibility of using pictures when adding a new question
-- Implement a way for the server program to display the results for each class (e.g. as a table). He should be able to get the results for students vs questions and some basic statistics (percentage of right answers)
-
-####ITEMS DONE
+####TO DO _(For Alpha Version)_
+- display statistics
+    - eval vs subject for each student
+        - can select subject for subsubject
+    - fix bug when more than 1 student
+    - implement listener for db change
+- manage classes
+- browsing and sending questions
+    - fix removing test/quiz
+- display ip address
+- modify UI
+- translate
+####TO DO _(For Alpha Version - Android)_
+- fix bug when sending answer
+- remove "play mode"
+- display statistics
+- translate
+####TO DO _(For Alpha+ Version)_
+- synchronize questions with server
+- manage short answer questions
+####TO DO _(For Alpha+ Version - Android)_
+- automatically connect to server
+- homework mode
+- customize activity waiting for questions
+####TO DO _(for Beta Version)_
+- browsing questions with subject

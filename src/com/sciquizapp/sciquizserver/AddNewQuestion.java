@@ -5,11 +5,14 @@ import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
+import tools.ListEntry;
+import tools.Scalr;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +21,8 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 
 public class AddNewQuestion extends JPanel implements ActionListener{
@@ -50,8 +55,9 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	JButton add_image_button;
 
 
-	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList, final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel<String> arg_from_questions,
-						  final DefaultListModel<String> arg_from_IDs) {
+	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList,
+						  final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel arg_from_questions,
+						  final DefaultListModel<String> arg_from_IDs, final JTree tree) {
 		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
@@ -59,7 +65,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		new_question_frame.add( panel );
 		panel.setAutoscrolls(true);
 		new_question_frame.pack();
-		questiontypes = new Object[]{"default","question ? choix multiples","question ? r?ponse br?ve"};
+		questiontypes = new Object[]{"question ? choix multiples","question ? r?ponse br?ve"};
 		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
 		question_text = new JTextArea("	");
@@ -321,7 +327,23 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					}
 					arg_multChoiceQuestionList.add(new_questmultchoice);
 					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
-					arg_from_questions.addElement(new_questmultchoice.getQUESTION());
+
+					//resize image of question to fit icon size
+					ImageIcon icon = new ImageIcon(new_questmultchoice.getIMAGE());
+					Image img = icon.getImage();
+					ImageIcon newIcon = null;
+					if (img.getWidth(null) > 0) {
+						BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+						Graphics2D g = bi.createGraphics();
+						g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+						BufferedImage scaledImage = Scalr.resize(bi, 40);
+						newIcon = new ImageIcon(scaledImage);
+					}
+					arg_from_questions.addElement(new ListEntry(new_questmultchoice.getQUESTION(),newIcon));
+
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+					model.insertNodeInto(new DefaultMutableTreeNode(new_questmultchoice), root, root.getChildCount());
 					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
 
 					for (int i = 0; i < subjectsVector.size(); i++) {

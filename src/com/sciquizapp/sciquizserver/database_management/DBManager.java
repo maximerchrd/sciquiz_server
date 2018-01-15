@@ -48,11 +48,12 @@ public class DBManager {
 		DbTableClasses.createTableSubject(c,stmt);
 		DbTableSubject.createTableSubject(c,stmt);
 		DbTableStudents.createTableSubject(c,stmt);
-		DbTableTests.createTableSubject(c,stmt);
+		DbTableTests.createTableTest(c,stmt);
 		DbTableIndividualObjectiveForStudentResult.createTableDirectEvaluationOfObjective(c,stmt);
 		DbTableIndividualQuestionForStudentResult.createTableDirectEvaluationOfObjective(c,stmt);
 		DbTableRelationClassObjective.createTableSubject(c,stmt);
 		DbTableRelationClassTest.createTableSubject(c,stmt);
+		DbTableRelationQuestionMultipleChoiceTest.createTableRelationQuestionTest(c,stmt);
 		DbTableRelationQuestionSubject.createTableSubject(c,stmt);
 		DbTableRelationQuestionObjective.createTableSubject(c,stmt);
 		DbTableRelationStudentObjective.createTableSubject(c,stmt);
@@ -81,15 +82,15 @@ public class DBManager {
 		}
 
 		// Then store the questions into the table
-		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette.jpg");
-		q1.setID(100);
-		this.addQuestion(q1);
-		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/medium_pic.jpg");
-		q2.setID(101);
-		this.addQuestion(q2);
-		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
-		q3.setID(102);
-		this.addQuestion(q3);
+//		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette.jpg");
+//		q1.setID(100);
+//		this.addQuestion(q1);
+//		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/medium_pic.jpg");
+//		q2.setID(101);
+//		this.addQuestion(q2);
+//		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
+//		q3.setID(102);
+//		this.addQuestion(q3);
 
 		try {
 			stmt.close();

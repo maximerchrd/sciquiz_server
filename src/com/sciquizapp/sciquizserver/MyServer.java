@@ -83,7 +83,6 @@ public class MyServer {
         parent.add(panel_for_questlist);
         //parent.add(newChooseDropAction.panel_for_copy);
         parent.add(TableUserVsQuest);
-        parent.add(panel_for_displayquest);
         DisplayStats displayStats = new DisplayStats();
         parent.add(displayStats);
         //parent.add(app.btnSetQuestNumber, BorderLayout.EAST);
