@@ -32,6 +32,7 @@
 package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.database_management.DbTableQuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.database_management.DbTableTests;
 import tools.ListEntry;
 import tools.ListEntryCellRenderer;
 import tools.Scalr;
@@ -68,6 +69,7 @@ public class ChooseDropActionDemo extends JFrame {
     DefaultListModel copy_question = new DefaultListModel<String>();
     ArrayList<String> copy_IDs = new ArrayList<>();
     private QuestionMultipleChoice questionSelectedNodeTreeFrom;
+    private Test testSelectedNodeTreeFrom;
     private DefaultMutableTreeNode selectedNodeTreeFrom;
     private JTree TreeFromQuestions;
     private DefaultMutableTreeNode topTreeNode = new DefaultMutableTreeNode("Questions");
@@ -77,6 +79,8 @@ public class ChooseDropActionDemo extends JFrame {
     public JPanel panel_for_from;
     public JPanel panel_for_copy;
     public JSplitPane splitPane;
+    private List<DefaultMutableTreeNode> testsNodeList = new ArrayList<DefaultMutableTreeNode>();
+    private List<Test> testsList = new ArrayList<Test>();
     private List<Question> questionList = new ArrayList<Question>();
     private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
     private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
@@ -91,9 +95,15 @@ public class ChooseDropActionDemo extends JFrame {
         try {
             questionList = database.getAllQuestions();
             multipleChoicesQuestList = database.getAllMultipleChoiceQuestions();
+            testsList = DbTableTests.getAllTests();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+        for (int i = 0; i < testsList.size(); i++) {
+            DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(testsList.get(i));
+            topTreeNode.add(newTreeNode);
+            testsNodeList.add(newTreeNode);
         }
         for (int i = 0; i < questionList.size(); i++) {
             ImageIcon icon = new ImageIcon(questionList.get(i).getIMAGE());
@@ -120,8 +130,19 @@ public class ChooseDropActionDemo extends JFrame {
                 newIcon = new ImageIcon(scaledImage);
             }
             from_questions.addElement(new ListEntry(multipleChoicesQuestList.get(i).getQUESTION(), newIcon));
-            DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
-            topTreeNode.add(newTreeNode);
+
+            Boolean questionAdded = false;
+            for (int j = 0; !questionAdded && j < testsList.size(); j++) {
+                if (testsList.get(j).getIdsQuestions().contains(multipleChoicesQuestList.get(i).getID())) {
+                    DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
+                    testsNodeList.get(j).add(newTreeNode);
+                    questionAdded = true;
+                }
+            }
+            if (!questionAdded) {
+                DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
+                topTreeNode.add(newTreeNode);
+            }
             from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
             QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
             genericQuestionList.add(temp_generic_question);
@@ -129,7 +150,6 @@ public class ChooseDropActionDemo extends JFrame {
 
         panel_for_from = new JPanel();
         panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
-        //copyFromList = new JList<String>(from_questions);
         copyFromList = new JList(from_questions);
         copyFromList.setCellRenderer(new ListEntryCellRenderer());
         copyFromList.setTransferHandler(new FromTransferHandler());
@@ -140,8 +160,12 @@ public class ChooseDropActionDemo extends JFrame {
         panel_for_from.add(label);
         //JScrollPane sp = new JScrollPane(copyFromList);
         TreeFromQuestions = new JTree(topTreeNode);
+        TreeFromQuestions.setToggleClickCount(1);
         TreeFromQuestions.setRootVisible(false);
         TreeFromQuestions.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        TreeFromQuestions.setDragEnabled(true);
+        TreeFromQuestions.setDropMode(DropMode.ON_OR_INSERT);
+        TreeFromQuestions.setTransferHandler(new TreeTransferHandler());
 
         TreeFromQuestions.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
             @Override
@@ -156,9 +180,10 @@ public class ChooseDropActionDemo extends JFrame {
 
                 Object nodeInfo = selectedNodeTreeFrom.getUserObject();
 
-                if (selectedNodeTreeFrom.isLeaf()) {
+                if (nodeInfo instanceof QuestionMultipleChoice && selectedNodeTreeFrom.isLeaf()) {
                     questionSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
                 } else {
+                    testSelectedNodeTreeFrom = (Test) nodeInfo;
                 }
             }
         });
@@ -213,11 +238,15 @@ public class ChooseDropActionDemo extends JFrame {
                         BufferedImage scaledImage = Scalr.resize(bi, 40);
                         newIcon = new ImageIcon(scaledImage);
                         label.setIcon(newIcon);
+                    } else {
+                        label.setIcon(null);
                     }
                     label.setText(question.getQUESTION());
+                } else if (o instanceof Test) {
+                    label.setIcon(UIManager.getIcon("FileChooser.homeFolderIcon"));
+                    label.setText("" + ((Test)((DefaultMutableTreeNode) value).getUserObject()).getTestName());
                 } else {
-                    label.setIcon(null);
-                    label.setText("" + value);
+                    System.out.println("problem rendering tree cell: object neither question nor test");
                 }
                 return label;
             }
@@ -279,12 +308,18 @@ public class ChooseDropActionDemo extends JFrame {
         panel_for_from.add(send_quest_button);
 
         //implement a button to remove a question from the panel for from
-        JButton delete_question_from_button = new JButton("remove the selected question");
+        JButton delete_question_from_button = new JButton("remove the selected question or test");
         delete_question_from_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (selectedNodeTreeFrom != null) {
                     try {
-                        DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionSelectedNodeTreeFrom.getID()));
+                        if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
+                            DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionSelectedNodeTreeFrom.getID()));
+                        } else if (selectedNodeTreeFrom.getUserObject() instanceof Test) {
+                            DbTableTests.removeTestWithID(String.valueOf(testSelectedNodeTreeFrom.getIdTest()));
+                        } else {
+                            System.out.println("problem deleting treenode; object neither question nor test");
+                        }
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     }
@@ -295,6 +330,40 @@ public class ChooseDropActionDemo extends JFrame {
             }
         });
         panel_for_from.add(delete_question_from_button);
+
+        //implement a button to create a test/quiz in the panel for from
+        JButton create_test_button = new JButton("create a test/quiz");
+        create_test_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    DbTableTests.addTest("new quiz/test");
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                Test newTest = DbTableTests.getLastTests();
+                DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+                model.insertNodeInto(new DefaultMutableTreeNode(newTest), root, root.getChildCount());
+            }
+        });
+        panel_for_from.add(create_test_button);
+
+        //implement a button to activate a question or a test
+        JButton activate_button = new JButton("activate the question or test/quiz");
+        activate_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    DbTableTests.addTest("new quiz/test");
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                Test newTest = DbTableTests.getLastTests();
+                DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+                model.insertNodeInto(new DefaultMutableTreeNode(newTest), root, root.getChildCount());
+            }
+        });
+        panel_for_from.add(activate_button);
 
         //implement a button to send the questions from the panel for copy
         JButton send_questions_button = new JButton("envoyer les questions");

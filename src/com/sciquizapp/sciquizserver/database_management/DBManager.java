@@ -48,11 +48,12 @@ public class DBManager {
 		DbTableClasses.createTableSubject(c,stmt);
 		DbTableSubject.createTableSubject(c,stmt);
 		DbTableStudents.createTableSubject(c,stmt);
-		DbTableTests.createTableSubject(c,stmt);
+		DbTableTests.createTableTest(c,stmt);
 		DbTableIndividualObjectiveForStudentResult.createTableDirectEvaluationOfObjective(c,stmt);
 		DbTableIndividualQuestionForStudentResult.createTableDirectEvaluationOfObjective(c,stmt);
 		DbTableRelationClassObjective.createTableSubject(c,stmt);
 		DbTableRelationClassTest.createTableSubject(c,stmt);
+		DbTableRelationQuestionMultipleChoiceTest.createTableRelationQuestionTest(c,stmt);
 		DbTableRelationQuestionSubject.createTableSubject(c,stmt);
 		DbTableRelationQuestionObjective.createTableSubject(c,stmt);
 		DbTableRelationStudentObjective.createTableSubject(c,stmt);

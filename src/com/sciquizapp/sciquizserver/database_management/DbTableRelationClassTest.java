@@ -11,7 +11,7 @@ public class DbTableRelationClassTest {
         try {
             statement = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS class_test_relation " +
-                    "(ID_ST_OBJ_REL       INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "(ID_CLASS_TEST       INTEGER PRIMARY KEY AUTOINCREMENT," +
                     " ID_CLASS      INT     NOT NULL, " +
                     " ID_TEST      INT     NOT NULL, " +
                     " QUANTITATIVE_EVAL      TEXT     NOT NULL) ";
