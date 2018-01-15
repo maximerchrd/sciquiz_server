@@ -155,9 +155,6 @@ public class ChooseDropActionDemo extends JFrame {
         copyFromList.setTransferHandler(new FromTransferHandler());
         copyFromList.setDragEnabled(true);
         copyFromList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JLabel label = new JLabel("Drag from here:");
-        label.setAlignmentX(0f);
-        panel_for_from.add(label);
         //JScrollPane sp = new JScrollPane(copyFromList);
         TreeFromQuestions = new JTree(topTreeNode);
         TreeFromQuestions.setToggleClickCount(1);
@@ -182,8 +179,10 @@ public class ChooseDropActionDemo extends JFrame {
 
                 if (nodeInfo instanceof QuestionMultipleChoice && selectedNodeTreeFrom.isLeaf()) {
                     questionSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                    testSelectedNodeTreeFrom = null;
                 } else {
                     testSelectedNodeTreeFrom = (Test) nodeInfo;
+                    questionSelectedNodeTreeFrom = null;
                 }
             }
         });
@@ -274,9 +273,6 @@ public class ChooseDropActionDemo extends JFrame {
 
         panel_for_copy = new JPanel();
         panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
-        label = new JLabel("Drop to COPY to here:");
-        label.setAlignmentX(0f);
-        panel_for_copy.add(label);
         JScrollPane sp2 = new JScrollPane(copyToList);
         sp2.setAlignmentX(0f);
         panel_for_copy.add(sp2);
@@ -352,15 +348,21 @@ public class ChooseDropActionDemo extends JFrame {
         JButton activate_button = new JButton("activate the question or test/quiz");
         activate_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    DbTableTests.addTest("new quiz/test");
-                } catch (Exception e1) {
-                    e1.printStackTrace();
+                if (testSelectedNodeTreeFrom != null) {
+                    for (int i = 0; i < testSelectedNodeTreeFrom.getIdsQuestions().size(); i++) {
+                        Boolean found = false;
+                        int j = 0;
+                        for (; !found && j < multipleChoicesQuestList.size(); j++) {
+                            if (multipleChoicesQuestList.get(j).getID() == testSelectedNodeTreeFrom.getIdsQuestions().get(i)) {
+                                found = true;
+                            }
+                        }
+                        QuestionMultipleChoice questionToActivate = multipleChoicesQuestList.get(j-1);
+                        activateQuestionMultipleChoice(copyToList,questionToActivate);
+                    }
+                } else {
+                    activateQuestionMultipleChoice(copyToList, questionSelectedNodeTreeFrom);
                 }
-                Test newTest = DbTableTests.getLastTests();
-                DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-                model.insertNodeInto(new DefaultMutableTreeNode(newTest), root, root.getChildCount());
             }
         });
         panel_for_from.add(activate_button);
@@ -486,28 +488,7 @@ public class ChooseDropActionDemo extends JFrame {
             }
 
             JList list = (JList) support.getComponent();
-            DefaultListModel model = (DefaultListModel) list.getModel();
-            int index = model.size();
-
-            //resize image from db to icon size
-            ImageIcon icon = new ImageIcon(multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))).getIMAGE());
-            Image img = icon.getImage();
-            ImageIcon newIcon = null;
-            if (img.getWidth(null) > 0) {
-                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = bi.createGraphics();
-                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                BufferedImage scaledImage = Scalr.resize(bi, 40);
-                newIcon = new ImageIcon(scaledImage);
-            }
-            ListEntry newListEntry = new ListEntry(multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))).getQUESTION(), newIcon);
-            model.insertElementAt(newListEntry, index);
-            own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
-
-            Rectangle rect = list.getCellBounds(index, index);
-            list.scrollRectToVisible(rect);
-            list.setSelectedIndex(index);
-            list.requestFocusInWindow();
+            activateQuestionMultipleChoice(list, multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))));
 
             return true;
         }
@@ -521,5 +502,28 @@ public class ChooseDropActionDemo extends JFrame {
         }
     }
 
+    private void activateQuestionMultipleChoice(JList list, QuestionMultipleChoice questionMultipleChoice) {
+        DefaultListModel model = (DefaultListModel) list.getModel();
+        int index = model.size();
 
+        //resize image from db to icon size
+        ImageIcon icon = new ImageIcon(questionMultipleChoice.getIMAGE());
+        Image img = icon.getImage();
+        ImageIcon newIcon = null;
+        if (img.getWidth(null) > 0) {
+            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = bi.createGraphics();
+            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+            BufferedImage scaledImage = Scalr.resize(bi, 40);
+            newIcon = new ImageIcon(scaledImage);
+        }
+        ListEntry newListEntry = new ListEntry(questionMultipleChoice.getQUESTION(), newIcon);
+        model.insertElementAt(newListEntry, index);
+        own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
+
+        Rectangle rect = list.getCellBounds(index, index);
+        list.scrollRectToVisible(rect);
+        list.setSelectedIndex(index);
+        list.requestFocusInWindow();
+    }
 }
