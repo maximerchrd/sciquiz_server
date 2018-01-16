@@ -2,6 +2,7 @@ package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.database_management.DbTableIndividualQuestionForStudentResult;
 import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
+import com.sciquizapp.sciquizserver.database_management.DbTableSubject;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
@@ -13,6 +14,7 @@ import java.net.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import javax.bluetooth.*;
 
@@ -172,13 +174,13 @@ public class NetworkCommunication {
         question_text += arg_quest.getIMAGE().split("/")[2];
         byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
 
-        // send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
+        // send file : the sizes of the file and of the text are given in the first 40 bytes (separated by ":")
 
-        //writing of the first 20 bytes
+        //writing of the first 40 bytes
         File myFile = new File(arg_quest.getIMAGE());
         int intfileLength = (int) myFile.length();
         int textbyteslength = bytearraytext.length;
-        byte[] bytearray = new byte[20 + textbyteslength + intfileLength];
+        byte[] bytearray = new byte[40 + textbyteslength + intfileLength];
         String fileLength;
         if (isQuiz) {
             fileLength = "QUIZZ";
@@ -194,14 +196,14 @@ public class NetworkCommunication {
 
         //copy the textbytes into the array which will be sent
         for (int i = 0; i < bytearraytext.length; i++) {
-            bytearray[i + 20] = bytearraytext[i];
+            bytearray[i + 40] = bytearraytext[i];
         }
 
         //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
         fis = new FileInputStream(myFile);
         bis = new BufferedInputStream(fis);
         int arraylength = bytearray.length;
-        bis.read(bytearray, 20 + textbyteslength, intfileLength);
+        bis.read(bytearray, 40 + textbyteslength, intfileLength);
         System.out.println("Sending " + arg_quest.getIMAGE() + "(" + (int) myFile.length() + " bytes)");
         System.out.println("Sending " + arraylength + " bytes in total");
         ArrayList<Student> StudentsArray = aClass.getStudents_array();
@@ -239,13 +241,13 @@ public class NetworkCommunication {
                 }
                 byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
 
-                // send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
+                // send file : the sizes of the file and of the text are given in the first 40 bytes (separated by ":")
 
-                //writing of the first 20 bytes
+                //writing of the first 40 bytes
                 File myFile = new File(questionList.get(j).getIMAGE());
                 int intfileLength = (int) myFile.length();
                 int textbyteslength = bytearraytext.length;
-                byte[] bytearray = new byte[20 + textbyteslength + intfileLength];
+                byte[] bytearray = new byte[40 + textbyteslength + intfileLength];
                 String fileLength;
                 fileLength = "QUEST";
                 fileLength += ":" + String.valueOf((int) myFile.length());
@@ -257,14 +259,14 @@ public class NetworkCommunication {
 
                 //copy the textbytes into the array which will be sent
                 for (int k = 0; k < bytearraytext.length; k++) {
-                    bytearray[k + 20] = bytearraytext[k];
+                    bytearray[k + 40] = bytearraytext[k];
                 }
 
                 //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
                 fis = new FileInputStream(myFile);
                 bis = new BufferedInputStream(fis);
                 int arraylength = bytearray.length;
-                bis.read(bytearray, 20 + textbyteslength, intfileLength);
+                bis.read(bytearray, 40 + textbyteslength, intfileLength);
                 System.out.println("Sending " + questionList.get(j).getIMAGE() + "(" + (int) myFile.length() + " bytes)");
                 System.out.println("Sending " + arraylength + " bytes in total");
                 for (int i = 0; i < aClass.getClassSize(); i++) {
@@ -295,8 +297,14 @@ public class NetworkCommunication {
                     question_text += multipleChoiceQuestionList.get(j).getOPT8() + "///";
                     question_text += multipleChoiceQuestionList.get(j).getOPT9() + "///";
                     question_text += multipleChoiceQuestionList.get(j).getID() + "///";
+                    Vector<String> subjectsVector = DbTableSubject.getSubjectsForQuestionID(multipleChoiceQuestionList.get(j).getID());
+                    for(int k = 0; k < subjectsVector.size(); k++) {
+                        question_text += subjectsVector.get(k) + "|||";
+                    }
+                    question_text += "///";
+                    System.out.println(question_text);
 
-                    // send file : the sizes of the file and of the text are given in the first 20 bytes (separated by ":")
+                    // send file : the sizes of the file and of the text are given in the first 40 bytes (separated by ":")
                     int intfileLength = 0;
                     File myFile = null;
                     if (!multipleChoiceQuestionList.get(j).getIMAGE().equals("none")) {
@@ -307,10 +315,10 @@ public class NetworkCommunication {
                         question_text += multipleChoiceQuestionList.get(j).getIMAGE() + "///";
                     }
 
-                    //writing of the first 20 bytes
+                    //writing of the first 40 bytes
                     byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
                     int textbyteslength = bytearraytext.length;
-                    byte[] bytearray = new byte[20 + textbyteslength + intfileLength];
+                    byte[] bytearray = new byte[40 + textbyteslength + intfileLength];
                     String fileLength;
                     fileLength = "MULTQ";
                     fileLength += ":" + String.valueOf(intfileLength);
@@ -322,14 +330,14 @@ public class NetworkCommunication {
 
                     //copy the textbytes into the array which will be sent
                     for (int k = 0; k < bytearraytext.length; k++) {
-                        bytearray[k + 20] = bytearraytext[k];
+                        bytearray[k + 40] = bytearraytext[k];
                     }
 
                     //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
                     if (!multipleChoiceQuestionList.get(j).getIMAGE().equals("none")) {
                         fis = new FileInputStream(myFile);
                         bis = new BufferedInputStream(fis);
-                        bis.read(bytearray, 20 + textbyteslength, intfileLength);
+                        bis.read(bytearray, 40 + textbyteslength, intfileLength);
                     }
                     System.out.println("Sending " + multipleChoiceQuestionList.get(j).getIMAGE() + "(" + intfileLength + " bytes)");
                     int arraylength = bytearray.length;
@@ -377,6 +385,7 @@ public class NetworkCommunication {
                                 //Student student = aClass.getStudents_array().get(j);
                                 //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
                                 double eval = DbTableIndividualQuestionForStudentResult.addIndividualQuestionForStudentResult(Integer.valueOf(answerString.split("///")[5]),answerString.split("///")[2],answerString.split("///")[3]);
+                                SendEvaluation(eval,Integer.valueOf(answerString.split("///")[5]), arg_student);
                                 mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
@@ -405,6 +414,30 @@ public class NetworkCommunication {
         //}
     }
 
+    private void SendEvaluation(double evaluation, int questionID, Student student) {
+        String evalToSend = "EVAL///" + evaluation + "///" + questionID + "///";
+        byte[] bytes = new byte[40];
+        int bytes_length = 0;
+        try {
+            bytes_length = evalToSend.getBytes("UTF-8").length;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < bytes_length; i++) {
+            try {
+                bytes[i] = evalToSend.getBytes("UTF-8")[i];
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            student.getOutputStream().write(bytes, 0, bytes.length);
+            student.getOutputStream().flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void SendNewConnectionResponse(OutputStream arg_outputStream, Boolean maximum) throws IOException {
         String response;
         if (maximum) {
@@ -412,7 +445,7 @@ public class NetworkCommunication {
         } else {
             response = "SERVR///OK///";
         }
-        byte[] bytes = new byte[20];
+        byte[] bytes = new byte[40];
         int bytes_length = response.getBytes("UTF-8").length;
         for (int i = 0; i < bytes_length; i++) {
             bytes[i] = response.getBytes("UTF-8")[i];
