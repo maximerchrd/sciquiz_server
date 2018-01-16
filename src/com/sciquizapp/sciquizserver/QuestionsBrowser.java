@@ -202,28 +202,7 @@ public class QuestionsBrowser extends JFrame {
                 if (evt.getClickCount() == 2) {
                     if (questionSelectedNodeTreeFrom != null) {
                         JList list = copyToList;
-                        DefaultListModel model = (DefaultListModel) list.getModel();
-                        int index = model.size();
-
-                        //resize image from db to icon size
-                        ImageIcon icon = new ImageIcon(questionSelectedNodeTreeFrom.getIMAGE());
-                        Image img = icon.getImage();
-                        ImageIcon newIcon = null;
-                        if (img.getWidth(null) > 0) {
-                            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                            Graphics2D g = bi.createGraphics();
-                            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                            BufferedImage scaledImage = Scalr.resize(bi, 40);
-                            newIcon = new ImageIcon(scaledImage);
-                        }
-                        ListEntry newListEntry = new ListEntry(questionSelectedNodeTreeFrom.getQUESTION(), newIcon);
-                        model.insertElementAt(newListEntry, index);
-                        own_networkcommunication.getClassroom().addQuestMultChoice(questionSelectedNodeTreeFrom);
-
-                        Rectangle rect = list.getCellBounds(index, index);
-                        list.scrollRectToVisible(rect);
-                        list.setSelectedIndex(index);
-                        list.requestFocusInWindow();
+                        activateQuestionMultipleChoice(list,questionSelectedNodeTreeFrom);
                     }
                 }
             }
@@ -393,7 +372,7 @@ public class QuestionsBrowser extends JFrame {
         panel_for_copy.add(send_questions_button);
 
         //implement a button to send the highlighted question
-        JButton send_questID_button = new JButton("activer la question avec ID");
+        JButton send_questID_button = new JButton("activate the question for students");
         send_questID_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int id_to_send = Integer.valueOf(copy_IDs.get(copyToList.getSelectedIndex()));
@@ -531,6 +510,7 @@ public class QuestionsBrowser extends JFrame {
         ListEntry newListEntry = new ListEntry(questionMultipleChoice.getQUESTION(), newIcon);
         model.insertElementAt(newListEntry, index);
         own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
+        copy_IDs.add(String.valueOf(questionMultipleChoice.getID()));
 
         Rectangle rect = list.getCellBounds(index, index);
         list.scrollRectToVisible(rect);

@@ -26,6 +26,10 @@ public class MyServer {
 
     public static void main(String[] args) throws Exception {
 
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = (int)screenSize.getWidth();
+        int screenHeight = (int)screenSize.getHeight();
+
         //does db stuffs
         DBManager dao = new DBManager();
         dao.createDBIfNotExists();
@@ -76,7 +80,7 @@ public class MyServer {
 
         //implement the division of the window with borderlayout
         JPanel parent = new JPanel(new GridBagLayout());
-        panel_for_questlist.setPreferredSize(new Dimension(520,600));
+        panel_for_questlist.setPreferredSize(new Dimension((int)(screenWidth*0.4),(int)(screenHeight*0.8)));
         GridBagConstraints questionsBrowserConstraints = new GridBagConstraints();
         questionsBrowserConstraints.gridheight = 2;
         questionsBrowserConstraints.gridx = 0;
@@ -88,18 +92,20 @@ public class MyServer {
         GridBagConstraints tableConstraints = new GridBagConstraints();
         tableConstraints.gridx = 1;
         tableConstraints.gridy = 0;
+        TableUserVsQuest.setPreferredSize(new Dimension((int)(screenWidth*0.5),(int)(screenHeight*0.4)));
         parent.add(TableUserVsQuest, tableConstraints);
         DisplayStats displayStats = new DisplayStats();
         GridBagConstraints displayStatsConstraints = new GridBagConstraints();
         displayStatsConstraints.gridx = 1;
         displayStatsConstraints.gridy = 1;
+        displayStats.setPreferredSize(new Dimension((int)(screenWidth*0.5),(int)(screenHeight*0.4)));
         parent.add(displayStats,displayStatsConstraints);
         //parent.add(app.btnSetQuestNumber, BorderLayout.EAST);
         //Display the window.
 
         frame.setContentPane(parent);
         frame.pack();
-        frame.setBounds(0, 0, 1200, 700);
+        frame.setBounds(0, 0, screenWidth, screenHeight);
         frame.setVisible(true);
 
     }

@@ -41,8 +41,10 @@ public class DisplayStats extends JPanel {
         this.add(chart_entries_box);
 
         xValues_vector = DbTableStudents.getStudentNames();
-        String[] chart_students = {xValues_vector.toString().replace("[","").replace("]","")};
-        //String[] chart_students = {"bla", "bli"};
+        String[] chart_students = new String[xValues_vector.size()];
+        for (int i = 0; i < xValues_vector.size(); i++) {
+            chart_students[i] = xValues_vector.get(i);
+        }
         chart_entries_box = new JComboBox(chart_students);
         this.add(chart_entries_box);
 

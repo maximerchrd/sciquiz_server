@@ -11,7 +11,6 @@
 - modify UI
 - translate
 ####TO DO _(For Alpha Version - Android)_
-- fix bug when sending answer
 - remove "play mode"
 - display statistics
 - translate
