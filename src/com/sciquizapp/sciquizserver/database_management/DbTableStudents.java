@@ -120,9 +120,10 @@ public class DbTableStudents {
                 rs = stmt.executeQuery(query);
                 while (rs.next()) {
                     subject_for_question.add(rs.getString("SUBJECT"));
+                    //multiplies each evaluation for a specific question by the number of objectives attributed to the question
                     evaluations_for_each_question.insertElementAt(evaluations_for_each_question.get(subject_for_question.size() - 1), subject_for_question.size());
                 }
-                evaluations_for_each_question.remove(evaluations_for_each_question.get(subject_for_question.size()));
+                evaluations_for_each_question.remove(subject_for_question.size());
             }
             for (int i = 0; i < subject_for_question.size(); i++) {
                 if (!subjects.contains(subject_for_question.get(i))) {
@@ -149,6 +150,79 @@ public class DbTableStudents {
         }
         Vector<Vector<String>> vectors = new Vector<Vector<String>>();
         vectors.add(subjects);
+        vectors.add(results);
+        return vectors;
+    }
+
+    static public Vector<Vector<String>> getStudentResultsPerObjective(String student_name) {
+        Vector<String> student_ids = new Vector<>();
+        Vector<String> objectives = new Vector<>();
+        Vector<String> results = new Vector<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+
+            String query = "SELECT ID_STUDENT_GLOBAL FROM students WHERE FIRST_NAME='" + student_name +"';";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                student_ids.add(rs.getString("ID_STUDENT_GLOBAL"));
+            }
+
+            int id_student = 0;
+            if (!student_ids.isEmpty()) {
+                id_student = Integer.parseInt(student_ids.get(0));
+            }
+            query = "SELECT ID_GLOBAL,QUANTITATIVE_EVAL FROM individual_question_for_student_result WHERE ID_STUDENT_GLOBAL='" + id_student +"';";
+            rs = stmt.executeQuery(query);
+            Vector<String> id_questions = new Vector<>();
+            Vector<String> evaluations_for_each_question = new Vector<>();
+            while (rs.next()) {
+                id_questions.add(rs.getString("ID_GLOBAL"));
+                evaluations_for_each_question.add(rs.getString("QUANTITATIVE_EVAL"));
+            }
+            Vector<String> objectives_for_question = new Vector<>();
+            for (int i = 0; i < id_questions.size(); i++) {
+                query = "SELECT OBJECTIVE FROM learning_objectives " +
+                        "INNER JOIN question_objective_relation ON learning_objectives.ID_OBJECTIVE_GLOBAL = question_objective_relation.ID_OBJECTIVE_GLOBAL " +
+                        "WHERE question_objective_relation.ID_GLOBAL = '" + id_questions.get(i) + "';";
+                rs = stmt.executeQuery(query);
+                while (rs.next()) {
+                    objectives_for_question.add(rs.getString("OBJECTIVE"));
+                    //multiplies each evaluation for a specific question by the number of objectives attributed to the question
+                    evaluations_for_each_question.insertElementAt(evaluations_for_each_question.get(objectives_for_question.size() - 1), objectives_for_question.size());
+                }
+                evaluations_for_each_question.remove(objectives_for_question.size());
+            }
+            for (int i = 0; i < objectives_for_question.size(); i++) {
+                if (!objectives.contains(objectives_for_question.get(i))) {
+                    objectives.add(objectives_for_question.get(i));
+                    results.add(evaluations_for_each_question.get(i));
+                } else {
+                    int old_result_index = objectives.indexOf(objectives_for_question.get(i));
+                    double old_result = Double.parseDouble(results.get(old_result_index));
+                    old_result += Double.parseDouble(evaluations_for_each_question.get(i));
+                    results.set(old_result_index,String.valueOf(old_result));
+                }
+            }
+            for (int i = 0; i < results.size(); i++) {
+                double result_for_averaging = Double.parseDouble(results.get(i));
+                int number_occurences = Collections.frequency(objectives_for_question,objectives.get(i));
+                results.set(i,String.valueOf(result_for_averaging/number_occurences));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        Vector<Vector<String>> vectors = new Vector<Vector<String>>();
+        vectors.add(objectives);
         vectors.add(results);
         return vectors;
     }
