@@ -1,6 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.database_management.DbTableIndividualQuestionForStudentResult;
+import com.sciquizapp.sciquizserver.database_management.DbTableLearningObjectives;
 import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import com.sciquizapp.sciquizserver.database_management.DbTableSubject;
 import com.sciquizapp.sciquizserver.questions.Question;
@@ -298,9 +299,17 @@ public class NetworkCommunication {
                     question_text += multipleChoiceQuestionList.get(j).getOPT9() + "///";
                     question_text += multipleChoiceQuestionList.get(j).getID() + "///";
                     Vector<String> subjectsVector = DbTableSubject.getSubjectsForQuestionID(multipleChoiceQuestionList.get(j).getID());
-                    for(int k = 0; k < subjectsVector.size(); k++) {
-                        question_text += subjectsVector.get(k) + "|||";
+                    int l = 0;
+                    for(l = 0; l < subjectsVector.size(); l++) {
+                        question_text += subjectsVector.get(l) + "|||";
                     }
+                    if (l == 0) question_text += " ";
+                    question_text += "///";
+                    Vector<String> objectivesVector = DbTableLearningObjectives.getObjectiveForQuestionID(multipleChoiceQuestionList.get(j).getID());
+                    for(l = 0; l < objectivesVector.size(); l++) {
+                        question_text += objectivesVector.get(l) + "|||";
+                    }
+                    if (l == 0) question_text += " ";
                     question_text += "///";
                     System.out.println(question_text);
 
@@ -416,6 +425,7 @@ public class NetworkCommunication {
 
     private void SendEvaluation(double evaluation, int questionID, Student student) {
         String evalToSend = "EVAL///" + evaluation + "///" + questionID + "///";
+        System.out.println("sending: " + evalToSend);
         byte[] bytes = new byte[40];
         int bytes_length = 0;
         try {
