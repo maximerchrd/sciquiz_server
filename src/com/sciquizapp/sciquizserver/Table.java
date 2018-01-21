@@ -141,6 +141,9 @@ public class Table extends JPanel {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
 	}
+	public void removeQuestion(int index) {
+		table.removeColumn(table.getColumnModel().getColumn(2 + index));
+	}
 	public void addAnswerForUser(Student student, String answer, String Question, double evaluation) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int rowNumber = 0;

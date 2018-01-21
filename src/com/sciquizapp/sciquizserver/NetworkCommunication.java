@@ -469,4 +469,8 @@ public class NetworkCommunication {
     public Classroom getClassroom() {
         return aClass;
     }
+
+    public void removeQuestion(int index) {
+        mTableQuestionVsUser.removeQuestion(index);
+    }
 }

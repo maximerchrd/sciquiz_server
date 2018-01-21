@@ -35,6 +35,15 @@ public class Language {
             ADDOBJECTIVEBUTTON_FRENCH
     };
 
+    static private String ADDNEWQUESTION_ARMENIAN = "Ավելացնել հարց";
+    static private String ADDSUBJECTBUTTON_ARMENIAN = "Ավելացնել թեմա";
+    static private String ADDOBJECTIVEBUTTON_ARMENIAN = "Ավելացնել նպատակը";
+    static private String[] ARMENIAN = {
+            ADDNEWQUESTION_ARMENIAN,
+            ADDSUBJECTBUTTON_ARMENIAN,
+            ADDOBJECTIVEBUTTON_ARMENIAN
+    };
+
     /**
      *  Returns String in current language
      * @param stringToTranslate

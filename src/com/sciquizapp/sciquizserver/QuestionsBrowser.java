@@ -245,7 +245,7 @@ public class QuestionsBrowser extends JFrame {
         panel_for_from.add(sp);
 
         //implement a button to add a new question to the database
-        JButton new_quest_button = new JButton("ajouter une question");
+        JButton new_quest_button = new JButton("add a question");
         new_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs, TreeFromQuestions);
@@ -277,7 +277,7 @@ public class QuestionsBrowser extends JFrame {
         panel_questlist.add(panel_for_copy);
 
         //implement a button to send the highlighted question
-        JButton send_quest_button = new JButton("activer la question");
+        JButton send_quest_button = new JButton("activate the question");
         send_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Question question_to_send;
@@ -358,7 +358,7 @@ public class QuestionsBrowser extends JFrame {
         panel_for_from.add(activate_button);
 
         //implement a button to send the questions from the panel for copy
-        JButton send_questions_button = new JButton("envoyer les questions");
+        JButton send_questions_button = new JButton("Send the questions");
         send_questions_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -392,6 +392,7 @@ public class QuestionsBrowser extends JFrame {
         delete_question_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int index = copyToList.getSelectedIndex();
+                network_singleton.removeQuestion(index);
                 copy_question.remove(index);
                 copy_IDs.remove(index);
             }
