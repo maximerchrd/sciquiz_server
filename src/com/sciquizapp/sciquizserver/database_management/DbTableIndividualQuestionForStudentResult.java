@@ -1,9 +1,8 @@
 package com.sciquizapp.sciquizserver.database_management;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -92,5 +91,52 @@ public class DbTableIndividualQuestionForStudentResult {
             System.exit(0);
         }
         return quantitative_evaluation;
+    }
+
+    static public String exportResults(String file_name) {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        PrintWriter resultsFile = null;
+        try {
+            resultsFile = new PrintWriter(file_name);
+            resultsFile.write("");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String query = "SELECT students.FIRST_NAME,DATE,individual_question_for_student_result.QUANTITATIVE_EVAL,multiple_choice_questions.QUESTION, " +
+                "individual_question_for_student_result.ANSWERS " +
+                "FROM 'individual_question_for_student_result' " +
+                "INNER JOIN students ON students.ID_STUDENT_GLOBAL=individual_question_for_student_result.ID_STUDENT_GLOBAL " +
+                "INNER JOIN multiple_choice_questions ON multiple_choice_questions.ID_GLOBAL=individual_question_for_student_result.ID_GLOBAL;";
+        try {
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                for (int i = 1; i < 6; i++) {
+                    resultsFile.print(rs.getString(i) + ";");
+                }
+                resultsFile.print("\n");
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        resultsFile.close();
+        return "done";
     }
 }

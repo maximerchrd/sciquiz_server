@@ -1,6 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
 
+import com.sciquizapp.sciquizserver.database_management.DbTableIndividualQuestionForStudentResult;
 import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -53,8 +54,6 @@ public class DisplayStats extends JPanel {
 
         display_chart.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e1) {
-
-
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -72,9 +71,16 @@ public class DisplayStats extends JPanel {
                     }
                 });
             }
-
         });
         this.add(display_chart);
+
+        JButton export_results = new JButton("export results");
+        export_results.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e1) {
+                DbTableIndividualQuestionForStudentResult.exportResults("results.csv");
+            }
+        });
+        this.add(export_results);
     }
 
     private void initAndShowGUI(String combobox1_selected, String combobox2_selected) {
