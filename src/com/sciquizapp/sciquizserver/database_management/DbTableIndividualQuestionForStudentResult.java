@@ -80,6 +80,10 @@ public class DbTableIndividualQuestionForStudentResult {
             }
             quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
 
+            if (quantitative_evaluation < 100) {
+                quantitative_evaluation = 0;
+            }
+
             System.out.println("student result: " + quantitative_evaluation);
             sql = "UPDATE individual_question_for_student_result SET QUANTITATIVE_EVAL = '" + quantitative_evaluation + "' WHERE ID_DIRECT_EVAL = (SELECT MAX(ID_DIRECT_EVAL) FROM individual_question_for_student_result);";
             stmt.executeUpdate(sql);

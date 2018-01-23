@@ -53,9 +53,9 @@ public class Table extends JPanel {
 		};
 
 		// Create a couple of columns
-		model.addColumn("Utilisateurs");
+		model.addColumn("Students");
 		policeColor.add(new Vector<>());
-		model.addColumn("Score");
+		model.addColumn("Evaluation");
 		policeColor.add(new Vector<>());
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
@@ -147,7 +147,7 @@ public class Table extends JPanel {
 	public void addAnswerForUser(Student student, String answer, String Question, double evaluation) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int rowNumber = 0;
-		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getInetAddress().toString())) {
+		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getName())) {
 			rowNumber++;
 		}
 		int columnNumber = 0;

@@ -78,7 +78,7 @@ public class MyServer {
 
 
 
-        //implement the division of the window with borderlayout
+        //implement the division of the window with Gridbaglayout
         JPanel parent = new JPanel(new GridBagLayout());
         panel_for_questlist.setPreferredSize(new Dimension((int)(screenWidth*0.4),(int)(screenHeight*0.8)));
         GridBagConstraints questionsBrowserConstraints = new GridBagConstraints();
@@ -86,23 +86,22 @@ public class MyServer {
         questionsBrowserConstraints.gridx = 0;
         questionsBrowserConstraints.gridy = 0;
         parent.add(panel_for_questlist,questionsBrowserConstraints);
-        //parent.setLayout(new GridLayout(0, 2));
-        //parent.add(panel_for_questlist);
-        //parent.add(newChooseDropAction.panel_for_copy);
-        GridBagConstraints tableConstraints = new GridBagConstraints();
-        tableConstraints.gridx = 1;
-        tableConstraints.gridy = 0;
-        TableUserVsQuest.setPreferredSize(new Dimension((int)(screenWidth*0.5),(int)(screenHeight*0.4)));
-        parent.add(TableUserVsQuest, tableConstraints);
+
+        DisplayTableUsersVsQuestions displayTablePanel = new DisplayTableUsersVsQuestions(new GridBagLayout(),
+                false, screenWidth, screenHeight, TableUserVsQuest);
+        GridBagConstraints tablePanelConstraints = new GridBagConstraints();
+        tablePanelConstraints.gridx = 1;
+        tablePanelConstraints.gridy = 0;
+        parent.add(displayTablePanel, tablePanelConstraints);
+
         DisplayStats displayStats = new DisplayStats();
         GridBagConstraints displayStatsConstraints = new GridBagConstraints();
         displayStatsConstraints.gridx = 1;
         displayStatsConstraints.gridy = 1;
         displayStats.setPreferredSize(new Dimension((int)(screenWidth*0.5),(int)(screenHeight*0.4)));
         parent.add(displayStats,displayStatsConstraints);
-        //parent.add(app.btnSetQuestNumber, BorderLayout.EAST);
-        //Display the window.
 
+        //Display the window.
         frame.setContentPane(parent);
         frame.pack();
         frame.setBounds(0, 0, screenWidth, screenHeight);

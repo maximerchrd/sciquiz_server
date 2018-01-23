@@ -245,7 +245,7 @@ public class QuestionsBrowser extends JFrame {
         panel_for_from.add(sp);
 
         //implement a button to add a new question to the database
-        JButton new_quest_button = new JButton("add a question");
+        JButton new_quest_button = new JButton("create a question");
         new_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs, TreeFromQuestions);
@@ -275,23 +275,6 @@ public class QuestionsBrowser extends JFrame {
         splitPane.setDividerLocation(splitpaneWidth / 2);
         panel_questlist.add(panel_for_from);
         panel_questlist.add(panel_for_copy);
-
-        //implement a button to send the highlighted question
-        JButton send_quest_button = new JButton("activate the question");
-        send_quest_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Question question_to_send;
-                System.out.println("copyToList.getSelectedIndex() =  " + copyToList.getSelectedIndex());
-                question_to_send = questionList.get(copyToList.getSelectedIndex());
-                try {
-                    network_singleton.SendQuestion(question_to_send, false);
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        });
-        panel_for_from.add(send_quest_button);
 
         //implement a button to remove a question from the panel for from
         JButton delete_question_from_button = new JButton("remove the selected question or test");

@@ -38,7 +38,7 @@ public class DisplayStats extends JPanel {
 
     public DisplayStats() {
         displayStats_singleton = this;
-        String[] chart_entries_options = {"Evaluation vs subject for student", "Evaluation vs objective for student"};
+        String[] chart_entries_options = {"Evaluation vs objective for student", "Evaluation vs subject for student"};
         chart_entries_box = new JComboBox(chart_entries_options);
         this.add(chart_entries_box);
 
@@ -109,7 +109,7 @@ public class DisplayStats extends JPanel {
     private Scene createScene(String combobox1_selected, String combobox2_selected) {
         usa = String.valueOf(System.currentTimeMillis());
         CategoryAxis xAxis = new CategoryAxis();
-        NumberAxis yAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis(0,100,10);
         BarChart<String, Number> bc = new BarChart<String, Number>(xAxis, yAxis);
         XYChart.Series series1 = new XYChart.Series();
         if (combobox1_selected.contentEquals("Evaluation vs subject for student")) {
@@ -131,6 +131,15 @@ public class DisplayStats extends JPanel {
             Vector<String> results = studentResultsPerObjective.get(1);
             series1.setName(combobox2_selected);
             for (int i = 0; i < objectives.size(); i++) {
+                if (objectives.get(i).length() > 16) {
+                    objectives.set(i, objectives.get(i).substring(0,15) + "\n" + objectives.get(i).substring(15,objectives.get(i).length()));
+                    if (objectives.get(i).length() > 31) {
+                        objectives.set(i, objectives.get(i).substring(0, 30) + "\n" + objectives.get(i).substring(30, objectives.get(i).length()));
+                        if (objectives.get(i).length() > 46) {
+                            objectives.set(i, objectives.get(i).substring(0, 45) + "...");
+                        }
+                    }
+                }
                 series1.getData().add(new XYChart.Data(objectives.get(i), Double.parseDouble(results.get(i))));
             }
             System.out.println("displaying eval vs objectives");

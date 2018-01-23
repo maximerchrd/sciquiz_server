@@ -45,7 +45,7 @@ public class DBManager {
 		DbTableQuestionIntermediateAnswers.createTableQuestionIntermediateAnswers(c,stmt);
 		DbTableDirectEvaluationOfObjective.createTableDirectEvaluationOfObjective(c,stmt);
 		DbTableLearningObjectives.createTableSubject(c,stmt);
-		DbTableClasses.createTableSubject(c,stmt);
+		DbTableClasses.createTableClasses(c,stmt);
 		DbTableSubject.createTableSubject(c,stmt);
 		DbTableStudents.createTableSubject(c,stmt);
 		DbTableTests.createTableTest(c,stmt);

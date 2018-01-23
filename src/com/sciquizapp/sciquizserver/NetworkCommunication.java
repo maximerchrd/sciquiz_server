@@ -99,7 +99,7 @@ public class NetworkCommunication {
                                         student.setOutputStream(skt.getOutputStream());
                                         aClass.addStudentIfNotInClass(student);
                                         System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getInetAddress().toString());
-                                        mTableQuestionVsUser.addUser(student.getInetAddress().toString());
+                                        //mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
                                         SendQuestionList(null, null, null);
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getInetAddress().toString())));
@@ -398,16 +398,8 @@ public class NetworkCommunication {
                                 mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
-                                //if (!aClass.studentAlreadyInClass(student)) {
-                                    DbTableStudents.addStudent(answerString.split("///")[1], answerString.split("///")[2]);
-                                    //student.openStreams();
-                                    //aClass.addStudentIfNotInClass(student);
-                                    //System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getAddress());
-                                    //mTableQuestionVsUser.addUser(arg_student.getAddress());
-                                //} else {
-                                //    aClass.updateStudent(student);
-                                    //listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getAddress())));
-                                //}
+                                DbTableStudents.addStudent(answerString.split("///")[1], answerString.split("///")[2]);
+                                mTableQuestionVsUser.addUser(answerString.split("///")[2]);
                             }
                         } else {
 
