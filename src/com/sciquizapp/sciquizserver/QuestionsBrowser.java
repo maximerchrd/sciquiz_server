@@ -60,8 +60,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class QuestionsBrowser extends JFrame {
+    static public Vector<String> activeQuestionIDs = new Vector<>();
     private int splitpaneWidth = 500;
     private int splitpaneHeight = 200;
     public int question_index = 0;
@@ -470,10 +472,12 @@ public class QuestionsBrowser extends JFrame {
         list.requestFocusInWindow();
 
         try {
-            own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID());
+            own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
             own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        activeQuestionIDs.add(String.valueOf(questionMultipleChoice.getID()));
     }
 }

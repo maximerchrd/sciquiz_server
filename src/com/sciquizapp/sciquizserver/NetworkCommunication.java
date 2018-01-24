@@ -99,6 +99,13 @@ public class NetworkCommunication {
                                         //mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
                                         SendQuestionList(null, null, null);
+                                        for (int i = 0; i < QuestionsBrowser.activeQuestionIDs.size(); i++) {
+                                            try {
+                                                sendMultipleChoiceWithID(Integer.parseInt(QuestionsBrowser.activeQuestionIDs.get(i)),student.getOutputStream());
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getInetAddress().toString())));
                                     } else {
                                         student.setInputStream(skt.getInputStream());
@@ -363,7 +370,7 @@ public class NetworkCommunication {
         }
     }
 
-    public void sendMultipleChoiceWithID (int questionID) throws IOException {
+    public void sendMultipleChoiceWithID (int questionID, OutputStream singleStudentOutputStream) throws IOException {
         QuestionMultipleChoice questionMultipleChoice= null;
         try {
             questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(questionID);
@@ -436,15 +443,25 @@ public class NetworkCommunication {
             System.out.println("Sending " + questionMultipleChoice.getIMAGE() + "(" + intfileLength + " bytes)");
             int arraylength = bytearray.length;
             System.out.println("Sending " + arraylength + " bytes in total");
-            for (int i = 0; i < aClass.getClassSize(); i++) {
-                OutputStream tempOutputStream = aClass.getStudents_array().get(i).getOutputStream();
+            if (singleStudentOutputStream == null) {
+                for (int i = 0; i < aClass.getClassSize(); i++) {
+                    OutputStream tempOutputStream = aClass.getStudents_array().get(i).getOutputStream();
+                    try {
+                        tempOutputStream.write(bytearray, 0, arraylength);
+                        tempOutputStream.flush();
+                    } catch (IOException ex2) {
+                        ex2.printStackTrace();
+                    }
+                }
+            } else {
                 try {
-                    tempOutputStream.write(bytearray, 0, arraylength);
-                    tempOutputStream.flush();
+                    singleStudentOutputStream.write(bytearray, 0, arraylength);
+                    singleStudentOutputStream.flush();
                 } catch (IOException ex2) {
                     ex2.printStackTrace();
                 }
             }
+
             System.out.println("Done.");
         }
     }

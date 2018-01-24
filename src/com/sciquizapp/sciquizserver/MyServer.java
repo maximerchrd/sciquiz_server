@@ -53,21 +53,15 @@ public class MyServer {
         //Create and set up the content pane.
         Table TableUserVsQuest = new Table();
         TableUserVsQuest.setOpaque(true); //content panes must be opaque
-        //frame.setContentPane(TableUserVsQuest);
 
 
         //start bluetooth network in new thread
         NetworkCommunication CommunicationWithClients = new NetworkCommunication(TableUserVsQuest);
-//        Thread networkThread = new Thread() {
-//            public void run() {
         try {
             CommunicationWithClients.startServer();
         } catch (IOException e) {
             e.printStackTrace();
         }
-//            }
-//        };
-//        networkThread.start();
 
 
 
