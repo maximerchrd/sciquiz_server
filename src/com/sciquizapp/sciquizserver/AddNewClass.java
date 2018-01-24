@@ -36,7 +36,7 @@ public class AddNewClass extends JPanel implements ActionListener{
 	JButton createClassButton;
 
 
-	public AddNewClass(int screenWidth, int screenHeight) {
+	public AddNewClass(int screenWidth, int screenHeight, DefaultComboBoxModel chooseClasse) {
 		new_class_frame = new JFrame("Create a new class");
 		createClassPanel = new JPanel(new GridBagLayout());
 
@@ -87,6 +87,7 @@ public class AddNewClass extends JPanel implements ActionListener{
 		createClassButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e1) {
 				DbTableClasses.addClass(classNameText.getText(), classLevelText.getText(), classYearText.getText());
+				chooseClasse.addElement(classNameText.getText());
 				new_class_frame.dispatchEvent(new WindowEvent(new_class_frame, WindowEvent.WINDOW_CLOSING));
 			}
 		});

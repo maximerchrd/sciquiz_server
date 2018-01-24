@@ -102,6 +102,62 @@ public class DbTableQuestionMultipleChoice {
             System.exit(0);
         }
     }
+    /**
+     * method for inserting new question into table multiple_choice_question
+     * @param questionID
+     * @throws Exception
+     */
+    static public QuestionMultipleChoice getMultipleChoiceQuestionWithID(int questionID) throws Exception {
+        QuestionMultipleChoice questionMultipleChoice = new QuestionMultipleChoice();
+        questionMultipleChoice.setID(questionID);
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = 	"SELECT LEVEL,QUESTION,OPTION0," +
+                    "OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,TRIAL0,TRIAL1,TRIAL2,TRIAL3,TRIAL4,TRIAL5,TRIAL6,TRIAL7," +
+                    "TRIAL8,TRIAL9,NB_CORRECT_ANS,IMAGE_PATH FROM multiple_choice_questions WHERE ID_GLOBAL='" + questionID + "';";
+
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                questionMultipleChoice.setLEVEL(rs.getString("LEVEL"));
+                questionMultipleChoice.setQUESTION(rs.getString("QUESTION"));
+                questionMultipleChoice.setOPT0(rs.getString("OPTION0"));
+                questionMultipleChoice.setOPT1(rs.getString("OPTION1"));
+                questionMultipleChoice.setOPT2(rs.getString("OPTION2"));
+                questionMultipleChoice.setOPT3(rs.getString("OPTION3"));
+                questionMultipleChoice.setOPT4(rs.getString("OPTION4"));
+                questionMultipleChoice.setOPT5(rs.getString("OPTION5"));
+                questionMultipleChoice.setOPT6(rs.getString("OPTION6"));
+                questionMultipleChoice.setOPT7(rs.getString("OPTION7"));
+                questionMultipleChoice.setOPT8(rs.getString("OPTION8"));
+                questionMultipleChoice.setOPT9(rs.getString("OPTION9"));
+                questionMultipleChoice.setTRIAL0(rs.getString("TRIAL0"));
+                questionMultipleChoice.setTRIAL1(rs.getString("TRIAL1"));
+                questionMultipleChoice.setTRIAL2(rs.getString("TRIAL2"));
+                questionMultipleChoice.setTRIAL3(rs.getString("TRIAL3"));
+                questionMultipleChoice.setTRIAL4(rs.getString("TRIAL4"));
+                questionMultipleChoice.setTRIAL5(rs.getString("TRIAL5"));
+                questionMultipleChoice.setTRIAL6(rs.getString("TRIAL6"));
+                questionMultipleChoice.setTRIAL7(rs.getString("TRIAL7"));
+                questionMultipleChoice.setTRIAL8(rs.getString("TRIAL8"));
+                questionMultipleChoice.setTRIAL9(rs.getString("TRIAL9"));
+                questionMultipleChoice.setNB_CORRECT_ANS(rs.getInt("NB_CORRECT_ANS"));
+                questionMultipleChoice.setIMAGE(rs.getString("IMAGE_PATH"));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return questionMultipleChoice;
+    }
     static public int getLastIDGlobal() throws Exception {
         Connection c = null;
         Statement stmt = null;

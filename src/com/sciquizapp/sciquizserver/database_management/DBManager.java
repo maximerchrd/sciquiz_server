@@ -57,6 +57,7 @@ public class DBManager {
 		DbTableRelationQuestionSubject.createTableSubject(c,stmt);
 		DbTableRelationQuestionObjective.createTableSubject(c,stmt);
 		DbTableRelationStudentObjective.createTableSubject(c,stmt);
+		DbTableRelationClassStudent.createTableRelationClassStudent(c,stmt);
 
 		try {
 			String sql = "DROP TABLE IF EXISTS 'question'; CREATE TABLE IF NOT EXISTS question " +
@@ -80,17 +81,6 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-
-		// Then store the questions into the table
-//		Question q1=new Question("TP","1","Comment appelle-t-on l''instrument ci-dessous","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/burette.jpg");
-//		q1.setID(100);
-//		this.addQuestion(q1);
-//		Question q2=new Question("TP","1","Picture of sky","burette","pipette","buchner", "compte-gouttes", "burette","res/drawable/medium_pic.jpg");
-//		q2.setID(101);
-//		this.addQuestion(q2);
-//		Question q3=new Question("TP","1","small pic","pic1","pic2","pic3", "pic4", "pic1","res/drawable/small.jpg");
-//		q3.setID(102);
-//		this.addQuestion(q3);
 
 		try {
 			stmt.close();

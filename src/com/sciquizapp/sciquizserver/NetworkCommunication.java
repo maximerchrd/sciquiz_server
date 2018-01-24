@@ -1,9 +1,6 @@
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.database_management.DbTableIndividualQuestionForStudentResult;
-import com.sciquizapp.sciquizserver.database_management.DbTableLearningObjectives;
-import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
-import com.sciquizapp.sciquizserver.database_management.DbTableSubject;
+import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
@@ -361,9 +358,94 @@ public class NetworkCommunication {
                         }
                     }
                     System.out.println("Done.");
-                    mTableQuestionVsUser.addQuestion(multipleChoiceQuestionList.get(j).getQUESTION());
                 }
             }
+        }
+    }
+
+    public void sendMultipleChoiceWithID (int questionID) throws IOException {
+        QuestionMultipleChoice questionMultipleChoice= null;
+        try {
+            questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(questionID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (questionMultipleChoice.getQUESTION().length() > 0) {
+            String question_text = questionMultipleChoice.getQUESTION() + "///";
+            question_text += questionMultipleChoice.getOPT0() + "///";
+            question_text += questionMultipleChoice.getOPT1() + "///";
+            question_text += questionMultipleChoice.getOPT2() + "///";
+            question_text += questionMultipleChoice.getOPT3() + "///";
+            question_text += questionMultipleChoice.getOPT4() + "///";
+            question_text += questionMultipleChoice.getOPT5() + "///";
+            question_text += questionMultipleChoice.getOPT6() + "///";
+            question_text += questionMultipleChoice.getOPT7() + "///";
+            question_text += questionMultipleChoice.getOPT8() + "///";
+            question_text += questionMultipleChoice.getOPT9() + "///";
+            question_text += questionMultipleChoice.getID() + "///";
+            Vector<String> subjectsVector = DbTableSubject.getSubjectsForQuestionID(questionID);
+            int l = 0;
+            for(l = 0; l < subjectsVector.size(); l++) {
+                question_text += subjectsVector.get(l) + "|||";
+            }
+            if (l == 0) question_text += " ";
+            question_text += "///";
+            Vector<String> objectivesVector = DbTableLearningObjectives.getObjectiveForQuestionID(questionMultipleChoice.getID());
+            for(l = 0; l < objectivesVector.size(); l++) {
+                question_text += objectivesVector.get(l) + "|||";
+            }
+            if (l == 0) question_text += " ";
+            question_text += "///";
+            System.out.println(question_text);
+
+            // send file : the sizes of the file and of the text are given in the first 40 bytes (separated by ":")
+            int intfileLength = 0;
+            File myFile = null;
+            if (!questionMultipleChoice.getIMAGE().equals("none")) {
+                question_text += questionMultipleChoice.getIMAGE().split("/")[2];
+                myFile = new File(questionMultipleChoice.getIMAGE());
+                intfileLength = (int) myFile.length();
+            } else {
+                question_text += questionMultipleChoice.getIMAGE() + "///";
+            }
+
+            //writing of the first 40 bytes
+            byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
+            int textbyteslength = bytearraytext.length;
+            byte[] bytearray = new byte[40 + textbyteslength + intfileLength];
+            String fileLength;
+            fileLength = "MULTQ";
+            fileLength += ":" + String.valueOf(intfileLength);
+            fileLength += ":" + String.valueOf(textbyteslength);
+            byte[] bytearraystring = fileLength.getBytes(Charset.forName("UTF-8"));
+            for (int k = 0; k < bytearraystring.length; k++) {
+                bytearray[k] = bytearraystring[k];
+            }
+
+            //copy the textbytes into the array which will be sent
+            for (int k = 0; k < bytearraytext.length; k++) {
+                bytearray[k + 40] = bytearraytext[k];
+            }
+
+            //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
+            if (!questionMultipleChoice.getIMAGE().equals("none")) {
+                fis = new FileInputStream(myFile);
+                bis = new BufferedInputStream(fis);
+                bis.read(bytearray, 40 + textbyteslength, intfileLength);
+            }
+            System.out.println("Sending " + questionMultipleChoice.getIMAGE() + "(" + intfileLength + " bytes)");
+            int arraylength = bytearray.length;
+            System.out.println("Sending " + arraylength + " bytes in total");
+            for (int i = 0; i < aClass.getClassSize(); i++) {
+                OutputStream tempOutputStream = aClass.getStudents_array().get(i).getOutputStream();
+                try {
+                    tempOutputStream.write(bytearray, 0, arraylength);
+                    tempOutputStream.flush();
+                } catch (IOException ex2) {
+                    ex2.printStackTrace();
+                }
+            }
+            System.out.println("Done.");
         }
     }
 
@@ -464,5 +546,8 @@ public class NetworkCommunication {
 
     public void removeQuestion(int index) {
         mTableQuestionVsUser.removeQuestion(index);
+    }
+    public void addQuestion(String question) {
+        mTableQuestionVsUser.addQuestion(question);
     }
 }

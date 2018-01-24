@@ -341,7 +341,7 @@ public class QuestionsBrowser extends JFrame {
         panel_for_from.add(activate_button);
 
         //implement a button to send the questions from the panel for copy
-        JButton send_questions_button = new JButton("Send the questions");
+        JButton send_questions_button = new JButton("Force sync questions with devices");
         send_questions_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -500,5 +500,12 @@ public class QuestionsBrowser extends JFrame {
         list.scrollRectToVisible(rect);
         list.setSelectedIndex(index);
         list.requestFocusInWindow();
+
+        try {
+            own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID());
+            own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,11 +1,14 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.database_management.DbTableClasses;
+import com.sciquizapp.sciquizserver.database_management.DbTableRelationClassStudent;
 import javafx.embed.swing.JFXPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 /**
  * Created by maximerichard on 22.01.18.
@@ -20,18 +23,23 @@ public class DisplayTableUsersVsQuestions extends JPanel {
         JButton addStudentToClassButton = null;
         JButton saveStudentToClassButton = null;
         JButton removeStudentFromClassButton = null;
-        /*
-        String[] chart_entries_options = {"New class"};
-        chooseClass = new JComboBox(chart_entries_options);
+
+        final DefaultComboBoxModel modelChooseClass = new DefaultComboBoxModel(DbTableClasses.getAllClasses());
+        chooseClass = new JComboBox(modelChooseClass);
         GridBagConstraints chooseClassConstraints = new GridBagConstraints();
         chooseClassConstraints.gridx = 0;
         chooseClassConstraints.gridy = 0;
         this.add(chooseClass, chooseClassConstraints);
 
+        Vector<String> students = DbTableClasses.getStudentsInClass(modelChooseClass.getSelectedItem().toString());
+        for (int i = 0; i < students.size(); i++) {
+            tableUserVsQuest.addUser(students.get(i));
+        }
+
         createNewClassButton = new JButton("create a new class");
         createNewClassButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e1) {
-                AddNewClass newClass = new AddNewClass(screenWidth, screenHeight);
+                AddNewClass newClass = new AddNewClass(screenWidth, screenHeight, modelChooseClass);
             }
         });
         GridBagConstraints createNewClassButtonConstraints = new GridBagConstraints();
@@ -40,28 +48,37 @@ public class DisplayTableUsersVsQuestions extends JPanel {
         this.add(createNewClassButton, createNewClassButtonConstraints);
 
         saveClassButton = new JButton("save students to class");
+        saveClassButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e1) {
+                for (int i = 0; i < tableUserVsQuest.getTable().getRowCount(); i++) {
+                    String studentName = tableUserVsQuest.getTable().getValueAt(0,i).toString();
+                    String className = modelChooseClass.getSelectedItem().toString();
+                    DbTableRelationClassStudent.addClassStudentRelation(className, studentName);
+                }
+            }
+        });
         GridBagConstraints saveClassButtonConstraints = new GridBagConstraints();
         saveClassButtonConstraints.gridx = 2;
         saveClassButtonConstraints.gridy = 0;
         this.add(saveClassButton, saveClassButtonConstraints);
 
-        addStudentToClassButton = new JButton("add selected student to class");
-        GridBagConstraints addStudentToClassButtonConstraints = new GridBagConstraints();
-        addStudentToClassButtonConstraints.gridx = 0;
-        addStudentToClassButtonConstraints.gridy = 1;
-        this.add(addStudentToClassButton, addStudentToClassButtonConstraints);
-
-        saveStudentToClassButton = new JButton("add selected student to class");
-        GridBagConstraints saveStudentToClassButtonConstraints = new GridBagConstraints();
-        saveStudentToClassButtonConstraints.gridx = 1;
-        saveStudentToClassButtonConstraints.gridy = 1;
-        this.add(saveStudentToClassButton, saveStudentToClassButtonConstraints);
-
         removeStudentFromClassButton = new JButton("remove student from class");
+        removeStudentFromClassButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e1) {
+                try {
+                    String studentName = tableUserVsQuest.getTable().getValueAt(tableUserVsQuest.getTable().getSelectedRow(),0).toString();
+                    String className = modelChooseClass.getSelectedItem().toString();
+                    DbTableRelationClassStudent.removeStudentFromClass(studentName, className);
+                            tableUserVsQuest.removeStudent(studentName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         GridBagConstraints removeStudentFromClassButtonConstraints = new GridBagConstraints();
-        removeStudentFromClassButtonConstraints.gridx = 2;
+        removeStudentFromClassButtonConstraints.gridx = 0;
         removeStudentFromClassButtonConstraints.gridy = 1;
-        this.add(removeStudentFromClassButton, removeStudentFromClassButtonConstraints);*/
+        this.add(removeStudentFromClassButton, removeStudentFromClassButtonConstraints);
 
         tableUserVsQuest.setPreferredSize(new Dimension((int)(screenWidth*0.55),(int)(screenHeight*0.3)));
         GridBagConstraints tableUserVsQuestConstraints = new GridBagConstraints();

@@ -185,4 +185,14 @@ public class Table extends JPanel {
 		} else { return true; }
 
 	}
+	public JTable getTable() {
+		return table;
+	}
+	public void removeStudent(String name) {
+		for (int i = 0; i < table.getRowCount(); i++) {
+			if (table.getValueAt(i,0).toString().contentEquals(name)) {
+				((DefaultTableModel)table.getModel()).removeRow(i);
+			}
+		}
+	}
 }
