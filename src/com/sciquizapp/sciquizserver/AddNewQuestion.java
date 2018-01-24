@@ -282,14 +282,14 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 				for (int i = 0; i < subjectsVector.size(); i++) {
 					try {
-						DbTableSubject.addSubject(subjectsVector.get(i).getText());
+						DbTableSubject.addSubject(subjectsVector.get(i).getText().replace("'","''"));
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}
 				for (int i = 0; i < objectivesVector.size(); i++) {
 					try {
-						DbTableLearningObjectives.addObjective(objectivesVector.get(i).getText(),1);
+						DbTableLearningObjectives.addObjective(objectivesVector.get(i).getText().replace("'","''"),1);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -310,10 +310,10 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 							number_correct_answers++;
 						}
 					}
-					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText(), options_vector.get(0),
-							options_vector.get(1), options_vector.get(2), options_vector.get(3), options_vector.get(4),
-							options_vector.get(5), options_vector.get(6), options_vector.get(7), options_vector.get(8),
-							options_vector.get(9), mFilePath);
+					QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText().replace("'","''"), options_vector.get(0).replace("'","''"),
+							options_vector.get(1).replace("'","''"), options_vector.get(2).replace("'","''"), options_vector.get(3).replace("'","''"), options_vector.get(4).replace("'","''"),
+							options_vector.get(5).replace("'","''"), options_vector.get(6).replace("'","''"), options_vector.get(7).replace("'","''"), options_vector.get(8).replace("'","''"),
+							options_vector.get(9).replace("'","''"), mFilePath.replace("'","''"));
 					new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
 					try {
 						DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
@@ -348,14 +348,14 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 					for (int i = 0; i < subjectsVector.size(); i++) {
 						try {
-							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText());
+							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText().replace("'","''"));
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
 					}
 					for (int i = 0; i < objectivesVector.size(); i++) {
 						try {
-							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText());
+							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText().replace("'","''"));
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
