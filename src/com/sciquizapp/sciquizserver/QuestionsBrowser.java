@@ -161,17 +161,11 @@ public class QuestionsBrowser extends JFrame {
 
         panel_for_from = new JPanel();
         panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
-        copyFromList = new JList(from_questions);
-        copyFromList.setCellRenderer(new ListEntryCellRenderer());
-        copyFromList.setTransferHandler(new FromTransferHandler());
-        copyFromList.setDragEnabled(true);
-        copyFromList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //JScrollPane sp = new JScrollPane(copyFromList);
         TreeFromQuestions = new JTree(topTreeNode);
         TreeFromQuestions.setToggleClickCount(1);
         TreeFromQuestions.setRootVisible(false);
         TreeFromQuestions.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        TreeFromQuestions.setDragEnabled(true);
+        TreeFromQuestions.setDragEnabled(false);
         TreeFromQuestions.setDropMode(DropMode.ON_OR_INSERT);
         TreeFromQuestions.setTransferHandler(new TreeTransferHandler());
 
@@ -385,32 +379,6 @@ public class QuestionsBrowser extends JFrame {
         //((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
         //getContentPane().setPreferredSize(new Dimension(320, 315));
-    }
-
-    class FromTransferHandler extends TransferHandler {
-        public int getSourceActions(JComponent comp) {
-            return COPY_OR_MOVE;
-        }
-
-        private int index = 0;
-
-        public Transferable createTransferable(JComponent comp) {
-            index = copyFromList.getSelectedIndex();
-            copy_IDs.add(from_IDs.get(index));
-            if (index < 0 || index >= from_questions.getSize()) {
-                return null;
-            }
-            ListEntry tempEntry = copyFromList.getSelectedValue();
-            return new StringSelection(tempEntry.getValue());
-        }
-
-        public void exportDone(JComponent comp, Transferable trans, int action) {
-            quiz.add(genericQuestionList.get(index));
-            if (action != MOVE) {
-                return;
-            }
-            from_questions.removeElementAt(index);
-        }
     }
 
     class ToTransferHandler extends TransferHandler {
