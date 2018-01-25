@@ -5,6 +5,8 @@ import tools.CustomTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Arc2D;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -14,6 +16,7 @@ import javax.swing.table.TableCellRenderer;
 
 
 public class Table extends JPanel {
+	private ArrayList<Student> studentArrayList;
 	private boolean DEBUG = false;
 	private int questionsColumnWidth = 150;
 	CustomTableModel model;
@@ -24,6 +27,7 @@ public class Table extends JPanel {
 	public Table() {
 		super(new GridLayout(1,0));
 
+		studentArrayList = new ArrayList<>();
 		model = new CustomTableModel();
 		table = new JTable(model) {
 			DefaultTableCellRenderer colorred=new DefaultTableCellRenderer();
@@ -57,7 +61,7 @@ public class Table extends JPanel {
 		policeColor.add(new Vector<>());
 		model.addColumn("Status");
 		policeColor.add(new Vector<>());
-		model.addColumn("Evaluation");
+		model.addColumn("Evaluation [%]");
 		policeColor.add(new Vector<>());
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
@@ -66,7 +70,7 @@ public class Table extends JPanel {
 
 		table.getColumnModel().getColumn(0).setPreferredWidth(120);
 		table.getColumnModel().getColumn(1).setPreferredWidth(110);
-		table.getColumnModel().getColumn(2).setPreferredWidth(70);
+		table.getColumnModel().getColumn(2).setPreferredWidth(80);
 
 
 		table.setGridColor(Color.lightGray);
@@ -143,6 +147,9 @@ public class Table extends JPanel {
 		}
 		model2.setValueAt(0, model2.getRowCount() - 1, 2);
 		numberUsers++;
+		Student newStudent = new Student();
+		newStudent.setName(User);
+		studentArrayList.add(newStudent);
 	}
 	public void addQuestion(String Question) {
 		policeColor.add(new Vector<>());
@@ -154,7 +161,7 @@ public class Table extends JPanel {
 		model2.addColumn(Question);
 		table.getColumnModel().getColumn(0).setPreferredWidth(120);
 		table.getColumnModel().getColumn(1).setPreferredWidth(110);
-		table.getColumnModel().getColumn(2).setPreferredWidth(70);
+		table.getColumnModel().getColumn(2).setPreferredWidth(80);
 		for (int i = 3; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(questionsColumnWidth);
 		}
@@ -164,7 +171,7 @@ public class Table extends JPanel {
 		policeColor.remove(3 + index);
 		table.getColumnModel().getColumn(0).setPreferredWidth(120);
 		table.getColumnModel().getColumn(1).setPreferredWidth(110);
-		table.getColumnModel().getColumn(2).setPreferredWidth(70);
+		table.getColumnModel().getColumn(2).setPreferredWidth(80);
 		for (int i = 3; i < model.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(questionsColumnWidth);
 		}
@@ -191,11 +198,19 @@ public class Table extends JPanel {
 			table.getCellRenderer(rowNumber,columnNumber);
 			model2.setValueAt(answer, rowNumber, columnNumber);
 
-			// increases score if answer right
-//			if (UserAndAnswer.split(";")[3].toString().matches("right")) {
-//				int score = (int)model2.getValueAt(rowNumber, 1);
-//				model2.setValueAt(score + 1, rowNumber, 1);
-//			}
+			// evaluation
+			Boolean found = false;
+			for (int i = 0; i < studentArrayList.size() && !found; i++) {
+				if (studentArrayList.get(i).getName().contentEquals(student.getName())) {
+					found = true;
+					String eval = model2.getValueAt(rowNumber, 2).toString();
+					Double oldEval = Double.valueOf(eval);
+					Double newEval = oldEval * studentArrayList.get(i).getNumberOfAnswers() + evaluation;
+					newEval = newEval / (studentArrayList.get(i).getNumberOfAnswers() + 1);
+					model2.setValueAt(Math.round(newEval),rowNumber,2);
+					studentArrayList.get(i).increaseNumberOfAnswers();
+				}
+			}
 		}
 	}
 	public Boolean IsUserInTable(String UserAndAnswer) {
