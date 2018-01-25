@@ -167,8 +167,8 @@ public class QuestionsBrowser extends JFrame {
         TreeFromQuestions.setToggleClickCount(1);
         TreeFromQuestions.setRootVisible(false);
         TreeFromQuestions.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        TreeFromQuestions.setDragEnabled(false);
-        TreeFromQuestions.setDropMode(DropMode.ON_OR_INSERT);
+        TreeFromQuestions.setDragEnabled(true);
+        TreeFromQuestions.setDropMode(DropMode.ON);
         TreeFromQuestions.setTransferHandler(new TreeTransferHandler());
 
         TreeFromQuestions.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
