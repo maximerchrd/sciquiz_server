@@ -55,6 +55,8 @@ public class Table extends JPanel {
 		// Create a couple of columns
 		model.addColumn("Students");
 		policeColor.add(new Vector<>());
+		model.addColumn("Status");
+		policeColor.add(new Vector<>());
 		model.addColumn("Evaluation");
 		policeColor.add(new Vector<>());
 
@@ -113,23 +115,27 @@ public class Table extends JPanel {
 		frame.pack();
 		frame.setVisible(true);
 	}*/
-	public void addUser(String User) {
+	public void addUser(String User, Boolean connection) {
 		for (int i = 0; i < policeColor.size(); i++) {
 			policeColor.get(i).add("black");
 		}
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int i = 0;
-		//System.out.println("rowcount:" + model2.getRowCount());
 		while (i < model2.getRowCount() && !String.valueOf(model2.getValueAt(i, 0)).equals(User)) {
-			//System.out.println("model2.getValueAt(i, 0)  :" + model2.getValueAt(i, 0));
-			//System.out.println("User  :" + User);
 			i++;
 		}
 		//System.out.println("i after loop:" + i);
 		if (i == model2.getRowCount()) {
 			model2.addRow(new Object[]{User});
+			if (connection) {
+				model2.setValueAt("connected",i,1);
+			} else {
+				model2.setValueAt("not connected",i,1);
+			}
+		} else {
+			model2.setValueAt("connected",i,1);
 		}
-		model2.setValueAt(0, model2.getRowCount() - 1, 1);
+		model2.setValueAt(0, model2.getRowCount() - 1, 2);
 		numberUsers++;
 	}
 	public void addQuestion(String Question) {
@@ -194,5 +200,16 @@ public class Table extends JPanel {
 				((DefaultTableModel)table.getModel()).removeRow(i);
 			}
 		}
+	}
+
+	public void userDisconnected(Student student) {
+		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
+		int rowNumber = 0;
+		while (!model2.getValueAt(rowNumber, 0).toString().contains(student.getName())) {
+			rowNumber++;
+		}
+		int columnNumber = 1;
+
+		model2.setValueAt("disconnected", rowNumber, columnNumber);
 	}
 }

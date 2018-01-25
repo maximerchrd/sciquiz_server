@@ -498,7 +498,10 @@ public class NetworkCommunication {
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                                 DbTableStudents.addStudent(answerString.split("///")[1], answerString.split("///")[2]);
-                                mTableQuestionVsUser.addUser(answerString.split("///")[2]);
+                                mTableQuestionVsUser.addUser(answerString.split("///")[2], true);
+                            } else if (answerString.split("///")[0].contains("DISC")) {
+                                Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+                                mTableQuestionVsUser.userDisconnected(student);
                             }
                         } else {
 

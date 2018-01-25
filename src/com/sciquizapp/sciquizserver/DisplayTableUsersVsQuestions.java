@@ -33,7 +33,7 @@ public class DisplayTableUsersVsQuestions extends JPanel {
 
         Vector<String> students = DbTableClasses.getStudentsInClass(modelChooseClass.getSelectedItem().toString());
         for (int i = 0; i < students.size(); i++) {
-            tableUserVsQuest.addUser(students.get(i));
+            tableUserVsQuest.addUser(students.get(i), false);
         }
 
         createNewClassButton = new JButton("create a new class");
