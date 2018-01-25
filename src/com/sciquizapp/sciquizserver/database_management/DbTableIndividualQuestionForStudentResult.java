@@ -34,6 +34,7 @@ public class DbTableIndividualQuestionForStudentResult {
     }
     static public double addIndividualQuestionForStudentResult(int id_global, String student_name, String answers) {
         double quantitative_evaluation = -1;
+        answers = answers.replace("'","''");
         Connection c = null;
         Statement stmt = null;
         stmt = null;
