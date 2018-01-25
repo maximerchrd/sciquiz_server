@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
+import tools.CustomTableModel;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,9 +15,8 @@ import javax.swing.table.TableCellRenderer;
 
 public class Table extends JPanel {
 	private boolean DEBUG = false;
-	private int firstsColumnWidth = 100;
 	private int questionsColumnWidth = 150;
-	DefaultTableModel model;
+	CustomTableModel model;
 	JTable table;
 	private Vector<Vector<String>> policeColor = new Vector<Vector<String>>();
 	int numberUsers = 0;
@@ -23,7 +24,7 @@ public class Table extends JPanel {
 	public Table() {
 		super(new GridLayout(1,0));
 
-		model = new DefaultTableModel();
+		model = new CustomTableModel();
 		table = new JTable(model) {
 			DefaultTableCellRenderer colorred=new DefaultTableCellRenderer();
 			{
@@ -62,9 +63,11 @@ public class Table extends JPanel {
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		for (int i = 0; i < table.getColumnCount(); i++) {
-			table.getColumnModel().getColumn(i).setPreferredWidth(firstsColumnWidth);
-		}
+
+		table.getColumnModel().getColumn(0).setPreferredWidth(120);
+		table.getColumnModel().getColumn(1).setPreferredWidth(110);
+		table.getColumnModel().getColumn(2).setPreferredWidth(70);
+
 
 		table.setGridColor(Color.lightGray);
 
@@ -149,15 +152,22 @@ public class Table extends JPanel {
 
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
-		for (int i = 0; i < 3; i++) {
-			table.getColumnModel().getColumn(i).setPreferredWidth(firstsColumnWidth);
-		}
+		table.getColumnModel().getColumn(0).setPreferredWidth(120);
+		table.getColumnModel().getColumn(1).setPreferredWidth(110);
+		table.getColumnModel().getColumn(2).setPreferredWidth(70);
 		for (int i = 3; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setPreferredWidth(questionsColumnWidth);
 		}
 	}
 	public void removeQuestion(int index) {
-		table.removeColumn(table.getColumnModel().getColumn(2 + index));
+		model.removeColumn(3 + index);
+		policeColor.remove(3 + index);
+		table.getColumnModel().getColumn(0).setPreferredWidth(120);
+		table.getColumnModel().getColumn(1).setPreferredWidth(110);
+		table.getColumnModel().getColumn(2).setPreferredWidth(70);
+		for (int i = 3; i < model.getColumnCount(); i++) {
+			table.getColumnModel().getColumn(i).setPreferredWidth(questionsColumnWidth);
+		}
 	}
 	public void addAnswerForUser(Student student, String answer, String Question, double evaluation) {
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
