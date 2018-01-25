@@ -6,16 +6,15 @@ import java.awt.event.MouseEvent;
 import java.util.Vector;
 
 import javax.swing.*;
-import javax.swing.border.MatteBorder;
-import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.text.TableView.TableRow;
 
 
 public class Table extends JPanel {
 	private boolean DEBUG = false;
+	private int firstsColumnWidth = 100;
+	private int questionsColumnWidth = 150;
 	DefaultTableModel model;
 	JTable table;
 	private Vector<Vector<String>> policeColor = new Vector<Vector<String>>();
@@ -62,6 +61,10 @@ public class Table extends JPanel {
 
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		for (int i = 0; i < table.getColumnCount(); i++) {
+			table.getColumnModel().getColumn(i).setPreferredWidth(firstsColumnWidth);
+		}
 
 		table.setGridColor(Color.lightGray);
 
@@ -74,7 +77,7 @@ public class Table extends JPanel {
 		}
 
 		//Create the scroll pane and add the table to it.
-		JScrollPane scrollPane = new JScrollPane(table);
+		JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		//Add the scroll pane to this panel.
 		add(scrollPane);
@@ -146,6 +149,12 @@ public class Table extends JPanel {
 
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		model2.addColumn(Question);
+		for (int i = 0; i < 3; i++) {
+			table.getColumnModel().getColumn(i).setPreferredWidth(firstsColumnWidth);
+		}
+		for (int i = 3; i < table.getColumnCount(); i++) {
+			table.getColumnModel().getColumn(i).setPreferredWidth(questionsColumnWidth);
+		}
 	}
 	public void removeQuestion(int index) {
 		table.removeColumn(table.getColumnModel().getColumn(2 + index));
