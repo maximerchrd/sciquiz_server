@@ -54,6 +54,7 @@ public class DbTableQuestionMultipleChoice {
      * @throws Exception
      */
     static public void addMultipleChoiceQuestion(QuestionMultipleChoice quest) throws Exception {
+        String globalID = DbTableQuestionGeneric.addGenericQuestion(0);
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -90,9 +91,8 @@ public class DbTableQuestionMultipleChoice {
                     quest.getTRIAL9() + "','" +
                     quest.getNB_CORRECT_ANS() + "','" +
                     quest.getIMAGE() + "','" +
-                    2000000 +"');";
-            stmt.executeUpdate(sql);
-            sql = "UPDATE multiple_choice_questions SET ID_GLOBAL = ID_GLOBAL + ID_QUESTION WHERE ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM multiple_choice_questions)";
+                    globalID +"');";
+            System.out.println(globalID);
             stmt.executeUpdate(sql);
             stmt.close();
             c.commit();

@@ -32,7 +32,9 @@
 package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.database_management.DbTableQuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.database_management.DbTableQuestionShortAnswer;
 import com.sciquizapp.sciquizserver.database_management.DbTableTests;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 import tools.ListEntry;
 import tools.ListEntryCellRenderer;
 import tools.Scalr;
@@ -87,6 +89,7 @@ public class QuestionsBrowser extends JFrame {
     private List<Test> testsList = new ArrayList<Test>();
     private List<Question> questionList = new ArrayList<Question>();
     private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
+    private List<QuestionShortAnswer> shortAnswerQuestList = new ArrayList<QuestionShortAnswer>();
     private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
     private List<QuestionGeneric> quiz = new ArrayList<QuestionGeneric>();
     private NetworkCommunication own_networkcommunication = null;
@@ -108,6 +111,7 @@ public class QuestionsBrowser extends JFrame {
         try {
             questionList = database.getAllQuestions();
             multipleChoicesQuestList = database.getAllMultipleChoiceQuestions();
+            shortAnswerQuestList = DbTableQuestionShortAnswer.getAllShortAnswersQuestions();
             testsList = DbTableTests.getAllTests();
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -158,6 +162,35 @@ public class QuestionsBrowser extends JFrame {
             }
             from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
             QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
+            genericQuestionList.add(temp_generic_question);
+        }
+        for (int i = 0; i < shortAnswerQuestList.size(); i++) {
+            ImageIcon newIcon = null;
+            ImageIcon icon = new ImageIcon(shortAnswerQuestList.get(i).getIMAGE());
+            Image img = icon.getImage();
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
+            }
+            from_questions.addElement(new ListEntry(shortAnswerQuestList.get(i).getQUESTION(), newIcon));
+
+            Boolean questionAdded = false;
+            for (int j = 0; !questionAdded && j < testsList.size(); j++) {
+                if (testsList.get(j).getIdsQuestions().contains(shortAnswerQuestList.get(i).getID())) {
+                    DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(shortAnswerQuestList.get(i));
+                    testsNodeList.get(j).add(newTreeNode);
+                    questionAdded = true;
+                }
+            }
+            if (!questionAdded) {
+                DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(shortAnswerQuestList.get(i));
+                topTreeNode.add(newTreeNode);
+            }
+            from_IDs.addElement(String.valueOf(shortAnswerQuestList.get(i).getID()));
+            QuestionGeneric temp_generic_question = new QuestionGeneric("SHRTA", i);
             genericQuestionList.add(temp_generic_question);
         }
 
@@ -227,11 +260,27 @@ public class QuestionsBrowser extends JFrame {
                         label.setIcon(null);
                     }
                     label.setText(question.getQUESTION());
+                } else if (o instanceof QuestionShortAnswer) {
+                    QuestionShortAnswer question = (QuestionShortAnswer) o;
+                    ImageIcon newIcon = null;
+                    ImageIcon icon = new ImageIcon(question.getIMAGE());
+                    Image img = icon.getImage();
+                    if (img.getWidth(null) > 0) {
+                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D g = bi.createGraphics();
+                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                        BufferedImage scaledImage = Scalr.resize(bi, 40);
+                        newIcon = new ImageIcon(scaledImage);
+                        label.setIcon(newIcon);
+                    } else {
+                        label.setIcon(null);
+                    }
+                    label.setText(question.getQUESTION());
                 } else if (o instanceof Test) {
                     label.setIcon(UIManager.getIcon("FileChooser.homeFolderIcon"));
                     label.setText("" + ((Test)((DefaultMutableTreeNode) value).getUserObject()).getTestName());
                 } else {
-                    System.out.println("problem rendering tree cell: object neither question nor test");
+                    System.out.println("problem rendering tree cell: object neither question multchoice, question short answer nor test");
                 }
                 return label;
             }
@@ -244,7 +293,7 @@ public class QuestionsBrowser extends JFrame {
         JButton new_quest_button = new JButton("create a question");
         new_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs, TreeFromQuestions);
+                AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, shortAnswerQuestList, from_questions, from_IDs, TreeFromQuestions);
             }
         });
         panel_for_from.add(new_quest_button);

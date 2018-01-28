@@ -1,7 +1,14 @@
 package com.sciquizapp.sciquizserver.database_management;
 
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
+
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by maximerichard on 24.11.17.
@@ -10,18 +17,91 @@ public class DbTableQuestionShortAnswer {
     static public void createTableQuestionShortAnswer(Connection connection, Statement statement) {
         try {
             statement = connection.createStatement();
-            String sql = "DROP TABLE IF EXISTS 'short_answers_questions'; CREATE TABLE IF NOT EXISTS short_answers_questions " +
+            String sql = "CREATE TABLE IF NOT EXISTS short_answer_questions " +
                     "(ID_QUESTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
                     " ID_GLOBAL      INT     NOT NULL, " +
-                    " SUBJECT           TEXT    NOT NULL, " +
                     " LEVEL      INT     NOT NULL, " +
                     " QUESTION           TEXT    NOT NULL, " +
-                    " ANSWER           TEXT    NOT NULL, " +
+                    " AUTOMATIC_CORRECTION      INT     NOT NULL, " +
                     " IMAGE_PATH           TEXT    NOT NULL) ";
             statement.executeUpdate(sql);
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+    }
+    static public void addShortAnswerQuestion(QuestionShortAnswer quest) throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            String idGlobal = DbTableQuestionGeneric.addGenericQuestion(1);
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"INSERT INTO short_answer_questions (ID_GLOBAL,LEVEL," +
+                    "QUESTION,AUTOMATIC_CORRECTION,IMAGE_PATH) " +
+                    "VALUES ('" +
+                    idGlobal + "','" +
+                    quest.getLEVEL() + "','" +
+                    quest.getQUESTION() + "','" +
+                    0 + "','" +
+                    quest.getIMAGE() +"');";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+
+            for (int i = 0; i < quest.getANSWER().size(); i++) {
+                DbTableAnswerOptions.addAnswerOption(idGlobal,quest.getANSWER().get(i));
+            }
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    static public List<QuestionShortAnswer> getAllShortAnswersQuestions() throws Exception{
+        List<QuestionShortAnswer> questionShortAnswerArrayList = new ArrayList<QuestionShortAnswer>();
+        // Select All Query
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            System.out.println("Opened database successfully");
+
+            stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM short_answer_questions;" );
+            while ( rs.next() ) {
+                QuestionShortAnswer quest = new QuestionShortAnswer();
+                //quest.setSUBJECT(rs.getString(2));
+                quest.setID(rs.getInt(2));
+                quest.setLEVEL(rs.getString(3));
+                quest.setQUESTION(rs.getString(4));
+                quest.setIMAGE(rs.getString(5));
+                ArrayList<String> answers = new ArrayList<>();
+                Statement stmt2 = c.createStatement();
+                ResultSet rs2 = stmt2.executeQuery( "SELECT OPTION FROM answer_options " +
+                        "INNER JOIN question_answeroption_relation ON answer_options.ID_ANSWEROPTION_GLOBAL = question_answeroption_relation.ID_ANSWEROPTION_GLOBAL " +
+                        "INNER JOIN short_answer_questions ON question_answeroption_relation.ID_GLOBAL = short_answer_questions.ID_GLOBAL " +
+                        "WHERE short_answer_questions.ID_GLOBAL = '" + quest.getID() +"';" );
+                while ( rs2.next() ) {
+                    answers.add(rs2.getString(1));
+                }
+                quest.setANSWER(answers);
+                questionShortAnswerArrayList.add(quest);
+            }
+            rs.close();
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Operation done successfully");
+        return questionShortAnswerArrayList;
     }
 }

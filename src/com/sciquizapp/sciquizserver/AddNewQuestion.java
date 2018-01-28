@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -56,7 +57,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 
 	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList,
-						  final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel arg_from_questions,
+						  final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final List<QuestionShortAnswer> arg_shortAnswerQuestionList, final DefaultListModel arg_from_questions,
 						  final DefaultListModel<String> arg_from_IDs, final JTree tree) {
 		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
@@ -65,12 +66,12 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		new_question_frame.add( panel );
 		panel.setAutoscrolls(true);
 		new_question_frame.pack();
-		questiontypes = new Object[]{"question ? choix multiples","question ? r?ponse br?ve"};
+		questiontypes = new Object[]{"multiple choice question","short answer question"};
 		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
 		question_text = new JTextArea("	");
 		answer1_checkbox = new JCheckBox();
-		answer1_label = new JLabel("R?ponse 1:");
+		answer1_label = new JLabel("Answer 1:");
 		answer1_text = new JTextArea("	");
 		checkboxVector = new Vector<>();
 		labelVector = new Vector<>();
@@ -79,8 +80,8 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		objectivesVector = new Vector<>();
 		GridBagConstraints add_image_button_constraints = new GridBagConstraints();
 		GridBagConstraints save_quest_button_constraints = new GridBagConstraints();
-		add_image_button = new JButton("ajouter une image");
-		save_quest_button = new JButton("ajouter la question");
+		add_image_button = new JButton("add a picture");
+		save_quest_button = new JButton("save the question");
 
 
 		columnsLayout = new GridBagLayout();
@@ -147,12 +148,12 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		panel.add(answer1_delete_button,answer1_delete_button_constraints);
 
 		//implement a button to add a correct answer
-		JButton add_correct_answer_button = new JButton("Ajouter une r?ponse");
+		JButton add_correct_answer_button = new JButton("Add an answer");
 		add_correct_answer_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e1) {
 				if (new_correct_answer_index < MAX_ANSWERS - 1) {
-					JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
+					JLabel new_answer_label = new JLabel("Answer " + (new_correct_answer_index + 2) + ":");
 					JCheckBox new_checkbox = new JCheckBox();
 					checkboxVector.add(new_checkbox);
 					JTextArea new_answer_text = new JTextArea("	");
@@ -296,10 +297,56 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				}
 
 				//add question to database according to question type
-				if (questiontype_list.getSelectedItem().toString().equals("question ? r?ponse br?ve")) {
-					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), answer1_text.getText(), mFilePath);
+				if (questiontype_list.getSelectedItem().toString().equals("short answer question")) {
+					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), mFilePath);
+					ArrayList<String> answerOptions = new ArrayList<String>();
+					for (int i = 0; i < textfieldVector.size(); i++) {
+						if (textfieldVector.get(i).toString().length() > 0) {
+							answerOptions.add(textfieldVector.get(i).toString());
+						}
+					}
+					new_questshortanswer.setANSWER(answerOptions);
+					try {
+						DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					arg_shortAnswerQuestionList.add(new_questshortanswer);
+					arg_genericQuestionList.add(new QuestionGeneric("SHRTA",arg_shortAnswerQuestionList.size()-1));
 
-				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
+					//resize image of question to fit icon size
+					ImageIcon icon = new ImageIcon(new_questshortanswer.getIMAGE());
+					Image img = icon.getImage();
+					ImageIcon newIcon = null;
+					if (img.getWidth(null) > 0) {
+						BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+						Graphics2D g = bi.createGraphics();
+						g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+						BufferedImage scaledImage = Scalr.resize(bi, 40);
+						newIcon = new ImageIcon(scaledImage);
+					}
+					arg_from_questions.addElement(new ListEntry(new_questshortanswer.getQUESTION(),newIcon));
+
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+					model.insertNodeInto(new DefaultMutableTreeNode(new_questshortanswer), root, root.getChildCount());
+					arg_from_IDs.addElement(String.valueOf(arg_shortAnswerQuestionList.get(arg_shortAnswerQuestionList.size() - 1).getID()));
+
+					for (int i = 0; i < subjectsVector.size(); i++) {
+						try {
+							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText().replace("'","''"));
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+					for (int i = 0; i < objectivesVector.size(); i++) {
+						try {
+							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText().replace("'","''"));
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+				} else if (questiontype_list.getSelectedItem().toString().equals("multiple choice question")) {
 					int number_correct_answers = 0;
 					String temp_option;
 					for (int i = 0; i < checkboxVector.size(); i++) {

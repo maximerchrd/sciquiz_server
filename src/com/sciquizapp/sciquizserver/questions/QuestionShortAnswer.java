@@ -1,11 +1,13 @@
 package com.sciquizapp.sciquizserver.questions;
 
+import java.util.ArrayList;
+
 public class QuestionShortAnswer {
 	private int ID;
 	private String SUBJECT;
 	private String LEVEL;
 	private String QUESTION;
-	private String ANSWER;
+	private ArrayList<String> ANSWERS;
 	private String IMAGE;
 	public QuestionShortAnswer()
 	{
@@ -13,15 +15,14 @@ public class QuestionShortAnswer {
 		SUBJECT="";
 		LEVEL="";
 		QUESTION="";
-		ANSWER="";
+		ANSWERS = null;
 		IMAGE="none";
 	}
-	public QuestionShortAnswer(String sUBJECT, String lEVEL, String qUESTION, String aNSWER, String iMAGE) {
+	public QuestionShortAnswer(String sUBJECT, String lEVEL, String qUESTION, String iMAGE) {
 		
 		SUBJECT = sUBJECT;
 		LEVEL = lEVEL;
 		QUESTION = qUESTION;
-		ANSWER = aNSWER;
 		IMAGE = iMAGE;
 	}
 	public int getID()
@@ -37,8 +38,8 @@ public class QuestionShortAnswer {
 	public String getQUESTION() {
 		return QUESTION;
 	}
-	public String getANSWER() {
-		return ANSWER;
+	public ArrayList<String> getANSWER() {
+		return ANSWERS;
 	}
 	public String getIMAGE() {
 		return IMAGE;
@@ -56,8 +57,8 @@ public class QuestionShortAnswer {
 	public void setQUESTION(String qUESTION) {
 		QUESTION = qUESTION;
 	}
-	public void setANSWER(String aNSWER) {
-		ANSWER = aNSWER;
+	public void setANSWER(ArrayList<String> aNSWERS) {
+		ANSWERS = aNSWERS;
 	}
 	public void setIMAGE(String iMAGE) {
 		IMAGE = iMAGE;
