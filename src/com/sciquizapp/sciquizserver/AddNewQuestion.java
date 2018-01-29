@@ -306,7 +306,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					ArrayList<String> answerOptions = new ArrayList<String>();
 					for (int i = 0; i < textfieldVector.size(); i++) {
 						if (textfieldVector.get(i).toString().length() > 0) {
-							answerOptions.add(textfieldVector.get(i).toString());
+							answerOptions.add(textfieldVector.get(i).getText());
 						}
 					}
 					new_questshortanswer.setANSWER(answerOptions);

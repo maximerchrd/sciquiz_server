@@ -13,7 +13,7 @@ public class DbTableAnswerOptions {
     static public void createTableAnswerOptions(Connection connection, Statement statement) {
         try {
             statement = connection.createStatement();
-            String sql = "DROP TABLE IF EXISTS 'answer_options'; CREATE TABLE IF NOT EXISTS answer_options " +
+            String sql = "CREATE TABLE IF NOT EXISTS answer_options " +
                     "(ID_ANSWEROPTION       INTEGER PRIMARY KEY AUTOINCREMENT," +
                     " ID_ANSWEROPTION_GLOBAL      INT     NOT NULL, " +
                     " OPTION           TEXT    NOT NULL, " +
