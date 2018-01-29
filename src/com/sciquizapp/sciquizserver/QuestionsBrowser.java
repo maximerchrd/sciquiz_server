@@ -38,8 +38,6 @@ import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 import tools.ListEntry;
 import tools.ListEntryCellRenderer;
 import tools.Scalr;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 
 import com.sciquizapp.sciquizserver.database_management.DBManager;
 import com.sciquizapp.sciquizserver.questions.Question;
@@ -74,7 +72,8 @@ public class QuestionsBrowser extends JFrame {
     DefaultListModel<String> from_IDs = new DefaultListModel<String>();
     DefaultListModel copy_question = new DefaultListModel<String>();
     ArrayList<String> copy_IDs = new ArrayList<>();
-    private QuestionMultipleChoice questionSelectedNodeTreeFrom;
+    private QuestionMultipleChoice questionMultChoiceSelectedNodeTreeFrom;
+    private QuestionShortAnswer questionShortAnswerSelectedNodeTreeFrom;
     private Test testSelectedNodeTreeFrom;
     private DefaultMutableTreeNode selectedNodeTreeFrom;
     private JTree TreeFromQuestions;
@@ -218,20 +217,29 @@ public class QuestionsBrowser extends JFrame {
                 Object nodeInfo = selectedNodeTreeFrom.getUserObject();
 
                 if (nodeInfo instanceof QuestionMultipleChoice && selectedNodeTreeFrom.isLeaf()) {
-                    questionSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                    questionMultChoiceSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                    questionShortAnswerSelectedNodeTreeFrom = null;
+                    testSelectedNodeTreeFrom = null;
+                } else if (nodeInfo instanceof QuestionShortAnswer && selectedNodeTreeFrom.isLeaf()) {
+                    questionShortAnswerSelectedNodeTreeFrom = (QuestionShortAnswer) nodeInfo;
+                    questionMultChoiceSelectedNodeTreeFrom = null;
                     testSelectedNodeTreeFrom = null;
                 } else {
                     testSelectedNodeTreeFrom = (Test) nodeInfo;
-                    questionSelectedNodeTreeFrom = null;
+                    questionMultChoiceSelectedNodeTreeFrom = null;
+                    questionShortAnswerSelectedNodeTreeFrom = null;
                 }
             }
         });
         TreeFromQuestions.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
-                    if (questionSelectedNodeTreeFrom != null) {
+                    if (questionMultChoiceSelectedNodeTreeFrom != null) {
                         JList list = copyToList;
-                        activateQuestionMultipleChoice(list,questionSelectedNodeTreeFrom);
+                        activateQuestionMultipleChoice(list, questionMultChoiceSelectedNodeTreeFrom);
+                    } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
+                        JList list = copyToList;
+                        activateQuestionShortAnswer(list, questionShortAnswerSelectedNodeTreeFrom);
                     }
                 }
             }
@@ -328,7 +336,7 @@ public class QuestionsBrowser extends JFrame {
                 if (selectedNodeTreeFrom != null) {
                     try {
                         if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
-                            DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionSelectedNodeTreeFrom.getID()));
+                            DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionMultChoiceSelectedNodeTreeFrom.getID()));
                         } else if (selectedNodeTreeFrom.getUserObject() instanceof Test) {
                             DbTableTests.removeTestWithID(String.valueOf(testSelectedNodeTreeFrom.getIdTest()));
                         } else {
@@ -339,7 +347,7 @@ public class QuestionsBrowser extends JFrame {
                     }
                     DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
                     model.removeNodeFromParent(selectedNodeTreeFrom);
-                    multipleChoicesQuestList.remove(questionSelectedNodeTreeFrom);
+                    multipleChoicesQuestList.remove(questionMultChoiceSelectedNodeTreeFrom);
                 }
             }
         });
@@ -370,16 +378,29 @@ public class QuestionsBrowser extends JFrame {
                     for (int i = 0; i < testSelectedNodeTreeFrom.getIdsQuestions().size(); i++) {
                         Boolean found = false;
                         int j = 0;
+                        int questiontype = -1;
                         for (; !found && j < multipleChoicesQuestList.size(); j++) {
+                            questiontype = -1;
                             if (multipleChoicesQuestList.get(j).getID() == testSelectedNodeTreeFrom.getIdsQuestions().get(i)) {
                                 found = true;
+                                questiontype = 0;
+                            } else if (shortAnswerQuestList.get(j).getID() == testSelectedNodeTreeFrom.getIdsQuestions().get(i)) {
+                                found = true;
+                                questiontype = 1;
                             }
                         }
-                        QuestionMultipleChoice questionToActivate = multipleChoicesQuestList.get(j-1);
-                        activateQuestionMultipleChoice(copyToList,questionToActivate);
+                        if (questiontype == 0) {
+                            QuestionMultipleChoice questionToActivate = multipleChoicesQuestList.get(j - 1);
+                            activateQuestionMultipleChoice(copyToList, questionToActivate);
+                        } else if (questiontype == 1) {
+                            QuestionShortAnswer questionToActivate = shortAnswerQuestList.get(j - 1);
+                            activateQuestionShortAnswer(copyToList, questionToActivate);
+                        }
                     }
-                } else {
-                    activateQuestionMultipleChoice(copyToList, questionSelectedNodeTreeFrom);
+                } else if (questionMultChoiceSelectedNodeTreeFrom != null){
+                    activateQuestionMultipleChoice(copyToList, questionMultChoiceSelectedNodeTreeFrom);
+                } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
+                    activateQuestionShortAnswer(copyToList, questionShortAnswerSelectedNodeTreeFrom);
                 }
             }
         });
@@ -439,7 +460,7 @@ public class QuestionsBrowser extends JFrame {
             this.action = action;
         }
 
-        public boolean canImport(TransferHandler.TransferSupport support) {
+        public boolean canImport(TransferHandler.TransferSupport support) {         //useless code???
             // for the demo, we'll only support drops (not clipboard paste)
             if (!support.isDrop()) {
                 return false;
@@ -459,7 +480,7 @@ public class QuestionsBrowser extends JFrame {
             return false;
         }
 
-        public boolean importData(TransferHandler.TransferSupport support) {
+        public boolean importData(TransferHandler.TransferSupport support) {            //useless code???
             // if we can't handle the import, say so
             if (!canImport(support)) {
                 return false;
@@ -528,5 +549,40 @@ public class QuestionsBrowser extends JFrame {
         }
 
         activeQuestionIDs.add(String.valueOf(questionMultipleChoice.getID()));
+    }
+
+    private void activateQuestionShortAnswer(JList list, QuestionShortAnswer questionShortAnswer) {
+        DefaultListModel model = (DefaultListModel) list.getModel();
+        int index = model.size();
+
+        //resize image from db to icon size
+        ImageIcon icon = new ImageIcon(questionShortAnswer.getIMAGE());
+        Image img = icon.getImage();
+        ImageIcon newIcon = null;
+        if (img.getWidth(null) > 0) {
+            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = bi.createGraphics();
+            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+            BufferedImage scaledImage = Scalr.resize(bi, 40);
+            newIcon = new ImageIcon(scaledImage);
+        }
+        ListEntry newListEntry = new ListEntry(questionShortAnswer.getQUESTION(), newIcon);
+        model.insertElementAt(newListEntry, index);
+        own_networkcommunication.getClassroom().addQuestShortAnswer(shortAnswerQuestList.get(index));
+        copy_IDs.add(String.valueOf(questionShortAnswer.getID()));
+
+        Rectangle rect = list.getCellBounds(index, index);
+        list.scrollRectToVisible(rect);
+        list.setSelectedIndex(index);
+        list.requestFocusInWindow();
+
+        try {
+            own_networkcommunication.sendShortAnswerQuestionWithID(questionShortAnswer.getID(), null);
+            own_networkcommunication.addQuestion(questionShortAnswer.getQUESTION());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        activeQuestionIDs.add(String.valueOf(questionShortAnswer.getID()));
     }
 }

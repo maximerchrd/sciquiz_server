@@ -104,4 +104,42 @@ public class DbTableQuestionShortAnswer {
         System.out.println("Operation done successfully");
         return questionShortAnswerArrayList;
     }
+
+    static public QuestionShortAnswer getShortAnswerQuestionWithId (int questionId) {
+        QuestionShortAnswer questionShortAnswer = new QuestionShortAnswer();
+        questionShortAnswer.setID(questionId);
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = 	"SELECT LEVEL,QUESTION,IMAGE_PATH FROM short_answer_questions WHERE ID_GLOBAL='" + questionId + "';";
+
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                questionShortAnswer.setLEVEL(rs.getString("LEVEL"));
+                questionShortAnswer.setQUESTION(rs.getString("QUESTION"));
+                questionShortAnswer.setIMAGE(rs.getString("IMAGE_PATH"));
+            }
+            ArrayList<String> answers = new ArrayList<>();
+            rs = stmt.executeQuery( "SELECT OPTION FROM answer_options " +
+                    "INNER JOIN question_answeroption_relation ON answer_options.ID_ANSWEROPTION_GLOBAL = question_answeroption_relation.ID_ANSWEROPTION_GLOBAL " +
+                    "INNER JOIN short_answer_questions ON question_answeroption_relation.ID_GLOBAL = short_answer_questions.ID_GLOBAL " +
+                    "WHERE short_answer_questions.ID_GLOBAL = '" + questionShortAnswer.getID() +"';" );
+            while ( rs.next() ) {
+                answers.add(rs.getString(1));
+            }
+            questionShortAnswer.setANSWER(answers);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return questionShortAnswer;
+    }
 }
