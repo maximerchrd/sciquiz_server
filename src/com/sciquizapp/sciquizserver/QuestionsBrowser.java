@@ -66,8 +66,6 @@ public class QuestionsBrowser extends JFrame {
     static public Vector<String> activeQuestionIDs = new Vector<>();
     private int splitpaneWidth = 500;
     private int splitpaneHeight = 200;
-    public int question_index = 0;
-    //DefaultListModel<String> from_questions = new DefaultListModel<String>();
     DefaultListModel from_questions = new DefaultListModel();
     DefaultListModel<String> from_IDs = new DefaultListModel<String>();
     DefaultListModel copy_question = new DefaultListModel<String>();
@@ -78,8 +76,6 @@ public class QuestionsBrowser extends JFrame {
     private DefaultMutableTreeNode selectedNodeTreeFrom;
     private JTree TreeFromQuestions;
     private DefaultMutableTreeNode topTreeNode = new DefaultMutableTreeNode("Questions");
-    private List<DefaultMutableTreeNode> TreeNodeQuestions;
-    private JList<ListEntry> copyFromList;
     final private JList<ListEntry> copyToList;
     public JPanel panel_for_from;
     public JPanel panel_for_copy;
@@ -90,7 +86,6 @@ public class QuestionsBrowser extends JFrame {
     private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
     private List<QuestionShortAnswer> shortAnswerQuestList = new ArrayList<QuestionShortAnswer>();
     private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
-    private List<QuestionGeneric> quiz = new ArrayList<QuestionGeneric>();
     private NetworkCommunication own_networkcommunication = null;
 
     public QuestionsBrowser(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {

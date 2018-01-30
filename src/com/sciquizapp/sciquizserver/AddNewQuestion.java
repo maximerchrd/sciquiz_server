@@ -310,11 +310,13 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						}
 					}
 					new_questshortanswer.setANSWER(answerOptions);
+					String idGlobal = "-1";
 					try {
-						DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
+						idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
+					new_questshortanswer.setID(Integer.valueOf(idGlobal));
 					arg_shortAnswerQuestionList.add(new_questshortanswer);
 					arg_genericQuestionList.add(new QuestionGeneric("SHRTA",arg_shortAnswerQuestionList.size()-1));
 

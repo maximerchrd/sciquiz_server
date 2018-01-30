@@ -30,12 +30,13 @@ public class DbTableQuestionShortAnswer {
             System.exit(0);
         }
     }
-    static public void addShortAnswerQuestion(QuestionShortAnswer quest) throws Exception {
+    static public String addShortAnswerQuestion(QuestionShortAnswer quest) throws Exception {
         Connection c = null;
         Statement stmt = null;
         stmt = null;
+        String idGlobal = "-1";
         try {
-            String idGlobal = DbTableQuestionGeneric.addGenericQuestion(1);
+            idGlobal = DbTableQuestionGeneric.addGenericQuestion(1);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
             c.setAutoCommit(false);
@@ -60,6 +61,7 @@ public class DbTableQuestionShortAnswer {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+        return idGlobal;
     }
 
     static public List<QuestionShortAnswer> getAllShortAnswersQuestions() throws Exception{
