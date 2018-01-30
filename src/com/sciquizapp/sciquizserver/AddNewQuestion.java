@@ -299,14 +299,14 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				//add question to database according to question type
 				if (questiontype_list.getSelectedItem().toString().equals("short answer question")) {
 					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer();
-					new_questshortanswer.setQUESTION(question_text.getText());
+					new_questshortanswer.setQUESTION(question_text.getText().replace("'","''"));
 					if (mFilePath.length() > 0) {
 						new_questshortanswer.setIMAGE(mFilePath);
 					}
 					ArrayList<String> answerOptions = new ArrayList<String>();
 					for (int i = 0; i < textfieldVector.size(); i++) {
 						if (textfieldVector.get(i).toString().length() > 0) {
-							answerOptions.add(textfieldVector.get(i).getText());
+							answerOptions.add(textfieldVector.get(i).getText().replace("'","''"));
 						}
 					}
 					new_questshortanswer.setANSWER(answerOptions);
