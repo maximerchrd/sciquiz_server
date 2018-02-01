@@ -5,6 +5,7 @@
     - fix removing test/quiz
 - modify UI
 - translate
+- fix bug when trying to add picture without explicit extension
 ####TO DO _(For Alpha Version - Android)_
 - display statistics
     - eval vs subject for each student

@@ -442,10 +442,6 @@ public class QuestionsBrowser extends JFrame {
             }
         });
         panel_for_copy.add(delete_question_button);
-
-        //((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-
-        //getContentPane().setPreferredSize(new Dimension(320, 315));
     }
 
     class ToTransferHandler extends TransferHandler {
