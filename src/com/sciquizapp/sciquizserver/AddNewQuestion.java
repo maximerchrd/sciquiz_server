@@ -56,9 +56,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	JButton add_image_button;
 
 
-	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList,
-						  final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final List<QuestionShortAnswer> arg_shortAnswerQuestionList, final DefaultListModel arg_from_questions,
-						  final DefaultListModel<String> arg_from_IDs, final JTree tree) {
+	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final JTree tree) {
 		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
@@ -317,8 +315,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						e1.printStackTrace();
 					}
 					new_questshortanswer.setID(Integer.valueOf(idGlobal));
-					arg_shortAnswerQuestionList.add(new_questshortanswer);
-					arg_genericQuestionList.add(new QuestionGeneric("SHRTA",arg_shortAnswerQuestionList.size()-1));
+					arg_genericQuestionList.add(new QuestionGeneric(new_questshortanswer.getID(), 1));
 
 					//resize image of question to fit icon size
 					ImageIcon icon = new ImageIcon(new_questshortanswer.getIMAGE());
@@ -331,12 +328,11 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						BufferedImage scaledImage = Scalr.resize(bi, 40);
 						newIcon = new ImageIcon(scaledImage);
 					}
-					arg_from_questions.addElement(new ListEntry(new_questshortanswer.getQUESTION(),newIcon));
 
 					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
 					model.insertNodeInto(new DefaultMutableTreeNode(new_questshortanswer), root, root.getChildCount());
-					arg_from_IDs.addElement(String.valueOf(arg_shortAnswerQuestionList.get(arg_shortAnswerQuestionList.size() - 1).getID()));
+					model.reload();
 
 					for (int i = 0; i < subjectsVector.size(); i++) {
 						try {
@@ -370,16 +366,12 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
 					try {
 						DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-					try {
 						new_questmultchoice.setID(DbTableQuestionMultipleChoice.getLastIDGlobal());
+
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
-					arg_multChoiceQuestionList.add(new_questmultchoice);
-					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
+					arg_genericQuestionList.add(new QuestionGeneric(new_questmultchoice.getID(),0));
 
 					//resize image of question to fit icon size
 					ImageIcon icon = new ImageIcon(new_questmultchoice.getIMAGE());
@@ -392,13 +384,11 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						BufferedImage scaledImage = Scalr.resize(bi, 40);
 						newIcon = new ImageIcon(scaledImage);
 					}
-					arg_from_questions.addElement(new ListEntry(new_questmultchoice.getQUESTION(),newIcon));
 
 					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
 					model.insertNodeInto(new DefaultMutableTreeNode(new_questmultchoice), root, root.getChildCount());
 					model.reload();
-					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
 
 					for (int i = 0; i < subjectsVector.size(); i++) {
 						try {
@@ -416,17 +406,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					}
 
 				} else {
-					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
-							options_vector.get(1), options_vector.get(2), options_vector.get(3),options_vector.get(0),mFilePath);
-					try {
-						new_db_man.addQuestion(new_quest);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					arg_questionList.add(new_quest);
-					arg_from_questions.addElement(new_quest.getQUESTION());
-					arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
+					System.out.println("Problem saving question: question type not supported");
 				}
 //				DefaultListModel<String>  jlist_model = (DefaultListModel<String>) arg_dragFrom.getModel();
 //				arg_dragFrom.setModel(jlist_model);

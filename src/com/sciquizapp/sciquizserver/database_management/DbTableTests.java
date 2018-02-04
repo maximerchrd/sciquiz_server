@@ -1,6 +1,7 @@
 package com.sciquizapp.sciquizserver.database_management;
 
 import com.sciquizapp.sciquizserver.Test;
+import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -28,7 +29,6 @@ public class DbTableTests {
         ArrayList<Test> tests = new ArrayList<>();
         Connection c = null;
         Statement stmt = null;
-        stmt = null;
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
@@ -40,8 +40,16 @@ public class DbTableTests {
                 Test newTest = new Test();
                 newTest.setTestName(rs.getString("NAME"));
                 newTest.setIdTest(Integer.parseInt(rs.getString("ID_TEST_GLOBAL")));
-                ArrayList<Integer> newQuestionList = DbTableRelationQuestionMultipleChoiceTest.getQuestionIdsFromTestId(String.valueOf(newTest.getIdTest()));
-                newTest.setIdsQuestions(newQuestionList);
+                ArrayList<Integer> newQuestionIDsList = DbTableRelationQuestionMultipleChoiceTest.getQuestionIdsFromTestId(String.valueOf(newTest.getIdTest()));
+                ArrayList<QuestionGeneric> questionGenericArrayList = new ArrayList<>();
+                for (int i = 0; i < newQuestionIDsList.size(); i++) {
+                    QuestionGeneric newQuestionGeneric = new QuestionGeneric();
+                    newQuestionGeneric.setGlobalID(newQuestionIDsList.get(i));
+                    newQuestionGeneric.setIntTypeOfQuestion(DbTableQuestionGeneric.getQuestionTypeFromIDGlobal(String.valueOf(newQuestionIDsList.get(i))));
+                    questionGenericArrayList.add(newQuestionGeneric);
+                }
+                newTest.setIdsQuestions(newQuestionIDsList);
+                newTest.setGenericQuestions(questionGenericArrayList);
                 tests.add(newTest);
             }
             stmt.close();

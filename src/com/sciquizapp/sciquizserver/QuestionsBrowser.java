@@ -31,16 +31,12 @@
 
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.database_management.DbTableQuestionMultipleChoice;
-import com.sciquizapp.sciquizserver.database_management.DbTableQuestionShortAnswer;
-import com.sciquizapp.sciquizserver.database_management.DbTableTests;
+import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 import tools.ListEntry;
 import tools.ListEntryCellRenderer;
 import tools.Scalr;
 
-import com.sciquizapp.sciquizserver.database_management.DBManager;
-import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
@@ -63,30 +59,29 @@ import java.util.List;
 import java.util.Vector;
 
 public class QuestionsBrowser extends JFrame {
-    static public Vector<String> activeQuestionIDs = new Vector<>();
     private int splitpaneWidth = 500;
     private int splitpaneHeight = 200;
-    DefaultListModel from_questions = new DefaultListModel();
-    DefaultListModel<String> from_IDs = new DefaultListModel<String>();
-    DefaultListModel copy_question = new DefaultListModel<String>();
-    ArrayList<String> copy_IDs = new ArrayList<>();
+    public JSplitPane splitPane;
+    private NetworkCommunication own_networkcommunication = null;
+
+    //members for left questions list (JTree)
+    DefaultListModel leftQuestionListModel = new DefaultListModel();
     private QuestionMultipleChoice questionMultChoiceSelectedNodeTreeFrom;
     private QuestionShortAnswer questionShortAnswerSelectedNodeTreeFrom;
     private Test testSelectedNodeTreeFrom;
     private DefaultMutableTreeNode selectedNodeTreeFrom;
     private JTree TreeFromQuestions;
     private DefaultMutableTreeNode topTreeNode = new DefaultMutableTreeNode("Questions");
-    final private JList<ListEntry> copyToList;
     public JPanel panel_for_from;
-    public JPanel panel_for_copy;
-    public JSplitPane splitPane;
     private List<DefaultMutableTreeNode> testsNodeList = new ArrayList<DefaultMutableTreeNode>();
     private List<Test> testsList = new ArrayList<Test>();
-    private List<Question> questionList = new ArrayList<Question>();
-    private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
-    private List<QuestionShortAnswer> shortAnswerQuestList = new ArrayList<QuestionShortAnswer>();
-    private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
-    private NetworkCommunication own_networkcommunication = null;
+    private List<QuestionGeneric> leftGenericQuestionList = new ArrayList<QuestionGeneric>();
+
+    //members for right questions list
+    static public Vector<String> IDsFromBroadcastedQuestions = new Vector<>();
+    DefaultListModel rightQuestionsListModel = new DefaultListModel<String>();
+    final private JList<ListEntry> rightJlist;
+    public JPanel panel_for_copy;
 
     public QuestionsBrowser(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
         super("QuestionsBrowser");
@@ -101,11 +96,8 @@ public class QuestionsBrowser extends JFrame {
         panel_questlist.add(ipLabel);
 
         own_networkcommunication = network_singleton;
-        DBManager database = new DBManager();
         try {
-            questionList = database.getAllQuestions();
-            multipleChoicesQuestList = database.getAllMultipleChoiceQuestions();
-            shortAnswerQuestList = DbTableQuestionShortAnswer.getAllShortAnswersQuestions();
+            leftGenericQuestionList = DbTableQuestionGeneric.getAllGenericQuestions();
             testsList = DbTableTests.getAllTests();
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -116,22 +108,31 @@ public class QuestionsBrowser extends JFrame {
             topTreeNode.add(newTreeNode);
             testsNodeList.add(newTreeNode);
         }
-        for (int i = 0; i < questionList.size(); i++) {
-            ImageIcon icon = new ImageIcon(questionList.get(i).getIMAGE());
-            Image img = icon.getImage();
-            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = bi.createGraphics();
-            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-            BufferedImage scaledImage = Scalr.resize(bi, 40);
-            ImageIcon newIcon = new ImageIcon(scaledImage);
-            from_questions.addElement(new ListEntry(questionList.get(i).getQUESTION(), newIcon));
-            from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
-            QuestionGeneric temp_generic_question = new QuestionGeneric("QUEST", i);
-            genericQuestionList.add(temp_generic_question);
-        }
-        for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
+        for (int i = 0; i < leftGenericQuestionList.size(); i++) {
+            QuestionMultipleChoice questionMultipleChoice = null;
+            QuestionShortAnswer questionShortAnswer = null;
+            if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 0) {
+                try {
+                    questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(leftGenericQuestionList.get(i).getGlobalID());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 1) {
+                try {
+                    questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(leftGenericQuestionList.get(i).getGlobalID());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Problem reading generic question list: question type not supported");
+            }
+
+            String imagePath = questionMultipleChoice == null ? questionShortAnswer.getIMAGE() : questionMultipleChoice.getIMAGE();
+            String questionText = questionMultipleChoice == null ? questionShortAnswer.getQUESTION() : questionMultipleChoice.getQUESTION();
+            Integer globalID = questionMultipleChoice == null ? questionShortAnswer.getID() : questionMultipleChoice.getID();
+
             ImageIcon newIcon = null;
-            ImageIcon icon = new ImageIcon(multipleChoicesQuestList.get(i).getIMAGE());
+            ImageIcon icon = new ImageIcon(imagePath);
             Image img = icon.getImage();
             if (img.getWidth(null) > 0) {
                 BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
@@ -140,25 +141,24 @@ public class QuestionsBrowser extends JFrame {
                 BufferedImage scaledImage = Scalr.resize(bi, 40);
                 newIcon = new ImageIcon(scaledImage);
             }
-            from_questions.addElement(new ListEntry(multipleChoicesQuestList.get(i).getQUESTION(), newIcon));
+            leftQuestionListModel.addElement(new ListEntry(questionText, newIcon));
 
             Boolean questionAdded = false;
             for (int j = 0; !questionAdded && j < testsList.size(); j++) {
-                if (testsList.get(j).getIdsQuestions().contains(multipleChoicesQuestList.get(i).getID())) {
-                    DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
+                if (testsList.get(j).getIdsQuestions().contains(globalID)) {
+                    DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
+                            new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
                     testsNodeList.get(j).add(newTreeNode);
                     questionAdded = true;
                 }
             }
             if (!questionAdded) {
-                DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
+                DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
+                        new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
                 topTreeNode.add(newTreeNode);
             }
-            from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
-            QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
-            genericQuestionList.add(temp_generic_question);
         }
-        for (int i = 0; i < shortAnswerQuestList.size(); i++) {
+        /*for (int i = 0; i < shortAnswerQuestList.size(); i++) {
             ImageIcon newIcon = null;
             ImageIcon icon = new ImageIcon(shortAnswerQuestList.get(i).getIMAGE());
             Image img = icon.getImage();
@@ -169,7 +169,7 @@ public class QuestionsBrowser extends JFrame {
                 BufferedImage scaledImage = Scalr.resize(bi, 40);
                 newIcon = new ImageIcon(scaledImage);
             }
-            from_questions.addElement(new ListEntry(shortAnswerQuestList.get(i).getQUESTION(), newIcon));
+            leftQuestionListModel.addElement(new ListEntry(shortAnswerQuestList.get(i).getQUESTION(), newIcon));
 
             Boolean questionAdded = false;
             for (int j = 0; !questionAdded && j < testsList.size(); j++) {
@@ -185,8 +185,9 @@ public class QuestionsBrowser extends JFrame {
             }
             from_IDs.addElement(String.valueOf(shortAnswerQuestList.get(i).getID()));
             QuestionGeneric temp_generic_question = new QuestionGeneric("SHRTA", i);
-            genericQuestionList.add(temp_generic_question);
-        }
+            temp_generic_question.setGlobalID(shortAnswerQuestList.get(i).getID());
+            leftGenericQuestionList.add(temp_generic_question);
+        }*/
 
         panel_for_from = new JPanel();
         panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
@@ -230,11 +231,11 @@ public class QuestionsBrowser extends JFrame {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
                     if (questionMultChoiceSelectedNodeTreeFrom != null) {
-                        JList list = copyToList;
-                        activateQuestionMultipleChoice(list, questionMultChoiceSelectedNodeTreeFrom);
+                        JList list = rightJlist;
+                        broadcastQuestionMultipleChoice(list, questionMultChoiceSelectedNodeTreeFrom);
                     } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
-                        JList list = copyToList;
-                        activateQuestionShortAnswer(list, questionShortAnswerSelectedNodeTreeFrom);
+                        JList list = rightJlist;
+                        broadcastQuestionShortAnswer(list, questionShortAnswerSelectedNodeTreeFrom);
                     }
                 }
             }
@@ -296,7 +297,7 @@ public class QuestionsBrowser extends JFrame {
         JButton new_quest_button = new JButton("create a question");
         new_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, shortAnswerQuestList, from_questions, from_IDs, TreeFromQuestions);
+                AddNewQuestion new_quest = new AddNewQuestion(leftGenericQuestionList, TreeFromQuestions);
             }
         });
         panel_for_from.add(new_quest_button);
@@ -304,14 +305,14 @@ public class QuestionsBrowser extends JFrame {
         parentFrame.add(panel_for_from, BorderLayout.WEST);
 
 
-        copyToList = new JList<ListEntry>(copy_question);
-        copyToList.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
-        copyToList.setDropMode(DropMode.INSERT);
-        copyToList.setCellRenderer(new ListEntryCellRenderer());
+        rightJlist = new JList<ListEntry>(rightQuestionsListModel);
+        //rightJlist.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
+        rightJlist.setDropMode(DropMode.INSERT);
+        rightJlist.setCellRenderer(new ListEntryCellRenderer());
 
         panel_for_copy = new JPanel();
         panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
-        JScrollPane sp2 = new JScrollPane(copyToList);
+        JScrollPane sp2 = new JScrollPane(rightJlist);
         sp2.setAlignmentX(0f);
         panel_for_copy.add(sp2);
         panel_for_copy.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
@@ -342,7 +343,7 @@ public class QuestionsBrowser extends JFrame {
                     }
                     DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
                     model.removeNodeFromParent(selectedNodeTreeFrom);
-                    multipleChoicesQuestList.remove(questionMultChoiceSelectedNodeTreeFrom);
+                    //leftGenericQuestionList.remove(selectedNodeTreeFrom);
                 }
             }
         });
@@ -357,7 +358,8 @@ public class QuestionsBrowser extends JFrame {
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
-                Test newTest = DbTableTests.getLastTests();
+                Test newTest = new Test();
+                newTest = DbTableTests.getLastTests();
                 DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
                 model.insertNodeInto(new DefaultMutableTreeNode(newTest), root, root.getChildCount());
@@ -366,36 +368,25 @@ public class QuestionsBrowser extends JFrame {
         panel_for_from.add(create_test_button);
 
         //implement a button to activate a question or a test
-        JButton activate_button = new JButton("activate the question or test/quiz");
+        JButton activate_button = new JButton("broadcast the question or test/quiz");
         activate_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (testSelectedNodeTreeFrom != null) {
-                    for (int i = 0; i < testSelectedNodeTreeFrom.getIdsQuestions().size(); i++) {
-                        Boolean found = false;
-                        int j = 0;
-                        int questiontype = -1;
-                        for (; !found && j < multipleChoicesQuestList.size(); j++) {
-                            questiontype = -1;
-                            if (multipleChoicesQuestList.get(j).getID() == testSelectedNodeTreeFrom.getIdsQuestions().get(i)) {
-                                found = true;
-                                questiontype = 0;
-                            } else if (shortAnswerQuestList.get(j).getID() == testSelectedNodeTreeFrom.getIdsQuestions().get(i)) {
-                                found = true;
-                                questiontype = 1;
+                    for (int i = 0; i < testSelectedNodeTreeFrom.getGenericQuestions().size(); i++) {
+                        if (testSelectedNodeTreeFrom.getGenericQuestions().get(i).getIntTypeOfQuestion() == 0) {
+                            try {
+                                broadcastQuestionMultipleChoice(rightJlist, DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(testSelectedNodeTreeFrom.getGenericQuestions().get(i).getGlobalID()));
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
                             }
-                        }
-                        if (questiontype == 0) {
-                            QuestionMultipleChoice questionToActivate = multipleChoicesQuestList.get(j - 1);
-                            activateQuestionMultipleChoice(copyToList, questionToActivate);
-                        } else if (questiontype == 1) {
-                            QuestionShortAnswer questionToActivate = shortAnswerQuestList.get(j - 1);
-                            activateQuestionShortAnswer(copyToList, questionToActivate);
+                        } else if (testSelectedNodeTreeFrom.getGenericQuestions().get(i).getIntTypeOfQuestion() == 1) {
+                            broadcastQuestionShortAnswer(rightJlist, DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(testSelectedNodeTreeFrom.getGenericQuestions().get(i).getGlobalID()));
                         }
                     }
                 } else if (questionMultChoiceSelectedNodeTreeFrom != null){
-                    activateQuestionMultipleChoice(copyToList, questionMultChoiceSelectedNodeTreeFrom);
+                    broadcastQuestionMultipleChoice(rightJlist, questionMultChoiceSelectedNodeTreeFrom);
                 } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
-                    activateQuestionShortAnswer(copyToList, questionShortAnswerSelectedNodeTreeFrom);
+                    broadcastQuestionShortAnswer(rightJlist, questionShortAnswerSelectedNodeTreeFrom);
                 }
             }
         });
@@ -405,12 +396,12 @@ public class QuestionsBrowser extends JFrame {
         JButton send_questions_button = new JButton("Force sync questions with devices");
         send_questions_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
+                /*try {
                     network_singleton.SendQuestionList(questionList, multipleChoicesQuestList, copy_IDs);
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
-                }
+                }*/
             }
         });
         panel_for_copy.add(send_questions_button);
@@ -419,7 +410,7 @@ public class QuestionsBrowser extends JFrame {
         JButton send_questID_button = new JButton("activate the question for students");
         send_questID_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int id_to_send = Integer.valueOf(copy_IDs.get(copyToList.getSelectedIndex()));
+                int id_to_send = Integer.valueOf(IDsFromBroadcastedQuestions.get(rightJlist.getSelectedIndex()));
                 try {
                     System.out.println("sending question id");
                     network_singleton.SendQuestionID(id_to_send);
@@ -431,149 +422,90 @@ public class QuestionsBrowser extends JFrame {
         });
         panel_for_copy.add(send_questID_button);
 
-        //implement a button to remove a question from the panel for copy
+        //implement a button to remove a question from the RIGHT panel
         JButton delete_question_button = new JButton("remove the selected question");
         delete_question_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int index = copyToList.getSelectedIndex();
+                int index = rightJlist.getSelectedIndex();
                 network_singleton.removeQuestion(index);
-                copy_question.remove(index);
-                copy_IDs.remove(index);
+                rightQuestionsListModel.remove(index);
+                IDsFromBroadcastedQuestions.remove(index);
             }
         });
         panel_for_copy.add(delete_question_button);
     }
 
-    class ToTransferHandler extends TransferHandler {
-        int action;
+    private void broadcastQuestionMultipleChoice(JList list, QuestionMultipleChoice questionMultipleChoice) {
+        if (!IDsFromBroadcastedQuestions.contains(String.valueOf(questionMultipleChoice.getID()))) {
+            DefaultListModel model = (DefaultListModel) list.getModel();
+            int index = model.size();
 
-        public ToTransferHandler(int action) {
-            this.action = action;
-        }
-
-        public boolean canImport(TransferHandler.TransferSupport support) {         //useless code???
-            // for the demo, we'll only support drops (not clipboard paste)
-            if (!support.isDrop()) {
-                return false;
+            //resize image from db to icon size
+            ImageIcon icon = new ImageIcon(questionMultipleChoice.getIMAGE());
+            Image img = icon.getImage();
+            ImageIcon newIcon = null;
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
             }
+            ListEntry newListEntry = new ListEntry(questionMultipleChoice.getQUESTION(), newIcon);
+            model.insertElementAt(newListEntry, index);
+            own_networkcommunication.getClassroom().addQuestMultChoice(questionMultipleChoice);
+            IDsFromBroadcastedQuestions.add(String.valueOf(questionMultipleChoice.getID()));
 
-            // we only import Strings
-            if (!support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                return false;
-            }
+            Rectangle rect = list.getCellBounds(index, index);
+            list.scrollRectToVisible(rect);
+            list.setSelectedIndex(index);
+            list.requestFocusInWindow();
 
-            boolean actionSupported = (action & support.getSourceDropActions()) == action;
-            if (actionSupported) {
-                support.setDropAction(action);
-                return true;
-            }
-
-            return false;
-        }
-
-        public boolean importData(TransferHandler.TransferSupport support) {            //useless code???
-            // if we can't handle the import, say so
-            if (!canImport(support)) {
-                return false;
-            }
-
-            // fetch the drop location
-            //JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
-
-            //int index = dl.getIndex();
-
-            // fetch the data and bail if this fails
-            String data;
             try {
-                data = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
-            } catch (UnsupportedFlavorException e) {
-                return false;
-            } catch (java.io.IOException e) {
-                return false;
+                own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
+                own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            JList list = (JList) support.getComponent();
-            activateQuestionMultipleChoice(list, multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))));
-
-            return true;
-        }
-
-        public Question getSelectedQuestion() {
-            JList copyTo = new JList(copy_question);
-            int indexOfQuestion = copyTo.getSelectedIndex();
-            Question questionToReturn;
-            questionToReturn = questionList.get(indexOfQuestion);
-            return questionToReturn;
+        } else {
+            JOptionPane.showMessageDialog(null, "Unfortunately, you cannot use a question twice in the same set", "Warning", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    private void activateQuestionMultipleChoice(JList list, QuestionMultipleChoice questionMultipleChoice) {
-        DefaultListModel model = (DefaultListModel) list.getModel();
-        int index = model.size();
+    private void broadcastQuestionShortAnswer(JList list, QuestionShortAnswer questionShortAnswer) {
+        if (!IDsFromBroadcastedQuestions.contains(String.valueOf(questionShortAnswer.getID()))) {
+            DefaultListModel model = (DefaultListModel) list.getModel();
+            int index = model.size();
 
-        //resize image from db to icon size
-        ImageIcon icon = new ImageIcon(questionMultipleChoice.getIMAGE());
-        Image img = icon.getImage();
-        ImageIcon newIcon = null;
-        if (img.getWidth(null) > 0) {
-            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = bi.createGraphics();
-            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-            BufferedImage scaledImage = Scalr.resize(bi, 40);
-            newIcon = new ImageIcon(scaledImage);
+            //resize image from db to icon size
+            ImageIcon icon = new ImageIcon(questionShortAnswer.getIMAGE());
+            Image img = icon.getImage();
+            ImageIcon newIcon = null;
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
+            }
+            ListEntry newListEntry = new ListEntry(questionShortAnswer.getQUESTION(), newIcon);
+            model.insertElementAt(newListEntry, index);
+            own_networkcommunication.getClassroom().addQuestShortAnswer(questionShortAnswer);
+            IDsFromBroadcastedQuestions.add(String.valueOf(questionShortAnswer.getID()));
+
+            Rectangle rect = list.getCellBounds(index, index);
+            list.scrollRectToVisible(rect);
+            list.setSelectedIndex(index);
+            list.requestFocusInWindow();
+
+            try {
+                own_networkcommunication.sendShortAnswerQuestionWithID(questionShortAnswer.getID(), null);
+                own_networkcommunication.addQuestion(questionShortAnswer.getQUESTION());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Unfortunately, you cannot use a question twice in the same set", "Warning", JOptionPane.INFORMATION_MESSAGE);
         }
-        ListEntry newListEntry = new ListEntry(questionMultipleChoice.getQUESTION(), newIcon);
-        model.insertElementAt(newListEntry, index);
-        own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
-        copy_IDs.add(String.valueOf(questionMultipleChoice.getID()));
-
-        Rectangle rect = list.getCellBounds(index, index);
-        list.scrollRectToVisible(rect);
-        list.setSelectedIndex(index);
-        list.requestFocusInWindow();
-
-        try {
-            own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
-            own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        activeQuestionIDs.add(String.valueOf(questionMultipleChoice.getID()));
-    }
-
-    private void activateQuestionShortAnswer(JList list, QuestionShortAnswer questionShortAnswer) {
-        DefaultListModel model = (DefaultListModel) list.getModel();
-        int index = model.size();
-
-        //resize image from db to icon size
-        ImageIcon icon = new ImageIcon(questionShortAnswer.getIMAGE());
-        Image img = icon.getImage();
-        ImageIcon newIcon = null;
-        if (img.getWidth(null) > 0) {
-            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = bi.createGraphics();
-            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-            BufferedImage scaledImage = Scalr.resize(bi, 40);
-            newIcon = new ImageIcon(scaledImage);
-        }
-        ListEntry newListEntry = new ListEntry(questionShortAnswer.getQUESTION(), newIcon);
-        model.insertElementAt(newListEntry, index);
-        own_networkcommunication.getClassroom().addQuestShortAnswer(shortAnswerQuestList.get(index));
-        copy_IDs.add(String.valueOf(questionShortAnswer.getID()));
-
-        Rectangle rect = list.getCellBounds(index, index);
-        list.scrollRectToVisible(rect);
-        list.setSelectedIndex(index);
-        list.requestFocusInWindow();
-
-        try {
-            own_networkcommunication.sendShortAnswerQuestionWithID(questionShortAnswer.getID(), null);
-            own_networkcommunication.addQuestion(questionShortAnswer.getQUESTION());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        activeQuestionIDs.add(String.valueOf(questionShortAnswer.getID()));
     }
 }

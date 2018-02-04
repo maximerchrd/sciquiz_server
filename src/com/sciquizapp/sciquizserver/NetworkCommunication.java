@@ -100,10 +100,10 @@ public class NetworkCommunication {
                                         //mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
                                         SendQuestionList(null, null, null);
-                                        for (int i = 0; i < QuestionsBrowser.activeQuestionIDs.size(); i++) {
+                                        for (int i = 0; i < QuestionsBrowser.IDsFromBroadcastedQuestions.size(); i++) {
                                             try {
-                                                sendMultipleChoiceWithID(Integer.parseInt(QuestionsBrowser.activeQuestionIDs.get(i)),student.getOutputStream());
-                                                sendShortAnswerQuestionWithID(Integer.parseInt(QuestionsBrowser.activeQuestionIDs.get(i)),student.getOutputStream());
+                                                sendMultipleChoiceWithID(Integer.parseInt(QuestionsBrowser.IDsFromBroadcastedQuestions.get(i)),student.getOutputStream());
+                                                sendShortAnswerQuestionWithID(Integer.parseInt(QuestionsBrowser.IDsFromBroadcastedQuestions.get(i)),student.getOutputStream());
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }

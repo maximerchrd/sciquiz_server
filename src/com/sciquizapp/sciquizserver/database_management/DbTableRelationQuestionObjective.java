@@ -32,7 +32,7 @@ public class DbTableRelationQuestionObjective {
             stmt = c.createStatement();
             String sql = 	"INSERT INTO question_objective_relation (ID_GLOBAL, ID_OBJECTIVE_GLOBAL) " +
                     "SELECT t1.ID_GLOBAL,t2.ID_OBJECTIVE_GLOBAL FROM multiple_choice_questions t1, learning_objectives t2 " +
-                    "WHERE t1.ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM multiple_choice_questions) " +
+                    "WHERE t1.ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM generic_questions) " +
                     "AND t2.OBJECTIVE='" + objective + "';";
             stmt.executeUpdate(sql);
             stmt.close();

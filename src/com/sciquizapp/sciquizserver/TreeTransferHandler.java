@@ -1,7 +1,9 @@
 package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.database_management.DbTableRelationQuestionMultipleChoiceTest;
+import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,7 +50,7 @@ class TreeTransferHandler extends TransferHandler {
         JTree.DropLocation dl =
                 (JTree.DropLocation)support.getDropLocation();
         DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode)(dl.getPath()).getLastPathComponent();
-        if (treeNode.getUserObject() instanceof QuestionMultipleChoice) {
+        if (treeNode.getUserObject() instanceof QuestionMultipleChoice || treeNode.getUserObject() instanceof QuestionShortAnswer) {
             return false;
         }
         JTree tree = (JTree)support.getComponent();
@@ -196,7 +198,21 @@ class TreeTransferHandler extends TransferHandler {
         // Add data to model.
         for(int i = 0; i < nodes.length; i++) {
             model.insertNodeInto(nodes[i], parent, index++);
-            DbTableRelationQuestionMultipleChoiceTest.addRelationQuestionTest(String.valueOf(((QuestionMultipleChoice)nodes[i].getUserObject()).getID()),String.valueOf(((Test)parent.getUserObject()).getIdTest()));
+            if (nodes[i].getUserObject() instanceof  QuestionMultipleChoice) {
+                DbTableRelationQuestionMultipleChoiceTest.addRelationQuestionTest(String.valueOf(((QuestionMultipleChoice) nodes[i].getUserObject()).getID()), String.valueOf(((Test) parent.getUserObject()).getIdTest()));
+                QuestionGeneric questionGeneric = new QuestionGeneric();
+                questionGeneric.setGlobalID(((QuestionMultipleChoice) nodes[i].getUserObject()).getID());
+                questionGeneric.setIntTypeOfQuestion(0);
+                ((Test) parent.getUserObject()).addGenericQuestion(questionGeneric);
+            } else if (nodes[i].getUserObject() instanceof QuestionShortAnswer) {
+                DbTableRelationQuestionMultipleChoiceTest.addRelationQuestionTest(String.valueOf(((QuestionShortAnswer) nodes[i].getUserObject()).getID()), String.valueOf(((Test) parent.getUserObject()).getIdTest()));
+                QuestionGeneric questionGeneric = new QuestionGeneric();
+                questionGeneric.setGlobalID(((QuestionShortAnswer) nodes[i].getUserObject()).getID());
+                questionGeneric.setIntTypeOfQuestion(1);
+                ((Test) parent.getUserObject()).addGenericQuestion(questionGeneric);
+            } else {
+                System.out.println("Problem in TreeTransferHandler: node user object not supported");
+            }
         }
         return true;
     }
