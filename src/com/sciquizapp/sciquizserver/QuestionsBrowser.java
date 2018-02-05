@@ -158,36 +158,6 @@ public class QuestionsBrowser extends JFrame {
                 topTreeNode.add(newTreeNode);
             }
         }
-        /*for (int i = 0; i < shortAnswerQuestList.size(); i++) {
-            ImageIcon newIcon = null;
-            ImageIcon icon = new ImageIcon(shortAnswerQuestList.get(i).getIMAGE());
-            Image img = icon.getImage();
-            if (img.getWidth(null) > 0) {
-                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = bi.createGraphics();
-                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                BufferedImage scaledImage = Scalr.resize(bi, 40);
-                newIcon = new ImageIcon(scaledImage);
-            }
-            leftQuestionListModel.addElement(new ListEntry(shortAnswerQuestList.get(i).getQUESTION(), newIcon));
-
-            Boolean questionAdded = false;
-            for (int j = 0; !questionAdded && j < testsList.size(); j++) {
-                if (testsList.get(j).getIdsQuestions().contains(shortAnswerQuestList.get(i).getID())) {
-                    DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(shortAnswerQuestList.get(i));
-                    testsNodeList.get(j).add(newTreeNode);
-                    questionAdded = true;
-                }
-            }
-            if (!questionAdded) {
-                DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(shortAnswerQuestList.get(i));
-                topTreeNode.add(newTreeNode);
-            }
-            from_IDs.addElement(String.valueOf(shortAnswerQuestList.get(i).getID()));
-            QuestionGeneric temp_generic_question = new QuestionGeneric("SHRTA", i);
-            temp_generic_question.setGlobalID(shortAnswerQuestList.get(i).getID());
-            leftGenericQuestionList.add(temp_generic_question);
-        }*/
 
         panel_for_from = new JPanel();
         panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));

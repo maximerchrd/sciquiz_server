@@ -41,7 +41,7 @@ public class DbTableRelationQuestionSubject {
             c.setAutoCommit(false);
             stmt = c.createStatement();
             String sql = "INSERT INTO question_subject_relation (ID_GLOBAL, ID_SUBJECT_GLOBAL, SUBJECT_LEVEL) SELECT t1.ID_GLOBAL,t2.ID_SUBJECT_GLOBAL," +
-                    "'1' FROM multiple_choice_questions t1, subjects t2 WHERE t1.ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM multiple_choice_questions) " +
+                    "'1' FROM generic_questions t1, subjects t2 WHERE t1.ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM generic_questions) " +
                     "AND t2.SUBJECT='" + subject + "';";
             stmt.executeUpdate(sql);
             stmt.close();
