@@ -62,8 +62,8 @@ public class DbTableLearningObjectives {
             stmt = c.createStatement();
             String query = "SELECT OBJECTIVE FROM learning_objectives " +
                     "INNER JOIN question_objective_relation ON learning_objectives.ID_OBJECTIVE_GLOBAL = question_objective_relation.ID_OBJECTIVE_GLOBAL " +
-                    "INNER JOIN multiple_choice_questions ON multiple_choice_questions.ID_GLOBAL = question_objective_relation.ID_GLOBAL " +
-                    "WHERE multiple_choice_questions.ID_GLOBAL = '" + questionID + "';";
+                    "INNER JOIN generic_questions ON generic_questions.ID_GLOBAL = question_objective_relation.ID_GLOBAL " +
+                    "WHERE generic_questions.ID_GLOBAL = '" + questionID + "';";
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 objectives.add(rs.getString("OBJECTIVE"));
