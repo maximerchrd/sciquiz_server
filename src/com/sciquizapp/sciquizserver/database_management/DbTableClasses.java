@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver.database_management;
 
+import com.sciquizapp.sciquizserver.Student;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -78,8 +80,8 @@ public class DbTableClasses {
         if (classes.size() == 0) classes.addElement("no class yet");
         return classes;
     }
-    static public Vector<String> getStudentsInClass(String className) {
-        Vector<String> classes = new Vector<>();
+    static public Vector<Student> getStudentsInClass(String className) {
+        Vector<Student> classes = new Vector<>();
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -88,13 +90,16 @@ public class DbTableClasses {
             c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
             c.setAutoCommit(false);
             stmt = c.createStatement();
-            String query = "SELECT FIRST_NAME FROM students " +
+            String query = "SELECT students.ID_STUDENT_GLOBAL,FIRST_NAME FROM students " +
                     " INNER JOIN class_students_relation ON students.ID_STUDENT_GLOBAL = class_students_relation.ID_STUDENT_GLOBAL " +
                     " INNER JOIN classes ON classes.ID_CLASS_GLOBAL = class_students_relation.ID_CLASS_GLOBAL " +
                     " WHERE classes.NAME = '" + className + "';";
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
-                classes.add(rs.getString("FIRST_NAME"));
+                Student newStudent = new Student();
+                newStudent.setName(rs.getString("FIRST_NAME"));
+                newStudent.setStudentID(rs.getInt("ID_CLASS_GLOBAL"));
+                classes.add(newStudent);
             }
             stmt.close();
             c.commit();

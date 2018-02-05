@@ -125,18 +125,18 @@ public class Table extends JPanel {
 		frame.pack();
 		frame.setVisible(true);
 	}*/
-	public void addUser(String User, Boolean connection) {
+	public void addUser(Student UserStudent, Boolean connection) {
 		for (int i = 0; i < policeColor.size(); i++) {
 			policeColor.get(i).add("black");
 		}
 		DefaultTableModel model2 = (DefaultTableModel) this.table.getModel();
 		int i = 0;
-		while (i < model2.getRowCount() && !String.valueOf(model2.getValueAt(i, 0)).equals(User)) {
+		while (i < model2.getRowCount() && !String.valueOf(model2.getValueAt(i, 0)).equals(UserStudent.getName())) {
 			i++;
 		}
 		//System.out.println("i after loop:" + i);
 		if (i == model2.getRowCount()) {
-			model2.addRow(new Object[]{User});
+			model2.addRow(new Object[]{UserStudent.getName()});
 			if (connection) {
 				model2.setValueAt("connected",i,1);
 			} else {
@@ -148,8 +148,14 @@ public class Table extends JPanel {
 		model2.setValueAt(0, model2.getRowCount() - 1, 2);
 		numberUsers++;
 		Student newStudent = new Student();
-		newStudent.setName(User);
+		newStudent.setName(UserStudent.getName());
+		newStudent.setStudentID(UserStudent.getStudentID());
 		studentArrayList.add(newStudent);
+	}
+
+	public Student getStudentWithRow (int index) {
+		Student student = studentArrayList.get(index);
+		return student;
 	}
 	public void addQuestion(String Question) {
 		policeColor.add(new Vector<>());
@@ -188,7 +194,7 @@ public class Table extends JPanel {
 		}
 
 		//if statement to prevent from answering more than once to the current question
-		if (model2.getValueAt(rowNumber, columnNumber)== null) {
+		if (model2.getValueAt(rowNumber, columnNumber) == null) {
 			System.out.println("evaluation: " + evaluation);
 			if (evaluation == 100) {
 				policeColor.get(columnNumber).set(rowNumber,"green");

@@ -156,4 +156,65 @@ public class DbTableIndividualQuestionForStudentResult {
         resultsFile.close();
         return "done";
     }
+
+    static public String getEvalForQuestionAndStudentIDs (Integer globalID, Integer globalStudentID) {
+        String evaluation = "";
+        String identifier = "";
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String query = "SELECT ID_DIRECT_EVAL,QUANTITATIVE_EVAL FROM individual_question_for_student_result " +
+                "WHERE (ID_STUDENT_GLOBAL='" + globalStudentID + "' AND ID_GLOBAL='" + globalID + "');";
+        try {
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                evaluation = rs.getString("QUANTITATIVE_EVAL");
+                identifier = rs.getString("ID_DIRECT_EVAL");
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return evaluation + "///" + identifier;
+    }
+
+    static public void setEvalForQuestionAndStudentIDs (Double eval, String identifier) {
+        Double evaluation = -1.0;
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String sql = "UPDATE individual_question_for_student_result SET QUANTITATIVE_EVAL = '" + eval + "' " +
+                "WHERE ID_DIRECT_EVAL = '" + identifier + "';";
+
+        try {
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -21,6 +21,7 @@ public class Student {
     private double overallPercentage = -1;
     private Boolean mConnectedByBT = false;
     private Integer numberOfAnswers;
+    private Integer studentID = -1;
 
 
     //constructors
@@ -67,6 +68,9 @@ public class Student {
     public void setInputStream(InputStream arg_inputstream) {
         mInputStream = arg_inputstream;
     }
+    public void setStudentID(Integer studentID) {
+        this.studentID = studentID;
+    }
     //getters
     public Integer getNumberOfAnswers() {
         return numberOfAnswers;
@@ -94,6 +98,9 @@ public class Student {
     }
     public Boolean getmConnectedByBT() {
         return mConnectedByBT;
+    }
+    public Integer getStudentID() {
+        return studentID;
     }
 
     /**

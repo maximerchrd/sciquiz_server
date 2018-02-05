@@ -30,7 +30,8 @@ public class DbTableStudents {
             System.exit(0);
         }
     }
-    static public void addStudent(String address, String name) {
+    static public Integer addStudent(String address, String name) {
+        Integer studentID = -1;
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -49,6 +50,11 @@ public class DbTableStudents {
             stmt.executeUpdate(sql);
             sql = "UPDATE students SET FIRST_NAME = '" + name + "' WHERE MAC_ADDRESS = '" + address + "';";
             stmt.executeUpdate(sql);
+            String query = "SELECT ID_STUDENT_GLOBAL FROM students WHERE ID_STUDENT = (SELECT MAX(ID_STUDENT) FROM students);";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                studentID = rs.getInt("ID_STUDENT_GLOBAL");
+            }
             stmt.close();
             c.commit();
             c.close();
@@ -56,6 +62,7 @@ public class DbTableStudents {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+        return studentID;
     }
     static public Vector<String> getStudentNames() {
         Vector<String> student_names = new Vector<>();
