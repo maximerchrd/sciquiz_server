@@ -44,6 +44,7 @@ public class NetworkCommunication {
     private StreamConnection streamConnection = null;
     private static Object lock = new Object();    //object used for waiting
     private int network_solution = 0; //0: all devices connected to same wifi router
+    final private int PORTNUMBER = 9090;
 
 
     public NetworkCommunication(Table TableQuestionVsUser) {
@@ -62,7 +63,7 @@ public class NetworkCommunication {
 
         if (network_solution == 0) {
             // First we create a server socket and bind it to port 9090.
-            ServerSocket myServerSocket = new ServerSocket(9090);
+            ServerSocket myServerSocket = new ServerSocket(PORTNUMBER);
 
 
             // wait for an incoming connection...

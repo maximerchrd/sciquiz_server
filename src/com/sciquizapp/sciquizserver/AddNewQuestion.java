@@ -86,6 +86,20 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		panel.setLayout(columnsLayout);
 
 
+		questiontype_list.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						JComboBox combo = (JComboBox)e.getSource();
+						String questionType = (String)combo.getSelectedItem();
+						for (int i = 0; questionType.contentEquals("short answer question") && i < checkboxVector.size(); i++) {
+							checkboxVector.get(i).setVisible(false);
+						}
+						for (int i = 0; questionType.contentEquals("multiple choice question") && i < checkboxVector.size(); i++) {
+							checkboxVector.get(i).setVisible(true);
+						}
+					}
+				}
+		);
 		GridBagConstraints questiontype_list_constraints = new GridBagConstraints();
 		questiontype_list_constraints.gridwidth = 3;
 		questiontype_list_constraints.gridx = 0;
@@ -154,6 +168,9 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					JLabel new_answer_label = new JLabel("Answer " + (new_correct_answer_index + 2) + ":");
 					JCheckBox new_checkbox = new JCheckBox();
 					checkboxVector.add(new_checkbox);
+					if (questiontype_list.getSelectedItem().toString().contentEquals("short answer question")) {
+						checkboxVector.get(checkboxVector.size() - 1).setVisible(false);
+					}
 					JTextArea new_answer_text = new JTextArea("	");
 					JButton new_delete_answer_button = new JButton("x");
 					new_delete_answer_button.addActionListener(new ActionListener() {
