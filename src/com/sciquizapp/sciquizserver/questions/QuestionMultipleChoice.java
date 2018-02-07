@@ -39,6 +39,7 @@ public class QuestionMultipleChoice {
 	private String TRIAL9;
 	private Vector<String> subjects;
 	private Vector<String> objectives;
+	private Vector <String> answers;
 	public QuestionMultipleChoice()	{
 		ID=0;
 		SUBJECT="";
@@ -67,6 +68,7 @@ public class QuestionMultipleChoice {
 		TRIAL8 = "0";
 		TRIAL9 = "0";
 		IMAGE="none";
+		answers = new Vector<>();
 	}
 	public QuestionMultipleChoice(String lEVEL, String qUESTION, String oPT0, String oPT1, String oPT2, String oPT3, String oPT4,
 								  String oPT5, String oPT6, String oPT7, String oPT8, String oPT9, String iMAGE) {
@@ -189,6 +191,27 @@ public class QuestionMultipleChoice {
 	}
 	public int getNB_CORRECT_ANS() {
 		return NB_CORRECT_ANS;
+	}
+	public Vector<String> getAnswers () {
+		answers.add(OPT0);
+		answers.add(OPT1);
+		answers.add(OPT2);
+		answers.add(OPT3);
+		answers.add(OPT4);
+		answers.add(OPT5);
+		answers.add(OPT6);
+		answers.add(OPT7);
+		answers.add(OPT8);
+		answers.add(OPT9);
+
+		for (int i = 0; i < answers.size(); i++) {
+			if (answers.get(i).contentEquals("") || answers.get(i).contentEquals(" ")) {
+				answers.remove(i);
+				i--;
+			}
+		}
+
+		return answers;
 	}
 	public String getIMAGE() {
 		return IMAGE;

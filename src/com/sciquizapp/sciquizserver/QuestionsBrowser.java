@@ -272,6 +272,27 @@ public class QuestionsBrowser extends JFrame {
         });
         panel_for_from.add(new_quest_button);
 
+        //implement a button to edit a question
+        JButton edit_quest_button = new JButton("edit the selected question");
+        edit_quest_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedNodeTreeFrom != null) {
+                    try {
+                        if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
+                            EditQuestion editQuestion = new EditQuestion(questionMultChoiceSelectedNodeTreeFrom.getID(), 0, TreeFromQuestions);
+                        } else if (selectedNodeTreeFrom.getUserObject() instanceof QuestionShortAnswer) {
+                            EditQuestion editQuestion = new EditQuestion(questionShortAnswerSelectedNodeTreeFrom.getID(), 1, TreeFromQuestions);
+                        } else {
+                            System.out.println("problem editing question; object not a question");
+                        }
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+        panel_for_from.add(edit_quest_button);
+
         parentFrame.add(panel_for_from, BorderLayout.WEST);
 
 
