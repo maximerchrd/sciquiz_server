@@ -1,6 +1,7 @@
 package com.sciquizapp.sciquizserver.questions;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class QuestionShortAnswer {
 	private int ID;
@@ -9,6 +10,8 @@ public class QuestionShortAnswer {
 	private String QUESTION;
 	private ArrayList<String> ANSWERS;
 	private String IMAGE;
+	private Vector<String> subjects;
+	private Vector<String> objectives;
 	public QuestionShortAnswer()
 	{
 		ID=0;
@@ -44,6 +47,13 @@ public class QuestionShortAnswer {
 	public String getIMAGE() {
 		return IMAGE;
 	}
+	public Vector<String> getSubjects() {
+		return subjects;
+	}
+	public Vector<String> getObjectives() {
+		return objectives;
+	}
+
 	public void setID(int id)
 	{
 		ID=id;
@@ -63,5 +73,10 @@ public class QuestionShortAnswer {
 	public void setIMAGE(String iMAGE) {
 		IMAGE = iMAGE;
 	}
-	
+	public void setSubjects(Vector<String> subjects) {
+		this.subjects = subjects;
+	}
+	public void setObjectives(Vector<String> objectives) {
+		this.objectives = objectives;
+	}
 }

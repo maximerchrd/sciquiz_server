@@ -54,6 +54,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 	Object[] questiontypes;
 	JButton save_quest_button;
 	JButton add_image_button;
+	JTextArea imagePathTextArea;
 
 
 	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final JTree tree) {
@@ -77,8 +78,10 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		subjectsVector = new Vector<>();
 		objectivesVector = new Vector<>();
 		GridBagConstraints add_image_button_constraints = new GridBagConstraints();
+		GridBagConstraints imagePathText_constraints = new GridBagConstraints();
 		GridBagConstraints save_quest_button_constraints = new GridBagConstraints();
 		add_image_button = new JButton("add a picture");
+		imagePathTextArea = new JTextArea();
 		save_quest_button = new JButton("save the question");
 
 
@@ -217,8 +220,10 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 
 					add_image_button_constraints.gridy += 2;
+					imagePathText_constraints.gridy += 2;
 					save_quest_button_constraints.gridy += 2;
 					columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
+					columnsLayout.setConstraints(imagePathTextArea, imagePathText_constraints);
 					columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
 					panel.revalidate();
 					panel.repaint();
@@ -235,7 +240,6 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 		addSubjectUI();
 		addObjectiveUI();
-
 
 		//implement a button to add a picture
 		add_image_button.addActionListener(new ActionListener()
@@ -277,12 +281,19 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 				//Reset the file chooser for the next time it's shown.
 				mFileChooser.setSelectedFile(null);
+
+				imagePathTextArea.setText(mFilePath);
 			}
 		});
-		add_image_button_constraints.gridwidth = 3;
+		add_image_button_constraints.gridwidth = 2;
 		add_image_button_constraints.gridx = 0;
 		add_image_button_constraints.gridy = bottom_index - 1;
 		panel.add(add_image_button, add_image_button_constraints);
+
+		imagePathTextArea.setText("        ");
+		imagePathText_constraints.gridx = 2;
+		imagePathText_constraints.gridy = bottom_index - 1;
+		panel.add(imagePathTextArea, imagePathText_constraints);
 
 		//implement a button to add a new question to the database
 		final DBManager new_db_man = new DBManager();

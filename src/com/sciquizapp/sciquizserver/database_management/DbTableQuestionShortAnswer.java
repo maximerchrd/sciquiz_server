@@ -142,6 +142,8 @@ public class DbTableQuestionShortAnswer {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+        questionShortAnswer.setObjectives(DbTableLearningObjectives.getObjectiveForQuestionID(questionId));
+        questionShortAnswer.setSubjects(DbTableSubject.getSubjectsForQuestionID(questionId));
         return questionShortAnswer;
     }
 }

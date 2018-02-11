@@ -46,12 +46,14 @@ public class EditQuestion extends JPanel implements ActionListener {
     private Object[] questiontypes;
     private JButton save_quest_button;
     private JButton add_image_button;
+    JTextArea imagePathTextArea;
     private int questionTypeMember = -1;
+    GridBagConstraints imagePathText_constraints;
 
     private QuestionMultipleChoice questionMultipleChoice = null;
     private QuestionShortAnswer questionShortAnswer = null;
 
-    public EditQuestion(int globalId, int questionType, final JTree tree) {
+    public EditQuestion(int globalId, int questionType, final JTree tree, DefaultMutableTreeNode treeNode) {
         questionTypeMember = questionType;
         new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
         window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
@@ -67,16 +69,21 @@ public class EditQuestion extends JPanel implements ActionListener {
         subjectsVector = new Vector<>();
         objectivesVector = new Vector<>();
         GridBagConstraints add_image_button_constraints = new GridBagConstraints();
+        imagePathText_constraints = new GridBagConstraints();
         GridBagConstraints save_quest_button_constraints = new GridBagConstraints();
         add_image_button = new JButton("add a picture");
         save_quest_button = new JButton("save the question");
+        imagePathTextArea = new JTextArea();
 
         try {
             if (questionType == 0) {
                 questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(globalId);
                 question_text = new JTextArea(questionMultipleChoice.getQUESTION());
+                mFilePath = questionMultipleChoice.getIMAGE();
             } else if (questionType == 1) {
                 questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(globalId);
+                question_text = new JTextArea(questionShortAnswer.getQUESTION());
+                mFilePath = questionShortAnswer.getIMAGE();
             } else {
                 System.out.println("Problem editing question: questionType not recognized");
             }
@@ -160,12 +167,19 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                 //Reset the file chooser for the next time it's shown.
                 mFileChooser.setSelectedFile(null);
+
+                imagePathTextArea.setText(mFilePath);
             }
         });
-        add_image_button_constraints.gridwidth = 3;
+        add_image_button_constraints.gridwidth = 2;
         add_image_button_constraints.gridx = 0;
         add_image_button_constraints.gridy = bottom_index - 1;
         panel.add(add_image_button, add_image_button_constraints);
+
+        imagePathTextArea.setText(mFilePath);
+        imagePathText_constraints.gridx = 2;
+        imagePathText_constraints.gridy = bottom_index - 1;
+        panel.add(imagePathTextArea, imagePathText_constraints);
 
         //set the layout for save question button because we need it for adding the answer options
         save_quest_button_constraints.gridx = 0;
@@ -183,7 +197,10 @@ public class EditQuestion extends JPanel implements ActionListener {
                 }
             }
         } else if (questionType == 1) {
-            questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(globalId);
+            ArrayList<String> answers = questionShortAnswer.getANSWER();
+            for (int i = 0; i < answers.size(); i++) {
+                addAnswerOption(0, add_image_button_constraints, save_quest_button_constraints, answers.get(i), false, 1);
+            }
         } else {
             System.out.println("Problem editing question: questionType not recognized");
         }
@@ -213,10 +230,10 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                 //add question to database according to question type
                 if (questionType == 1) {
-                    QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer();
-                    new_questshortanswer.setQUESTION(question_text.getText().replace("'", "''"));
+                    QuestionShortAnswer edited_questshortanswer = new QuestionShortAnswer();
+                    edited_questshortanswer.setQUESTION(question_text.getText().replace("'", "''"));
                     if (mFilePath.length() > 0) {
-                        new_questshortanswer.setIMAGE(mFilePath);
+                        edited_questshortanswer.setIMAGE(mFilePath);
                     }
                     ArrayList<String> answerOptions = new ArrayList<String>();
                     for (int i = 0; i < textfieldVector.size(); i++) {
@@ -224,17 +241,17 @@ public class EditQuestion extends JPanel implements ActionListener {
                             answerOptions.add(textfieldVector.get(i).getText().replace("'", "''"));
                         }
                     }
-                    new_questshortanswer.setANSWER(answerOptions);
+                    edited_questshortanswer.setANSWER(answerOptions);
                     String idGlobal = "-1";
                     try {
-                        idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
+                        idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(edited_questshortanswer);
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     }
-                    new_questshortanswer.setID(Integer.valueOf(idGlobal));
+                    edited_questshortanswer.setID(Integer.valueOf(idGlobal));
 
                     //resize image of question to fit icon size
-                    ImageIcon icon = new ImageIcon(new_questshortanswer.getIMAGE());
+                    ImageIcon icon = new ImageIcon(edited_questshortanswer.getIMAGE());
                     Image img = icon.getImage();
                     ImageIcon newIcon = null;
                     if (img.getWidth(null) > 0) {
@@ -246,8 +263,7 @@ public class EditQuestion extends JPanel implements ActionListener {
                     }
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-                    model.insertNodeInto(new DefaultMutableTreeNode(new_questshortanswer), root, root.getChildCount());
+                    model.nodeChanged(treeNode);
                     model.reload();
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
@@ -275,20 +291,20 @@ public class EditQuestion extends JPanel implements ActionListener {
                             number_correct_answers++;
                         }
                     }
-                    QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question_text.getText().replace("'", "''"), options_vector.get(0).replace("'", "''"),
+                    QuestionMultipleChoice edited_questmultchoice = new QuestionMultipleChoice("1", question_text.getText().replace("'", "''"), options_vector.get(0).replace("'", "''"),
                             options_vector.get(1).replace("'", "''"), options_vector.get(2).replace("'", "''"), options_vector.get(3).replace("'", "''"), options_vector.get(4).replace("'", "''"),
                             options_vector.get(5).replace("'", "''"), options_vector.get(6).replace("'", "''"), options_vector.get(7).replace("'", "''"), options_vector.get(8).replace("'", "''"),
                             options_vector.get(9).replace("'", "''"), mFilePath.replace("'", "''"));
-                    new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
-                    new_questmultchoice.setID(globalId);
+                    edited_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
+                    edited_questmultchoice.setID(globalId);
                     try {
-                        DbTableQuestionMultipleChoice.updateMultipleChoiceQuestion(new_questmultchoice);
+                        DbTableQuestionMultipleChoice.updateMultipleChoiceQuestion(edited_questmultchoice);
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     }
 
                     //resize image of question to fit icon size
-                    ImageIcon icon = new ImageIcon(new_questmultchoice.getIMAGE());
+                    ImageIcon icon = new ImageIcon(edited_questmultchoice.getIMAGE());
                     Image img = icon.getImage();
                     ImageIcon newIcon = null;
                     if (img.getWidth(null) > 0) {
@@ -300,9 +316,9 @@ public class EditQuestion extends JPanel implements ActionListener {
                     }
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    //DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-                    //model.insertNodeInto(new DefaultMutableTreeNode(new_questmultchoice), root, root.getChildCount());
-                    model.reload();
+                    treeNode.setUserObject(edited_questmultchoice);
+                    model.nodeChanged(treeNode);
+                   // model.reload();
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
@@ -396,8 +412,10 @@ public class EditQuestion extends JPanel implements ActionListener {
 
 
         add_image_button_constraints.gridy += 2;
+        imagePathText_constraints.gridy += 2;
         save_quest_button_constraints.gridy += 2;
         columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
+        columnsLayout.setConstraints(imagePathTextArea, imagePathText_constraints);
         columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
         panel.revalidate();
         panel.repaint();
@@ -419,6 +437,10 @@ public class EditQuestion extends JPanel implements ActionListener {
         if (questionTypeMember == 0) {
             for (int i = 0; i < questionMultipleChoice.getObjectives().size(); i++ ) {
                 addObjectiveItem(questionMultipleChoice.getObjectives().get(i));
+            }
+        } else if (questionTypeMember == 1) {
+            for (int i = 0; i < questionShortAnswer.getObjectives().size(); i++ ) {
+                addObjectiveItem(questionShortAnswer.getObjectives().get(i));
             }
         }
     }
@@ -473,6 +495,10 @@ public class EditQuestion extends JPanel implements ActionListener {
         if (questionTypeMember == 0) {
             for (int i = 0; i < questionMultipleChoice.getSubjects().size(); i++ ) {
                 addSubjectItem(questionMultipleChoice.getSubjects().get(i));
+            }
+        } else if (questionTypeMember == 1) {
+            for (int i = 0; i < questionShortAnswer.getSubjects().size(); i++ ) {
+                addSubjectItem(questionShortAnswer.getSubjects().get(i));
             }
         }
     }

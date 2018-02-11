@@ -59,8 +59,8 @@ public class DbTableSubject {
             stmt = c.createStatement();
             String query = "SELECT SUBJECT FROM subjects " +
                     "INNER JOIN question_subject_relation ON subjects.ID_SUBJECT_GLOBAL = question_subject_relation.ID_SUBJECT_GLOBAL " +
-                    "INNER JOIN multiple_choice_questions ON multiple_choice_questions.ID_GLOBAL = question_subject_relation.ID_GLOBAL " +
-                    "WHERE multiple_choice_questions.ID_GLOBAL = '" + questionID + "';";
+                    "INNER JOIN generic_questions ON generic_questions.ID_GLOBAL = question_subject_relation.ID_GLOBAL " +
+                    "WHERE generic_questions.ID_GLOBAL = '" + questionID + "';";
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 subjects.add(rs.getString("SUBJECT"));

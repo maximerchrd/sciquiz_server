@@ -279,9 +279,9 @@ public class QuestionsBrowser extends JFrame {
                 if (selectedNodeTreeFrom != null) {
                     try {
                         if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
-                            EditQuestion editQuestion = new EditQuestion(questionMultChoiceSelectedNodeTreeFrom.getID(), 0, TreeFromQuestions);
+                            EditQuestion editQuestion = new EditQuestion(questionMultChoiceSelectedNodeTreeFrom.getID(), 0, TreeFromQuestions, selectedNodeTreeFrom);
                         } else if (selectedNodeTreeFrom.getUserObject() instanceof QuestionShortAnswer) {
-                            EditQuestion editQuestion = new EditQuestion(questionShortAnswerSelectedNodeTreeFrom.getID(), 1, TreeFromQuestions);
+                            EditQuestion editQuestion = new EditQuestion(questionShortAnswerSelectedNodeTreeFrom.getID(), 1, TreeFromQuestions, selectedNodeTreeFrom);
                         } else {
                             System.out.println("problem editing question; object not a question");
                         }
@@ -324,6 +324,8 @@ public class QuestionsBrowser extends JFrame {
                     try {
                         if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
                             DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionMultChoiceSelectedNodeTreeFrom.getID()));
+                        } else if (selectedNodeTreeFrom.getUserObject() instanceof QuestionShortAnswer) {
+                            // implement method to remove short answer question
                         } else if (selectedNodeTreeFrom.getUserObject() instanceof Test) {
                             DbTableTests.removeTestWithID(String.valueOf(testSelectedNodeTreeFrom.getIdTest()));
                         } else {
