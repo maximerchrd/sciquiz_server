@@ -86,13 +86,32 @@ public class QuestionsBrowser extends JFrame {
     public QuestionsBrowser(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
         super("QuestionsBrowser");
 
-        String ip_address = "";
+        //button and label for displaying ip address
+        final String[] ip_address = {""};
+        JButton refreshIpButton = new JButton("refresh IP address");
+        JLabel ipLabel = new JLabel("");
+        refreshIpButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Thread getIpThread = new Thread() {
+                    public void run() {
+                        try {
+                            ip_address[0] = InetAddress.getLocalHost().getHostAddress();
+                        } catch (UnknownHostException e1) {
+                            e1.printStackTrace();
+                        }
+                        ipLabel.setText("students should connect to the following address: " + ip_address[0]);
+                    }
+                };
+                getIpThread.start();
+            }
+        });
+        panel_questlist.add(refreshIpButton);
         try {
-            ip_address = InetAddress.getLocalHost().getHostAddress();
+            ip_address[0] = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        JLabel ipLabel = new JLabel("students should connect to the following address: " + ip_address);
+        ipLabel.setText("students should connect to the following address: " + ip_address[0]);
         panel_questlist.add(ipLabel);
 
         own_networkcommunication = network_singleton;
@@ -212,11 +231,12 @@ public class QuestionsBrowser extends JFrame {
         });
         TreeFromQuestions.setCellRenderer(new DefaultTreeCellRenderer() {
             private JLabel label;
+
             @Override
             public Component getTreeCellRendererComponent(JTree tree,
                                                           Object value, boolean selected, boolean expanded,
                                                           boolean isLeaf, int row, boolean focused) {
-                label=(JLabel)super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
+                label = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
                 Object o = ((DefaultMutableTreeNode) value).getUserObject();
                 if (o instanceof QuestionMultipleChoice) {
                     QuestionMultipleChoice question = (QuestionMultipleChoice) o;
@@ -252,7 +272,7 @@ public class QuestionsBrowser extends JFrame {
                     label.setText(question.getQUESTION());
                 } else if (o instanceof Test) {
                     label.setIcon(UIManager.getIcon("FileChooser.homeFolderIcon"));
-                    label.setText("" + ((Test)((DefaultMutableTreeNode) value).getUserObject()).getTestName());
+                    label.setText("" + ((Test) ((DefaultMutableTreeNode) value).getUserObject()).getTestName());
                 } else {
                     System.out.println("problem rendering tree cell: object neither question multchoice, question short answer nor test");
                 }
@@ -311,7 +331,7 @@ public class QuestionsBrowser extends JFrame {
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, sp2);
         panel_questlist.add(splitPane);
         System.out.println("width: " + splitpaneWidth + "; height: " + splitpaneHeight);
-        splitPane.setPreferredSize(new Dimension(splitpaneWidth,splitpaneHeight));
+        splitPane.setPreferredSize(new Dimension(splitpaneWidth, splitpaneHeight));
         splitPane.setDividerLocation(splitpaneWidth / 2);
         panel_questlist.add(panel_for_from);
         panel_questlist.add(panel_for_copy);
@@ -376,7 +396,7 @@ public class QuestionsBrowser extends JFrame {
                             broadcastQuestionShortAnswer(rightJlist, DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(testSelectedNodeTreeFrom.getGenericQuestions().get(i).getGlobalID()));
                         }
                     }
-                } else if (questionMultChoiceSelectedNodeTreeFrom != null){
+                } else if (questionMultChoiceSelectedNodeTreeFrom != null) {
                     broadcastQuestionMultipleChoice(rightJlist, questionMultChoiceSelectedNodeTreeFrom);
                 } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
                     broadcastQuestionShortAnswer(rightJlist, questionShortAnswerSelectedNodeTreeFrom);
