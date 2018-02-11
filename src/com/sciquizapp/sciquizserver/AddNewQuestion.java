@@ -70,7 +70,7 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		question_label = new JLabel("Question:");
 		question_text = new JTextArea("	");
 		answer1_checkbox = new JCheckBox();
-		answer1_label = new JLabel("R?ponse 1:");
+		answer1_label = new JLabel("Réponse 1:");
 		answer1_text = new JTextArea("	");
 		checkboxVector = new Vector<>();
 		labelVector = new Vector<>();
