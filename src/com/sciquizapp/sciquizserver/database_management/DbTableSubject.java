@@ -23,7 +23,7 @@ public class DbTableSubject {
             System.exit(0);
         }
     }
-    static public void addSubject(String subject) throws Exception {
+    static public void addSubject(String subject) {
         Connection c = null;
         Statement stmt = null;
         stmt = null;

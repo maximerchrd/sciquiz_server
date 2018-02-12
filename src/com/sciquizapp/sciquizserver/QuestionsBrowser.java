@@ -64,6 +64,10 @@ public class QuestionsBrowser extends JFrame {
     public JSplitPane splitPane;
     private NetworkCommunication own_networkcommunication = null;
 
+    //members for subject browsing
+    private JPanel subjectBrowsingPanel;
+    private JButton createSubjectButton;
+
     //members for left questions list (JTree)
     DefaultListModel leftQuestionListModel = new DefaultListModel();
     private QuestionMultipleChoice questionMultChoiceSelectedNodeTreeFrom;
@@ -113,6 +117,17 @@ public class QuestionsBrowser extends JFrame {
         }
         ipLabel.setText("students should connect to the following address: " + ip_address[0]);
         panel_questlist.add(ipLabel);
+
+        //subject browsing
+        subjectBrowsingPanel = new JPanel();
+        createSubjectButton = new JButton("create a new subject");
+        createSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddNewSubject addNewSubject = new AddNewSubject();
+            }
+        });
+        subjectBrowsingPanel.add(createSubjectButton);
+        panel_questlist.add(subjectBrowsingPanel);
 
         own_networkcommunication = network_singleton;
         try {

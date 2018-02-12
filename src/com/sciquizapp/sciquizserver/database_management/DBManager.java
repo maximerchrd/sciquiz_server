@@ -60,6 +60,7 @@ public class DBManager {
 		DbTableRelationClassStudent.createTableRelationClassStudent(c,stmt);
 		DbTableAnswerOptions.createTableAnswerOptions(c,stmt);
 		DbTableRelationQuestionAnserOption.createTableSubject(c,stmt);
+		DbTableRelationSubjectSubject.createTableRelationSubjectSubject(c,stmt);
 
 		try {
 			String sql = "DROP TABLE IF EXISTS 'question'; CREATE TABLE IF NOT EXISTS question " +
