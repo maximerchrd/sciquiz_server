@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import com.sciquizapp.sciquizserver.database_management.DbTableRelationSubjectSubject;
 import com.sciquizapp.sciquizserver.database_management.DbTableSubject;
 
@@ -12,8 +14,8 @@ import java.util.Vector;
 
 
 public class AddNewSubject extends JPanel implements ActionListener{
-	private final Vector<JTextArea> parentSubjectsVector;
-	private final Vector<JTextArea> childSubjectsVector;
+	private final Vector<JComboBox> parentSubjectsVector;
+	private final Vector<JComboBox> childSubjectsVector;
 	private int new_subject_index = 0;
 	private int new_objective_index = 0;
 	private int bottom_index = 7;
@@ -85,7 +87,14 @@ public class AddNewSubject extends JPanel implements ActionListener{
 		{
 			public void actionPerformed(ActionEvent e1)
 			{
-				JTextArea newChildSubjectText = new JTextArea("	");
+				JComboBox newChildSubjectText = new JComboBox();
+				Vector<String> allSubjects = DbTableSubject.getAllSubjects();
+				Object[] elements = new Object[allSubjects.size()];
+				for (int i = 0; i < allSubjects.size(); i++) {
+					elements[i] = allSubjects.get(i);
+				}
+				AutoCompleteSupport.install(newChildSubjectText, GlazedLists.eventListOf(elements));
+				newChildSubjectText.setPreferredSize(new Dimension(200,25));
 				childSubjectsVector.add(newChildSubjectText);
 				JButton removeChildSubjectButton = new JButton("x");
 				removeChildSubjectButton.addActionListener(new ActionListener() {
@@ -131,7 +140,14 @@ public class AddNewSubject extends JPanel implements ActionListener{
 		{
 			public void actionPerformed(ActionEvent e1)
 			{
-				JTextArea newParentSubjectText = new JTextArea("	");
+				JComboBox newParentSubjectText = new JComboBox();
+				Vector<String> allSubjects = DbTableSubject.getAllSubjects();
+				Object[] elements = new Object[allSubjects.size()];
+				for (int i = 0; i < allSubjects.size(); i++) {
+					elements[i] = allSubjects.get(i);
+				}
+				AutoCompleteSupport.install(newParentSubjectText, GlazedLists.eventListOf(elements));
+				newParentSubjectText.setPreferredSize(new Dimension(200,25));
 				parentSubjectsVector.add(newParentSubjectText);
 				JButton removeParentSubjectButton = new JButton("x");
 				removeParentSubjectButton.addActionListener(new ActionListener() {
@@ -174,10 +190,10 @@ public class AddNewSubject extends JPanel implements ActionListener{
 	private void saveSubject() {
 		DbTableSubject.addSubject(newSubjectTextArea.getText());
 		for (int i = 0; i < parentSubjectsVector.size(); i++) {
-			DbTableRelationSubjectSubject.addRelationSubjectSubject(parentSubjectsVector.get(i).getText(),newSubjectTextArea.getText());
+			DbTableRelationSubjectSubject.addRelationSubjectSubject(parentSubjectsVector.get(i).getSelectedItem().toString().replace("'", "''"),newSubjectTextArea.getText().replace("'", "''"));
 		}
 		for (int i = 0; i < childSubjectsVector.size(); i++) {
-			DbTableRelationSubjectSubject.addRelationSubjectSubject(newSubjectTextArea.getText(),childSubjectsVector.get(i).getText());
+			DbTableRelationSubjectSubject.addRelationSubjectSubject(newSubjectTextArea.getText().replace("'", "''"),childSubjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
 		}
 		new_subject_frame.dispatchEvent(new WindowEvent(new_subject_frame, WindowEvent.WINDOW_CLOSING));
 	}

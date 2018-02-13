@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
@@ -29,8 +31,8 @@ public class EditQuestion extends JPanel implements ActionListener {
     private Vector<JLabel> labelVector;
     private Vector<JCheckBox> checkboxVector;
     private Vector<JTextArea> textfieldVector;
-    final private Vector<JTextArea> subjectsVector;
-    final private Vector<JTextArea> objectivesVector;
+    final private Vector<JComboBox> subjectsVector;
+    final private Vector<JComboBox> objectivesVector;
     private JFileChooser mFileChooser;
     private String mFilePath = "";
     private int new_correct_answer_index = 0;
@@ -215,14 +217,14 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                 for (int i = 0; i < subjectsVector.size(); i++) {
                     try {
-                        DbTableSubject.addSubject(subjectsVector.get(i).getText().replace("'", "''"));
+                        DbTableSubject.addSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     }
                 }
                 for (int i = 0; i < objectivesVector.size(); i++) {
                     try {
-                        DbTableLearningObjectives.addObjective(objectivesVector.get(i).getText().replace("'", "''"), 1);
+                        DbTableLearningObjectives.addObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"), 1);
                     } catch (Exception e1) {
                         e1.printStackTrace();
                     }
@@ -268,14 +270,14 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText().replace("'", "''"));
+                            DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
                     }
                     for (int i = 0; i < objectivesVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText().replace("'", "''"));
+                            DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
@@ -322,14 +324,14 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText().replace("'", "''"));
+                            DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
                     }
                     for (int i = 0; i < objectivesVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText().replace("'", "''"));
+                            DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
@@ -446,7 +448,15 @@ public class EditQuestion extends JPanel implements ActionListener {
     }
 
     private void addObjectiveItem(String objectiveText) {
-        JTextArea new_objective_text = new JTextArea(objectiveText);
+        JComboBox new_objective_text = new JComboBox();
+        Vector<String> allObjectives = DbTableLearningObjectives.getAllObjectives();
+        Object[] elements = new Object[allObjectives.size()];
+        for (int i = 0; i < allObjectives.size(); i++) {
+            elements[i] = allObjectives.get(i);
+        }
+        AutoCompleteSupport.install(new_objective_text, GlazedLists.eventListOf(elements));
+        new_objective_text.setPreferredSize(new Dimension(300,25));
+        new_objective_text.setSelectedItem(objectiveText);
         objectivesVector.add(new_objective_text);
         JButton new_delete_objective_button = new JButton("x");
         new_delete_objective_button.addActionListener(new ActionListener() {
@@ -504,7 +514,15 @@ public class EditQuestion extends JPanel implements ActionListener {
     }
 
     private void addSubjectItem(String subjectText) {
-        JTextArea new_subject_text = new JTextArea(subjectText);
+        JComboBox new_subject_text = new JComboBox();
+        Vector<String> allSubjects = DbTableSubject.getAllSubjects();
+        Object[] elements = new Object[allSubjects.size()];
+        for (int i = 0; i < allSubjects.size(); i++) {
+            elements[i] = allSubjects.get(i);
+        }
+        AutoCompleteSupport.install(new_subject_text, GlazedLists.eventListOf(elements));
+        new_subject_text.setSelectedItem(subjectText);
+        new_subject_text.setPreferredSize(new Dimension(200,25));
         subjectsVector.add(new_subject_text);
         JButton new_delete_subject_button = new JButton("x");
         new_delete_subject_button.addActionListener(new ActionListener() {

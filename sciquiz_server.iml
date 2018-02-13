@@ -8,7 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="bluecove-2.1.0" level="project" />
-    <orderEntry type="library" name="bluecove-bluez-2.1.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="glazedlists-1.11.0" level="project" />
   </component>
 </module>

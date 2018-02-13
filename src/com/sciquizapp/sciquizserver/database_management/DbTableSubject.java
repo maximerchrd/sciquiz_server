@@ -75,4 +75,29 @@ public class DbTableSubject {
 
         return subjects;
     }
+    static public Vector<String> getAllSubjects() {
+        Vector<String> subjects = new Vector<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = "SELECT SUBJECT FROM subjects;";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                subjects.add(rs.getString("SUBJECT"));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
+        return subjects;
+    }
 }

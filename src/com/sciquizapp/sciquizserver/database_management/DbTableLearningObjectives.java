@@ -78,4 +78,30 @@ public class DbTableLearningObjectives {
 
         return objectives;
     }
+
+    static public Vector<String> getAllObjectives() {
+        Vector<String> objectives = new Vector<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = "SELECT OBJECTIVE FROM learning_objectives;";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                objectives.add(rs.getString("OBJECTIVE"));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
+        return objectives;
+    }
 }
