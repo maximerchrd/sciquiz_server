@@ -36,7 +36,7 @@ public class EditSubject extends JPanel implements ActionListener{
 		mSubjectSelectedNode = subjectSelectedNode;
 		mQuestionsBrowser = questionsBrowser;
 		new_subject_frame = new JFrame("Edit the subject");
-		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.4);
+		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.5);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.35);
 		panel = new JPanel();
 		new_subject_frame.add( panel );
@@ -155,44 +155,7 @@ public class EditSubject extends JPanel implements ActionListener{
 		{
 			public void actionPerformed(ActionEvent e1)
 			{
-				JComboBox newParentSubjectText = new JComboBox();
-				Vector<String> allSubjects = DbTableSubject.getAllSubjects();
-				Object[] elements = new Object[allSubjects.size()];
-				for (int i = 0; i < allSubjects.size(); i++) {
-					elements[i] = allSubjects.get(i);
-				}
-				AutoCompleteSupport.install(newParentSubjectText, GlazedLists.eventListOf(elements));
-				newParentSubjectText.setPreferredSize(new Dimension(200,25));
-				parentSubjectsVector.add(newParentSubjectText);
-				JButton removeParentSubjectButton = new JButton("x");
-				removeParentSubjectButton.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e2) {
-						panel.remove(newParentSubjectText);
-						panel.remove(removeParentSubjectButton);
-						panel.validate();
-						panel.repaint();
-						parentSubjectsVector.remove(newParentSubjectText);
-					}
-				});
-
-				GridBagConstraints new_subject_text_constraints = new GridBagConstraints();
-				new_subject_text_constraints.fill = GridBagConstraints.HORIZONTAL;
-				new_subject_text_constraints.gridwidth = 1;
-
-				new_subject_text_constraints.gridx = 0;
-				new_subject_text_constraints.gridy = new_subject_index + 4;
-				panel.add(newParentSubjectText,new_subject_text_constraints);
-
-				GridBagConstraints new_delete_subject_button_constraints = new GridBagConstraints();
-				new_delete_subject_button_constraints.gridwidth = 1;
-				new_delete_subject_button_constraints.gridx = 1;
-				new_delete_subject_button_constraints.gridy = new_subject_index + 4;
-				panel.add(removeParentSubjectButton,new_delete_subject_button_constraints);
-				panel.validate();
-				panel.repaint();
-
-				new_subject_index++;
+				addParentSubjecItem("");
 			}
 		});
 		GridBagConstraints addParentSubjectButtonConstraints = new GridBagConstraints();
@@ -200,6 +163,53 @@ public class EditSubject extends JPanel implements ActionListener{
 		addParentSubjectButtonConstraints.gridx = 0;
 		addParentSubjectButtonConstraints.gridy = 3;
 		panel.add(addParentSubjectButton, addParentSubjectButtonConstraints);
+
+		Vector<String> children = DbTableSubject.getSubjectsWithChild(mSubjectSelectedNode.getUserObject().toString());
+		for (int i = 0; i < children.size(); i++) {
+			addParentSubjecItem(children.get(i));
+		}
+	}
+
+	private void addParentSubjecItem(String selectedItem) {
+		JComboBox newParentSubjectText = new JComboBox();
+		Vector<String> allSubjects = DbTableSubject.getAllSubjects();
+		Object[] elements = new Object[allSubjects.size()];
+		for (int i = 0; i < allSubjects.size(); i++) {
+            elements[i] = allSubjects.get(i);
+        }
+		AutoCompleteSupport.install(newParentSubjectText, GlazedLists.eventListOf(elements));
+		newParentSubjectText.setPreferredSize(new Dimension(200,25));
+		newParentSubjectText.setSelectedItem(selectedItem);
+		parentSubjectsVector.add(newParentSubjectText);
+		JButton removeParentSubjectButton = new JButton("x");
+		removeParentSubjectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e2) {
+                panel.remove(newParentSubjectText);
+                panel.remove(removeParentSubjectButton);
+                panel.validate();
+                panel.repaint();
+                parentSubjectsVector.remove(newParentSubjectText);
+            }
+        });
+
+		GridBagConstraints new_subject_text_constraints = new GridBagConstraints();
+		new_subject_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+		new_subject_text_constraints.gridwidth = 1;
+
+		new_subject_text_constraints.gridx = 0;
+		new_subject_text_constraints.gridy = new_subject_index + 4;
+		panel.add(newParentSubjectText,new_subject_text_constraints);
+
+		GridBagConstraints new_delete_subject_button_constraints = new GridBagConstraints();
+		new_delete_subject_button_constraints.gridwidth = 1;
+		new_delete_subject_button_constraints.gridx = 1;
+		new_delete_subject_button_constraints.gridy = new_subject_index + 4;
+		panel.add(removeParentSubjectButton,new_delete_subject_button_constraints);
+		panel.validate();
+		panel.repaint();
+
+		new_subject_index++;
 	}
 
 	private void saveSubject() {

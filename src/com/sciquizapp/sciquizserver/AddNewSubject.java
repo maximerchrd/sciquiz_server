@@ -36,7 +36,7 @@ public class AddNewSubject extends JPanel implements ActionListener{
 	public AddNewSubject(QuestionsBrowser questionsBrowser) {
 		mQuestionsBrowser = questionsBrowser;
 		new_subject_frame = new JFrame("Create a new subject");
-		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.4);
+		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.5);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.35);
 		panel = new JPanel();
 		new_subject_frame.add( panel );

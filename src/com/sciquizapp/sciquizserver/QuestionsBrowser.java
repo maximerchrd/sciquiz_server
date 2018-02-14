@@ -45,7 +45,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -67,9 +66,11 @@ public class QuestionsBrowser extends JFrame {
     private JButton editSubjectButton;
     private JTree subjectsTree;
     private DefaultMutableTreeNode selectedSubjectNode;
-    private DefaultMutableTreeNode topSubjectTreeNode = new DefaultMutableTreeNode("Subject");
+    private DefaultMutableTreeNode topSubjectTreeNode = new DefaultMutableTreeNode("All Subjects");
     private JScrollPane scrollPaneSubjects;
+    private GridBagLayout subjectBrowsingLayout;
     final private QuestionsBrowser questionsBrowser;
+    private JButton filterQuestionWithSubjectButton;
 
     //members for left questions list (JTree)
     DefaultListModel leftQuestionListModel = new DefaultListModel();
@@ -124,25 +125,7 @@ public class QuestionsBrowser extends JFrame {
         panel_questlist.add(ipLabel);
 
         //subject browsing
-        subjectBrowsingPanel = new JPanel();
-        createSubjectButton = new JButton("create a new subject");
-        createSubjectButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                AddNewSubject addNewSubject = new AddNewSubject(questionsBrowser);
-            }
-        });
-        editSubjectButton = new JButton("edit the subject");
-        editSubjectButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (selectedSubjectNode != null) {
-                    EditSubject editSubject = new EditSubject(selectedSubjectNode, questionsBrowser);
-                }
-            }
-        });
-        subjectBrowsingPanel.add(createSubjectButton);
-        subjectBrowsingPanel.add(editSubjectButton);
-        subjectTreeUI();
-        panel_questlist.add(subjectBrowsingPanel);
+        subjectBrowsingUI(panel_questlist);
 
         own_networkcommunication = network_singleton;
         try {
@@ -478,12 +461,55 @@ public class QuestionsBrowser extends JFrame {
         panel_for_copy.add(delete_question_button);
     }
 
+    private void subjectBrowsingUI(JPanel panel_questlist) {
+        subjectBrowsingPanel = new JPanel();
+        subjectBrowsingLayout = new GridBagLayout();
+        subjectBrowsingPanel.setLayout(subjectBrowsingLayout);
+        createSubjectButton = new JButton("create a new subject");
+        createSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddNewSubject addNewSubject = new AddNewSubject(questionsBrowser);
+            }
+        });
+        editSubjectButton = new JButton("edit the subject");
+        editSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedSubjectNode != null) {
+                    EditSubject editSubject = new EditSubject(selectedSubjectNode, questionsBrowser);
+                }
+            }
+        });
+        filterQuestionWithSubjectButton = new JButton("Filter questions with subject");
+
+        GridBagConstraints createSubjectButtonConstraints = new GridBagConstraints();
+        createSubjectButtonConstraints.gridx = 0;
+        createSubjectButtonConstraints.gridy = 0;
+        subjectBrowsingPanel.add(createSubjectButton,createSubjectButtonConstraints);
+
+        GridBagConstraints editSubjectButtonConstraints = new GridBagConstraints();
+        editSubjectButtonConstraints.gridx = 0;
+        editSubjectButtonConstraints.gridy = 1;
+        subjectBrowsingPanel.add(editSubjectButton, editSubjectButtonConstraints);
+
+        GridBagConstraints filterQuestionWithSubjectButtonConstraints = new GridBagConstraints();
+        filterQuestionWithSubjectButtonConstraints.gridx = 0;
+        filterQuestionWithSubjectButtonConstraints.gridy = 2;
+        subjectBrowsingPanel.add(filterQuestionWithSubjectButton, filterQuestionWithSubjectButtonConstraints);
+        subjectTreeUI();
+        panel_questlist.add(subjectBrowsingPanel);
+    }
+
     private void subjectTreeUI() {
         scrollPaneSubjects = new JScrollPane();
         buildSubjectTree();
         scrollPaneSubjects.setAlignmentX(0f);
-        scrollPaneSubjects.setPreferredSize(new Dimension((int)(splitpaneWidth * 0.5),(int)(splitpaneHeight*0.7)));
-        subjectBrowsingPanel.add(scrollPaneSubjects);
+        scrollPaneSubjects.setPreferredSize(new Dimension((int)(splitpaneWidth * 0.7),(int)(splitpaneHeight*0.7)));
+
+        GridBagConstraints scrollPaneSubjectsConstraints = new GridBagConstraints();
+        scrollPaneSubjectsConstraints.gridx = 1;
+        scrollPaneSubjectsConstraints.gridy = 0;
+        scrollPaneSubjectsConstraints.gridheight = 3;
+        subjectBrowsingPanel.add(scrollPaneSubjects,scrollPaneSubjectsConstraints);
     }
 
     public void buildSubjectTree() {
@@ -498,7 +524,7 @@ public class QuestionsBrowser extends JFrame {
 
         subjectsTree = new JTree(topSubjectTreeNode);
         subjectsTree.setToggleClickCount(1);
-        subjectsTree.setRootVisible(false);
+        subjectsTree.setRootVisible(true);
         subjectsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         subjectsTree.setDragEnabled(true);
         subjectsTree.setDropMode(DropMode.ON);

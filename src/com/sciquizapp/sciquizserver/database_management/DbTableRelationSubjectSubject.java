@@ -37,7 +37,7 @@ public class DbTableRelationSubjectSubject {
             c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
             c.setAutoCommit(false);
             stmt = c.createStatement();
-            String sql = "INSERT INTO subject_subject_relation (ID_SUBJECT_GLOBAL_PARENT, ID_SUBJECT_GLOBAL_CHILD) SELECT DISTINCT ID_SUBJECT_GLOBAL," +
+            String sql = "INSERT OR IGNORE INTO subject_subject_relation (ID_SUBJECT_GLOBAL_PARENT, ID_SUBJECT_GLOBAL_CHILD) SELECT DISTINCT ID_SUBJECT_GLOBAL," +
                     "(SELECT ID_SUBJECT_GLOBAL FROM subjects WHERE  SUBJECT='" + subjectChild + "')" +
                     "FROM subjects WHERE  SUBJECT='" + subjectParent + "';";
             stmt.executeUpdate(sql);
@@ -51,6 +51,26 @@ public class DbTableRelationSubjectSubject {
     }
 
     public static void removeRelationsForSubject(String subject) {
-        //to implement
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = "DELETE FROM subject_subject_relation " +
+                    "WHERE ID_SUBJECT_GLOBAL_PARENT=(SELECT ID_SUBJECT_GLOBAL FROM subjects WHERE SUBJECT='" + subject + "');";
+            stmt.executeUpdate(sql);
+            sql = "DELETE FROM subject_subject_relation " +
+                    "WHERE ID_SUBJECT_GLOBAL_CHILD=(SELECT ID_SUBJECT_GLOBAL FROM subjects WHERE SUBJECT='" + subject + "');";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
     }
 }
