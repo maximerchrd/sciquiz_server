@@ -43,10 +43,7 @@ import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
@@ -67,6 +64,12 @@ public class QuestionsBrowser extends JFrame {
     //members for subject browsing
     private JPanel subjectBrowsingPanel;
     private JButton createSubjectButton;
+    private JButton editSubjectButton;
+    private JTree subjectsTree;
+    private DefaultMutableTreeNode selectedSubjectNode;
+    private DefaultMutableTreeNode topSubjectTreeNode = new DefaultMutableTreeNode("Subject");
+    private JScrollPane scrollPaneSubjects;
+    final private QuestionsBrowser questionsBrowser;
 
     //members for left questions list (JTree)
     DefaultListModel leftQuestionListModel = new DefaultListModel();
@@ -89,6 +92,8 @@ public class QuestionsBrowser extends JFrame {
 
     public QuestionsBrowser(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
         super("QuestionsBrowser");
+
+        questionsBrowser = this;
 
         //button and label for displaying ip address
         final String[] ip_address = {""};
@@ -123,10 +128,20 @@ public class QuestionsBrowser extends JFrame {
         createSubjectButton = new JButton("create a new subject");
         createSubjectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddNewSubject addNewSubject = new AddNewSubject();
+                AddNewSubject addNewSubject = new AddNewSubject(questionsBrowser);
+            }
+        });
+        editSubjectButton = new JButton("edit the subject");
+        editSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedSubjectNode != null) {
+                    EditSubject editSubject = new EditSubject(selectedSubjectNode, questionsBrowser);
+                }
             }
         });
         subjectBrowsingPanel.add(createSubjectButton);
+        subjectBrowsingPanel.add(editSubjectButton);
+        subjectTreeUI();
         panel_questlist.add(subjectBrowsingPanel);
 
         own_networkcommunication = network_singleton;
@@ -461,6 +476,62 @@ public class QuestionsBrowser extends JFrame {
             }
         });
         panel_for_copy.add(delete_question_button);
+    }
+
+    private void subjectTreeUI() {
+        scrollPaneSubjects = new JScrollPane();
+        buildSubjectTree();
+        scrollPaneSubjects.setAlignmentX(0f);
+        scrollPaneSubjects.setPreferredSize(new Dimension((int)(splitpaneWidth * 0.5),(int)(splitpaneHeight*0.7)));
+        subjectBrowsingPanel.add(scrollPaneSubjects);
+    }
+
+    public void buildSubjectTree() {
+        topSubjectTreeNode.removeAllChildren();
+        //add nodes
+        Vector<String> topSubjects = DbTableSubject.getSubjectsWithParent("");
+        for (int i = 0; i < topSubjects.size(); i++) {
+            DefaultMutableTreeNode parentSubjectNode = new DefaultMutableTreeNode(topSubjects.get(i));
+            topSubjectTreeNode.add(parentSubjectNode);
+            addChildSubjectNode(parentSubjectNode);
+        }
+
+        subjectsTree = new JTree(topSubjectTreeNode);
+        subjectsTree.setToggleClickCount(1);
+        subjectsTree.setRootVisible(false);
+        subjectsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        subjectsTree.setDragEnabled(true);
+        subjectsTree.setDropMode(DropMode.ON);
+        subjectsTree.setTransferHandler(new TreeTransferHandler());
+        subjectsTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                //Returns the last path element of the selection.
+                //This method is useful only when the selection model allows a single selection.
+                selectedSubjectNode = (DefaultMutableTreeNode) subjectsTree.getLastSelectedPathComponent();
+
+                if (selectedSubjectNode == null)
+                    //Nothing is selected.
+                    return;
+            }
+        });
+        scrollPaneSubjects.setViewportView(subjectsTree);
+    }
+
+    private void addChildSubjectNode (DefaultMutableTreeNode parentNode) {
+        Vector<String> childSubjects = DbTableSubject.getSubjectsWithParent(parentNode.getUserObject().toString());
+        for (int i = 0; i < childSubjects.size(); i++) {
+            DefaultMutableTreeNode childParentNode = new DefaultMutableTreeNode(childSubjects.get(i));
+            parentNode.add(childParentNode);
+            TreeNode[] pathToNode = parentNode.getPath();
+            Vector<String> pathToNodeVector = new Vector<>();
+            for (int j = 0; j < pathToNode.length; j++) {
+                pathToNodeVector.add(pathToNode[j].toString());
+            }
+            if (!pathToNodeVector.contains(childParentNode.getUserObject().toString())) {
+                addChildSubjectNode(childParentNode);
+            }
+        }
     }
 
     private void broadcastQuestionMultipleChoice(JList list, QuestionMultipleChoice questionMultipleChoice) {

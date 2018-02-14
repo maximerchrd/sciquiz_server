@@ -7,16 +7,14 @@ import com.sciquizapp.sciquizserver.database_management.DbTableSubject;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.util.Enumeration;
 import java.util.Vector;
 
 
-public class AddNewSubject extends JPanel implements ActionListener{
+public class EditSubject extends JPanel implements ActionListener{
 	private final Vector<JComboBox> parentSubjectsVector;
 	private final Vector<JComboBox> childSubjectsVector;
 	private int new_subject_index = 0;
@@ -31,11 +29,13 @@ public class AddNewSubject extends JPanel implements ActionListener{
 	private JTextArea newSubjectTextArea;
 	private JButton saveSubjectButton;
 	private QuestionsBrowser mQuestionsBrowser;
+	DefaultMutableTreeNode mSubjectSelectedNode;
 
 
-	public AddNewSubject(QuestionsBrowser questionsBrowser) {
+	public EditSubject(DefaultMutableTreeNode subjectSelectedNode, QuestionsBrowser questionsBrowser) {
+		mSubjectSelectedNode = subjectSelectedNode;
 		mQuestionsBrowser = questionsBrowser;
-		new_subject_frame = new JFrame("Create a new subject");
+		new_subject_frame = new JFrame("Edit the subject");
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.4);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.35);
 		panel = new JPanel();
@@ -45,8 +45,8 @@ public class AddNewSubject extends JPanel implements ActionListener{
 		parentSubjectsVector = new Vector<>();
 		childSubjectsVector = new Vector<>();
 
-		newSubjectLabel = new JLabel("New Subject:");
-		newSubjectTextArea = new JTextArea("		");
+		newSubjectLabel = new JLabel("Subject:");
+		newSubjectTextArea = new JTextArea(mSubjectSelectedNode.getUserObject().toString());
 		saveSubjectButton = new JButton("save the subject");
 		saveSubjectButton.addActionListener(new ActionListener()
 		{
@@ -92,43 +92,7 @@ public class AddNewSubject extends JPanel implements ActionListener{
 		{
 			public void actionPerformed(ActionEvent e1)
 			{
-				JComboBox newChildSubjectText = new JComboBox();
-				Vector<String> allSubjects = DbTableSubject.getAllSubjects();
-				Object[] elements = new Object[allSubjects.size()];
-				for (int i = 0; i < allSubjects.size(); i++) {
-					elements[i] = allSubjects.get(i);
-				}
-				AutoCompleteSupport.install(newChildSubjectText, GlazedLists.eventListOf(elements));
-				newChildSubjectText.setPreferredSize(new Dimension(200,25));
-				childSubjectsVector.add(newChildSubjectText);
-				JButton removeChildSubjectButton = new JButton("x");
-				removeChildSubjectButton.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e2) {
-						panel.remove(newChildSubjectText);
-						panel.remove(removeChildSubjectButton);
-						panel.validate();
-						panel.repaint();
-						childSubjectsVector.remove(newChildSubjectText);
-					}
-				});
-
-				GridBagConstraints new_objective_text_constraints = new GridBagConstraints();
-				new_objective_text_constraints.fill = GridBagConstraints.HORIZONTAL;
-				new_objective_text_constraints.gridwidth = 1;
-				new_objective_text_constraints.gridx = 2;
-				new_objective_text_constraints.gridy = new_objective_index + 4;
-				panel.add(newChildSubjectText,new_objective_text_constraints);
-
-				GridBagConstraints new_delete_objective_button_constraints = new GridBagConstraints();
-				new_delete_objective_button_constraints.gridwidth = 1;
-				new_delete_objective_button_constraints.gridx = 3;
-				new_delete_objective_button_constraints.gridy = new_objective_index + 4;
-				panel.add(removeChildSubjectButton,new_delete_objective_button_constraints);
-				panel.validate();
-				panel.repaint();
-
-				new_objective_index++;
+				addChildSubjectItem("");
 			}
 		});
 		GridBagConstraints addChildSubjectButtonConstraints = new GridBagConstraints();
@@ -136,6 +100,52 @@ public class AddNewSubject extends JPanel implements ActionListener{
 		addChildSubjectButtonConstraints.gridx = 2;
 		addChildSubjectButtonConstraints.gridy = 3;
 		panel.add(addChildSubjectButton, addChildSubjectButtonConstraints);
+
+		Vector<String> children = DbTableSubject.getSubjectsWithParent(mSubjectSelectedNode.getUserObject().toString());
+		for (int i = 0; i < children.size(); i++) {
+			addChildSubjectItem(children.get(i));
+		}
+	}
+
+	private void addChildSubjectItem(String selectedItem) {
+		JComboBox newChildSubjectText = new JComboBox();
+		Vector<String> allSubjects = DbTableSubject.getAllSubjects();
+		Object[] elements = new Object[allSubjects.size()];
+		for (int i = 0; i < allSubjects.size(); i++) {
+            elements[i] = allSubjects.get(i);
+        }
+		AutoCompleteSupport.install(newChildSubjectText, GlazedLists.eventListOf(elements));
+		newChildSubjectText.setPreferredSize(new Dimension(200,25));
+		newChildSubjectText.setSelectedItem(selectedItem);
+		childSubjectsVector.add(newChildSubjectText);
+		JButton removeChildSubjectButton = new JButton("x");
+		removeChildSubjectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e2) {
+                panel.remove(newChildSubjectText);
+                panel.remove(removeChildSubjectButton);
+                panel.validate();
+                panel.repaint();
+                childSubjectsVector.remove(newChildSubjectText);
+            }
+        });
+
+		GridBagConstraints new_objective_text_constraints = new GridBagConstraints();
+		new_objective_text_constraints.fill = GridBagConstraints.HORIZONTAL;
+		new_objective_text_constraints.gridwidth = 1;
+		new_objective_text_constraints.gridx = 2;
+		new_objective_text_constraints.gridy = new_objective_index + 4;
+		panel.add(newChildSubjectText,new_objective_text_constraints);
+
+		GridBagConstraints new_delete_objective_button_constraints = new GridBagConstraints();
+		new_delete_objective_button_constraints.gridwidth = 1;
+		new_delete_objective_button_constraints.gridx = 3;
+		new_delete_objective_button_constraints.gridy = new_objective_index + 4;
+		panel.add(removeChildSubjectButton,new_delete_objective_button_constraints);
+		panel.validate();
+		panel.repaint();
+
+		new_objective_index++;
 	}
 
 	private void addParentSubjectUI() {

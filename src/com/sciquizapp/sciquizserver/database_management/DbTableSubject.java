@@ -100,4 +100,38 @@ public class DbTableSubject {
 
         return subjects;
     }
+    static public Vector<String> getSubjectsWithParent(String parentSubject) {
+        Vector<String> subjects = new Vector<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        String query = "";
+        if (parentSubject.contentEquals("")) {
+            query = "SELECT SUBJECT FROM subjects " +
+                    "WHERE ID_SUBJECT_GLOBAL NOT IN (SELECT ID_SUBJECT_GLOBAL_CHILD FROM subject_subject_relation);";
+        } else {
+            query = "SELECT SUBJECT FROM subjects " +
+                    "INNER JOIN subject_subject_relation ON subjects.ID_SUBJECT_GLOBAL = subject_subject_relation.ID_SUBJECT_GLOBAL_CHILD " +
+                    "WHERe subject_subject_relation.ID_SUBJECT_GLOBAL_PARENT = (select ID_SUBJECT_GLOBAL from subjects where SUBJECT='" + parentSubject + "');";
+        }
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                subjects.add(rs.getString("SUBJECT"));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+
+        return subjects;
+    }
 }

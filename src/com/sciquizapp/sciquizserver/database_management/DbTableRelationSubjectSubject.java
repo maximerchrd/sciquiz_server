@@ -49,4 +49,8 @@ public class DbTableRelationSubjectSubject {
             System.exit(0);
         }
     }
+
+    public static void removeRelationsForSubject(String subject) {
+        //to implement
+    }
 }
