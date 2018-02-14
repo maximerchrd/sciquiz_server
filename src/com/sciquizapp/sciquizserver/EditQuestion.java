@@ -3,7 +3,6 @@ package com.sciquizapp.sciquizserver;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import com.sciquizapp.sciquizserver.database_management.*;
-import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 import tools.Scalr;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 
@@ -244,13 +242,10 @@ public class EditQuestion extends JPanel implements ActionListener {
                         }
                     }
                     edited_questshortanswer.setANSWER(answerOptions);
-                    String idGlobal = "-1";
-                    try {
-                        idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(edited_questshortanswer);
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    }
-                    edited_questshortanswer.setID(Integer.valueOf(idGlobal));
+                    edited_questshortanswer.setID(globalId);
+
+                    DbTableQuestionShortAnswer.updateShortAnswerQuestion(edited_questshortanswer);
+
 
                     //resize image of question to fit icon size
                     ImageIcon icon = new ImageIcon(edited_questshortanswer.getIMAGE());
@@ -265,8 +260,8 @@ public class EditQuestion extends JPanel implements ActionListener {
                     }
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+                    treeNode.setUserObject(edited_questshortanswer);
                     model.nodeChanged(treeNode);
-                    model.reload();
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
@@ -321,7 +316,6 @@ public class EditQuestion extends JPanel implements ActionListener {
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                     treeNode.setUserObject(edited_questmultchoice);
                     model.nodeChanged(treeNode);
-                   // model.reload();
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
@@ -376,6 +370,7 @@ public class EditQuestion extends JPanel implements ActionListener {
         new_delete_answer_button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e2) {
+                textfieldVector.remove(new_answer_text);
                 panel.remove(new_answer_label);
                 panel.remove(new_checkbox);
                 panel.remove(new_answer_text);

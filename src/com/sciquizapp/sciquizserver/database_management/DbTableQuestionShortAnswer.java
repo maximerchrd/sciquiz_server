@@ -1,6 +1,5 @@
 package com.sciquizapp.sciquizserver.database_management;
 
-import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 
 import java.sql.Connection;
@@ -62,6 +61,33 @@ public class DbTableQuestionShortAnswer {
             System.exit(0);
         }
         return idGlobal;
+    }
+
+    static public void updateShortAnswerQuestion(QuestionShortAnswer quest) {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"UPDATE short_answer_questions " +
+                    "SET QUESTION='" + quest.getQUESTION() + "', " +
+                    "IMAGE_PATH='" + quest.getIMAGE() + "' " +
+                    "WHERE ID_GLOBAL='" + quest.getID() + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+            DbTableAnswerOptions.removeOptionsRelationsQuestion(String.valueOf(quest.getID()));
+            for (int i = 0; i < quest.getANSWER().size(); i++) {
+                DbTableAnswerOptions.addAnswerOption(String.valueOf(quest.getID()),quest.getANSWER().get(i));
+            }
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
     }
 
     static public List<QuestionShortAnswer> getAllShortAnswersQuestions() throws Exception{

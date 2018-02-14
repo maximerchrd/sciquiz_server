@@ -38,14 +38,38 @@ public class DbTableAnswerOptions {
                     "VALUES ('" +
                     2000000 + "','" +
                     option +"');";
-            stmt.executeUpdate(sql);
-
-            sql = "UPDATE answer_options SET ID_ANSWEROPTION_GLOBAL = ID_ANSWEROPTION_GLOBAL + ID_ANSWEROPTION WHERE ID_ANSWEROPTION = (SELECT MAX(ID_ANSWEROPTION) FROM answer_options)";
-            stmt.executeUpdate(sql);
+            int rowsAffected = stmt.executeUpdate(sql);
+            if (rowsAffected > 0) {
+                sql = "UPDATE answer_options SET ID_ANSWEROPTION_GLOBAL = ID_ANSWEROPTION_GLOBAL + ID_ANSWEROPTION WHERE ID_ANSWEROPTION = (SELECT MAX(ID_ANSWEROPTION) FROM answer_options)";
+                stmt.executeUpdate(sql);
+                System.out.println(option + " added");
+            } else {
+                System.out.println(option + " not added");
+            }
             stmt.close();
             c.commit();
             c.close();
             DbTableRelationQuestionAnserOption.addRelationQuestionAnserOption(questionID, option);
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    static public void removeOptionsRelationsQuestion(String questionID) throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"DELETE FROM question_answeroption_relation WHERE ID_GLOBAL='" + questionID + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
