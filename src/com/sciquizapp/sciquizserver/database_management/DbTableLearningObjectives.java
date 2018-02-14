@@ -62,8 +62,34 @@ public class DbTableLearningObjectives {
             stmt = c.createStatement();
             String query = "SELECT OBJECTIVE FROM learning_objectives " +
                     "INNER JOIN question_objective_relation ON learning_objectives.ID_OBJECTIVE_GLOBAL = question_objective_relation.ID_OBJECTIVE_GLOBAL " +
-                    "INNER JOIN multiple_choice_questions ON multiple_choice_questions.ID_GLOBAL = question_objective_relation.ID_GLOBAL " +
-                    "WHERE multiple_choice_questions.ID_GLOBAL = '" + questionID + "';";
+                    "INNER JOIN generic_questions ON generic_questions.ID_GLOBAL = question_objective_relation.ID_GLOBAL " +
+                    "WHERE generic_questions.ID_GLOBAL = '" + questionID + "';";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                objectives.add(rs.getString("OBJECTIVE"));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
+        return objectives;
+    }
+
+    static public Vector<String> getAllObjectives() {
+        Vector<String> objectives = new Vector<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = "SELECT OBJECTIVE FROM learning_objectives;";
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 objectives.add(rs.getString("OBJECTIVE"));

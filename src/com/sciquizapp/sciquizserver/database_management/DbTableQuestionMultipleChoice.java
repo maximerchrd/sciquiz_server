@@ -54,6 +54,7 @@ public class DbTableQuestionMultipleChoice {
      * @throws Exception
      */
     static public void addMultipleChoiceQuestion(QuestionMultipleChoice quest) throws Exception {
+        String globalID = DbTableQuestionGeneric.addGenericQuestion(0);
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -90,9 +91,48 @@ public class DbTableQuestionMultipleChoice {
                     quest.getTRIAL9() + "','" +
                     quest.getNB_CORRECT_ANS() + "','" +
                     quest.getIMAGE() + "','" +
-                    2000000 +"');";
+                    globalID +"');";
+            System.out.println(globalID);
             stmt.executeUpdate(sql);
-            sql = "UPDATE multiple_choice_questions SET ID_GLOBAL = ID_GLOBAL + ID_QUESTION WHERE ID_QUESTION = (SELECT MAX(ID_QUESTION) FROM multiple_choice_questions)";
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    /**
+     * method for inserting new question into table multiple_choice_question
+     * @param quest
+     * @throws Exception
+     */
+    static public void updateMultipleChoiceQuestion(QuestionMultipleChoice quest) throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = "UPDATE multiple_choice_questions " +
+                    "SET QUESTION='" + quest.getQUESTION() + "', " +
+                    "OPTION0='" + quest.getOPT0() + "', " +
+                    "OPTION1='" + quest.getOPT1() + "', " +
+                    "OPTION2='" + quest.getOPT2() + "', " +
+                    "OPTION3='" + quest.getOPT3() + "', " +
+                    "OPTION4='" + quest.getOPT4() + "', " +
+                    "OPTION5='" + quest.getOPT5() + "', " +
+                    "OPTION6='" + quest.getOPT6() + "', " +
+                    "OPTION7='" + quest.getOPT7() + "', " +
+                    "OPTION8='" + quest.getOPT8() + "', " +
+                    "OPTION9='" + quest.getOPT9() + "', " +
+                    "NB_CORRECT_ANS='" + quest.getNB_CORRECT_ANS() + "', " +
+                    "IMAGE_PATH='" + quest.getIMAGE() + "' " +
+                    "WHERE ID_GLOBAL='" + quest.getID() + "';";
+            System.out.println(quest.getID());
             stmt.executeUpdate(sql);
             stmt.close();
             c.commit();
@@ -156,6 +196,8 @@ public class DbTableQuestionMultipleChoice {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+        questionMultipleChoice.setObjectives(DbTableLearningObjectives.getObjectiveForQuestionID(questionID));
+        questionMultipleChoice.setSubjects(DbTableSubject.getSubjectsForQuestionID(questionID));
         return questionMultipleChoice;
     }
     static public int getLastIDGlobal() throws Exception {

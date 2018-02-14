@@ -1,24 +1,21 @@
 ##README
 ####TO DO _(For Alpha Version)_
 - display statistics
-- browsing and sending questions
-    - fix removing test/quiz
 - modify UI
 - translate
+- fix bug when trying to add picture without explicit extension
+- synchronize questions with server
+- browsing questions with subject
 ####TO DO _(For Alpha Version - Android)_
 - display statistics
     - eval vs subject for each student
         - can select subject for subsubject
 - translate
-####TO DO _(For Alpha+ Version)_
-- synchronize questions with server
-- manage short answer questions
-####TO DO _(For Alpha+ Version - Android)_
 - automatically connect to server
 - homework mode
 - customize activity waiting for questions
-####TO DO _(for Beta Version)_
-- browsing questions with subject
+
+
 
 
 

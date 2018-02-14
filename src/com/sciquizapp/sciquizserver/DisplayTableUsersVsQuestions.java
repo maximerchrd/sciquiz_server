@@ -23,6 +23,7 @@ public class DisplayTableUsersVsQuestions extends JPanel {
         JButton addStudentToClassButton = null;
         JButton saveStudentToClassButton = null;
         JButton removeStudentFromClassButton = null;
+        JButton editEvaluationButton = null;
 
         final DefaultComboBoxModel modelChooseClass = new DefaultComboBoxModel(DbTableClasses.getAllClasses());
         chooseClass = new JComboBox(modelChooseClass);
@@ -31,7 +32,7 @@ public class DisplayTableUsersVsQuestions extends JPanel {
         chooseClassConstraints.gridy = 0;
         this.add(chooseClass, chooseClassConstraints);
 
-        Vector<String> students = DbTableClasses.getStudentsInClass(modelChooseClass.getSelectedItem().toString());
+        Vector<Student> students = DbTableClasses.getStudentsInClass(modelChooseClass.getSelectedItem().toString());
         for (int i = 0; i < students.size(); i++) {
             tableUserVsQuest.addUser(students.get(i), false);
         }
@@ -79,6 +80,24 @@ public class DisplayTableUsersVsQuestions extends JPanel {
         removeStudentFromClassButtonConstraints.gridx = 0;
         removeStudentFromClassButtonConstraints.gridy = 1;
         this.add(removeStudentFromClassButton, removeStudentFromClassButtonConstraints);
+
+        editEvaluationButton = new JButton("edit evaluation");
+        editEvaluationButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e1) {
+                try {
+                    Student student = tableUserVsQuest.getStudentWithRow(tableUserVsQuest.getTable().getSelectedRow());
+                    Integer globalID = Integer.parseInt(QuestionsBrowser.IDsFromBroadcastedQuestions.get(tableUserVsQuest.getTable().getSelectedColumn() - 3));
+                    ChangeEvaluationOfQuestion changeEvaluationOfQuestion = new ChangeEvaluationOfQuestion(globalID, student.getStudentID());
+                    System.out.println("student: " + student.getName() + " row: " + tableUserVsQuest.getTable().getSelectedRow());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        GridBagConstraints editEvaluationButtonConstraints = new GridBagConstraints();
+        editEvaluationButtonConstraints.gridx = 1;
+        editEvaluationButtonConstraints.gridy = 1;
+        this.add(editEvaluationButton, editEvaluationButtonConstraints);
 
         tableUserVsQuest.setPreferredSize(new Dimension((int)(screenWidth*0.55),(int)(screenHeight*0.3)));
         GridBagConstraints tableUserVsQuestConstraints = new GridBagConstraints();

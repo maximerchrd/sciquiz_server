@@ -31,28 +31,20 @@
 
 package com.sciquizapp.sciquizserver;
 
-import com.sciquizapp.sciquizserver.database_management.DbTableQuestionMultipleChoice;
-import com.sciquizapp.sciquizserver.database_management.DbTableTests;
+import com.sciquizapp.sciquizserver.database_management.*;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 import tools.ListEntry;
 import tools.ListEntryCellRenderer;
 import tools.Scalr;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 
-import com.sciquizapp.sciquizserver.database_management.DBManager;
-import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -63,51 +55,256 @@ import java.util.List;
 import java.util.Vector;
 
 public class QuestionsBrowser extends JFrame {
-    static public Vector<String> activeQuestionIDs = new Vector<>();
     private int splitpaneWidth = 500;
     private int splitpaneHeight = 200;
-    public int question_index = 0;
-    //DefaultListModel<String> from_questions = new DefaultListModel<String>();
-    DefaultListModel from_questions = new DefaultListModel();
-    DefaultListModel<String> from_IDs = new DefaultListModel<String>();
-    DefaultListModel copy_question = new DefaultListModel<String>();
-    ArrayList<String> copy_IDs = new ArrayList<>();
-    private QuestionMultipleChoice questionSelectedNodeTreeFrom;
+    public JSplitPane splitPane;
+    private NetworkCommunication own_networkcommunication = null;
+
+    //members for subject browsing
+    private JPanel subjectBrowsingPanel;
+    private JButton createSubjectButton;
+    private JButton editSubjectButton;
+    private JTree subjectsTree;
+    private DefaultMutableTreeNode selectedSubjectNode;
+    private DefaultMutableTreeNode topSubjectTreeNode = new DefaultMutableTreeNode("All Subjects");
+    private JScrollPane scrollPaneSubjects;
+    private GridBagLayout subjectBrowsingLayout;
+    final private QuestionsBrowser questionsBrowser;
+    private JButton filterQuestionWithSubjectButton;
+
+    //members for left questions list (JTree)
+    DefaultListModel leftQuestionListModel = new DefaultListModel();
+    private QuestionMultipleChoice questionMultChoiceSelectedNodeTreeFrom;
+    private QuestionShortAnswer questionShortAnswerSelectedNodeTreeFrom;
     private Test testSelectedNodeTreeFrom;
     private DefaultMutableTreeNode selectedNodeTreeFrom;
     private JTree TreeFromQuestions;
     private DefaultMutableTreeNode topTreeNode = new DefaultMutableTreeNode("Questions");
-    private List<DefaultMutableTreeNode> TreeNodeQuestions;
-    private JList<ListEntry> copyFromList;
-    final private JList<ListEntry> copyToList;
     public JPanel panel_for_from;
-    public JPanel panel_for_copy;
-    public JSplitPane splitPane;
     private List<DefaultMutableTreeNode> testsNodeList = new ArrayList<DefaultMutableTreeNode>();
     private List<Test> testsList = new ArrayList<Test>();
-    private List<Question> questionList = new ArrayList<Question>();
-    private List<QuestionMultipleChoice> multipleChoicesQuestList = new ArrayList<QuestionMultipleChoice>();
-    private List<QuestionGeneric> genericQuestionList = new ArrayList<QuestionGeneric>();
-    private List<QuestionGeneric> quiz = new ArrayList<QuestionGeneric>();
-    private NetworkCommunication own_networkcommunication = null;
+    private List<QuestionGeneric> leftGenericQuestionList = new ArrayList<QuestionGeneric>();
+    private JScrollPane questionTreeScrollPane;
+
+    //members for right questions list
+    static public Vector<String> IDsFromBroadcastedQuestions = new Vector<>();
+    DefaultListModel rightQuestionsListModel = new DefaultListModel<String>();
+    final private JList<ListEntry> rightJlist;
+    public JPanel panel_for_copy;
 
     public QuestionsBrowser(final JFrame parentFrame, final JPanel panel_questlist, final JPanel panel_disquest, final NetworkCommunication network_singleton) {
         super("QuestionsBrowser");
 
-        String ip_address = "";
+        questionsBrowser = this;
+
+        //button and label for displaying ip address
+        final String[] ip_address = {""};
+        JButton refreshIpButton = new JButton("refresh IP address");
+        JLabel ipLabel = new JLabel("");
+        refreshIpButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Thread getIpThread = new Thread() {
+                    public void run() {
+                        try {
+                            ip_address[0] = InetAddress.getLocalHost().getHostAddress();
+                        } catch (UnknownHostException e1) {
+                            e1.printStackTrace();
+                        }
+                        ipLabel.setText("students should connect to the following address: " + ip_address[0]);
+                    }
+                };
+                getIpThread.start();
+            }
+        });
+        panel_questlist.add(refreshIpButton);
         try {
-            ip_address = InetAddress.getLocalHost().getHostAddress();
+            ip_address[0] = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        JLabel ipLabel = new JLabel("students should connect to the following address: " + ip_address);
+        ipLabel.setText("students should connect to the following address: " + ip_address[0]);
         panel_questlist.add(ipLabel);
 
+        //subject browsing
+        subjectBrowsingUI(panel_questlist);
+
         own_networkcommunication = network_singleton;
-        DBManager database = new DBManager();
+        questionTreeScrollPane = new JScrollPane();
+        buildQuestionsTree("");
+        panel_for_from.add(questionTreeScrollPane);
+
+        //implement a button to add a new question to the database
+        JButton new_quest_button = new JButton("create a question");
+        new_quest_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddNewQuestion new_quest = new AddNewQuestion(leftGenericQuestionList, TreeFromQuestions, questionsBrowser);
+            }
+        });
+        panel_for_from.add(new_quest_button);
+
+        //implement a button to edit a question
+        JButton edit_quest_button = new JButton("edit the selected question");
+        edit_quest_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedNodeTreeFrom != null) {
+                    try {
+                        if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
+                            EditQuestion editQuestion = new EditQuestion(questionMultChoiceSelectedNodeTreeFrom.getID(), 0, TreeFromQuestions, selectedNodeTreeFrom);
+                        } else if (selectedNodeTreeFrom.getUserObject() instanceof QuestionShortAnswer) {
+                            EditQuestion editQuestion = new EditQuestion(questionShortAnswerSelectedNodeTreeFrom.getID(), 1, TreeFromQuestions, selectedNodeTreeFrom);
+                        } else {
+                            System.out.println("problem editing question; object not a question");
+                        }
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+        panel_for_from.add(edit_quest_button);
+
+        parentFrame.add(panel_for_from, BorderLayout.WEST);
+
+
+        rightJlist = new JList<ListEntry>(rightQuestionsListModel);
+        //rightJlist.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
+        rightJlist.setDropMode(DropMode.INSERT);
+        rightJlist.setCellRenderer(new ListEntryCellRenderer());
+
+        panel_for_copy = new JPanel();
+        panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
+        JScrollPane sp2 = new JScrollPane(rightJlist);
+        sp2.setAlignmentX(0f);
+        panel_for_copy.add(sp2);
+        panel_for_copy.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+        panel_questlist.setLayout(new FlowLayout());
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, questionTreeScrollPane, sp2);
+        panel_questlist.add(splitPane);
+        System.out.println("width: " + splitpaneWidth + "; height: " + splitpaneHeight);
+        splitPane.setPreferredSize(new Dimension(splitpaneWidth, splitpaneHeight));
+        splitPane.setDividerLocation(splitpaneWidth / 2);
+        panel_questlist.add(panel_for_from);
+        panel_questlist.add(panel_for_copy);
+
+        //implement a button to remove a question from the panel for from
+        JButton delete_question_from_button = new JButton("remove the selected question or test");
+        delete_question_from_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedNodeTreeFrom != null) {
+                    try {
+                        if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
+                            DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionMultChoiceSelectedNodeTreeFrom.getID()));
+                        } else if (selectedNodeTreeFrom.getUserObject() instanceof QuestionShortAnswer) {
+                            // implement method to remove short answer question
+                        } else if (selectedNodeTreeFrom.getUserObject() instanceof Test) {
+                            DbTableTests.removeTestWithID(String.valueOf(testSelectedNodeTreeFrom.getIdTest()));
+                        } else {
+                            System.out.println("problem deleting treenode; object neither question nor test");
+                        }
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                    DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
+                    model.removeNodeFromParent(selectedNodeTreeFrom);
+                    //leftGenericQuestionList.remove(selectedNodeTreeFrom);
+                }
+            }
+        });
+        panel_for_from.add(delete_question_from_button);
+
+        //implement a button to create a test/quiz in the panel for from
+        JButton create_test_button = new JButton("create a test/quiz");
+        create_test_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    DbTableTests.addTest("new quiz/test");
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                Test newTest = new Test();
+                newTest = DbTableTests.getLastTests();
+                DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+                model.insertNodeInto(new DefaultMutableTreeNode(newTest), root, root.getChildCount());
+            }
+        });
+        panel_for_from.add(create_test_button);
+
+        //implement a button to activate a question or a test
+        JButton activate_button = new JButton("broadcast the question or test/quiz");
+        activate_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (testSelectedNodeTreeFrom != null) {
+                    for (int i = 0; i < testSelectedNodeTreeFrom.getGenericQuestions().size(); i++) {
+                        if (testSelectedNodeTreeFrom.getGenericQuestions().get(i).getIntTypeOfQuestion() == 0) {
+                            try {
+                                broadcastQuestionMultipleChoice(rightJlist, DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(testSelectedNodeTreeFrom.getGenericQuestions().get(i).getGlobalID()));
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                        } else if (testSelectedNodeTreeFrom.getGenericQuestions().get(i).getIntTypeOfQuestion() == 1) {
+                            broadcastQuestionShortAnswer(rightJlist, DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(testSelectedNodeTreeFrom.getGenericQuestions().get(i).getGlobalID()));
+                        }
+                    }
+                } else if (questionMultChoiceSelectedNodeTreeFrom != null) {
+                    broadcastQuestionMultipleChoice(rightJlist, questionMultChoiceSelectedNodeTreeFrom);
+                } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
+                    broadcastQuestionShortAnswer(rightJlist, questionShortAnswerSelectedNodeTreeFrom);
+                }
+            }
+        });
+        panel_for_from.add(activate_button);
+
+        //implement a button to send the questions from the panel for copy
+        JButton send_questions_button = new JButton("Force sync questions with devices");
+        send_questions_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                /*try {
+                    network_singleton.SendQuestionList(questionList, multipleChoicesQuestList, copy_IDs);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }*/
+            }
+        });
+        panel_for_copy.add(send_questions_button);
+
+        //implement a button to send the highlighted question
+        JButton send_questID_button = new JButton("activate the question for students");
+        send_questID_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int id_to_send = Integer.valueOf(IDsFromBroadcastedQuestions.get(rightJlist.getSelectedIndex()));
+                try {
+                    System.out.println("sending question id");
+                    network_singleton.SendQuestionID(id_to_send);
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+        });
+        panel_for_copy.add(send_questID_button);
+
+        //implement a button to remove a question from the RIGHT panel
+        JButton delete_question_button = new JButton("remove the selected question");
+        delete_question_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int index = rightJlist.getSelectedIndex();
+                network_singleton.removeQuestion(index);
+                rightQuestionsListModel.remove(index);
+                IDsFromBroadcastedQuestions.remove(index);
+            }
+        });
+        panel_for_copy.add(delete_question_button);
+    }
+
+    private void buildQuestionsTree(String selectedSubject) {
+        topTreeNode.removeAllChildren();
+        if (!DbTableSubject.isSubject(selectedSubject)) {
+            selectedSubject = "";
+        }
         try {
-            questionList = database.getAllQuestions();
-            multipleChoicesQuestList = database.getAllMultipleChoiceQuestions();
+            leftGenericQuestionList = DbTableQuestionGeneric.getAllGenericQuestions();
             testsList = DbTableTests.getAllTests();
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -118,47 +315,58 @@ public class QuestionsBrowser extends JFrame {
             topTreeNode.add(newTreeNode);
             testsNodeList.add(newTreeNode);
         }
-        for (int i = 0; i < questionList.size(); i++) {
-            ImageIcon icon = new ImageIcon(questionList.get(i).getIMAGE());
-            Image img = icon.getImage();
-            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = bi.createGraphics();
-            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-            BufferedImage scaledImage = Scalr.resize(bi, 40);
-            ImageIcon newIcon = new ImageIcon(scaledImage);
-            from_questions.addElement(new ListEntry(questionList.get(i).getQUESTION(), newIcon));
-            from_IDs.addElement(String.valueOf(questionList.get(i).getID()));
-            QuestionGeneric temp_generic_question = new QuestionGeneric("QUEST", i);
-            genericQuestionList.add(temp_generic_question);
-        }
-        for (int i = 0; i < multipleChoicesQuestList.size(); i++) {
-            ImageIcon newIcon = null;
-            ImageIcon icon = new ImageIcon(multipleChoicesQuestList.get(i).getIMAGE());
-            Image img = icon.getImage();
-            if (img.getWidth(null) > 0) {
-                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = bi.createGraphics();
-                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                BufferedImage scaledImage = Scalr.resize(bi, 40);
-                newIcon = new ImageIcon(scaledImage);
-            }
-            from_questions.addElement(new ListEntry(multipleChoicesQuestList.get(i).getQUESTION(), newIcon));
+        for (int i = 0; i < leftGenericQuestionList.size(); i++) {
+            Vector<String> questionSubjects = DbTableSubject.getSubjectsForQuestionID(leftGenericQuestionList.get(i).getGlobalID());
+            if (selectedSubject.length() == 0 || questionSubjects.contains(selectedSubject)) {
+                QuestionMultipleChoice questionMultipleChoice = null;
+                QuestionShortAnswer questionShortAnswer = null;
+                if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 0) {
+                    try {
+                        questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(leftGenericQuestionList.get(i).getGlobalID());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 1) {
+                    try {
+                        questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(leftGenericQuestionList.get(i).getGlobalID());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Problem reading generic question list: question type not supported");
+                }
 
-            Boolean questionAdded = false;
-            for (int j = 0; !questionAdded && j < testsList.size(); j++) {
-                if (testsList.get(j).getIdsQuestions().contains(multipleChoicesQuestList.get(i).getID())) {
-                    DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
-                    testsNodeList.get(j).add(newTreeNode);
-                    questionAdded = true;
+                String imagePath = questionMultipleChoice == null ? questionShortAnswer.getIMAGE() : questionMultipleChoice.getIMAGE();
+                String questionText = questionMultipleChoice == null ? questionShortAnswer.getQUESTION() : questionMultipleChoice.getQUESTION();
+                Integer globalID = questionMultipleChoice == null ? questionShortAnswer.getID() : questionMultipleChoice.getID();
+
+                ImageIcon newIcon = null;
+                ImageIcon icon = new ImageIcon(imagePath);
+                Image img = icon.getImage();
+                if (img.getWidth(null) > 0) {
+                    BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g = bi.createGraphics();
+                    g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                    BufferedImage scaledImage = Scalr.resize(bi, 40);
+                    newIcon = new ImageIcon(scaledImage);
+                }
+                leftQuestionListModel.addElement(new ListEntry(questionText, newIcon));
+
+                Boolean questionAdded = false;
+                for (int j = 0; !questionAdded && j < testsList.size(); j++) {
+                    if (testsList.get(j).getIdsQuestions().contains(globalID)) {
+                        DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
+                                new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
+                        testsNodeList.get(j).add(newTreeNode);
+                        questionAdded = true;
+                    }
+                }
+                if (!questionAdded) {
+                    DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
+                            new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
+                    topTreeNode.add(newTreeNode);
                 }
             }
-            if (!questionAdded) {
-                DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(multipleChoicesQuestList.get(i));
-                topTreeNode.add(newTreeNode);
-            }
-            from_IDs.addElement(String.valueOf(multipleChoicesQuestList.get(i).getID()));
-            QuestionGeneric temp_generic_question = new QuestionGeneric("MULTQ", i);
-            genericQuestionList.add(temp_generic_question);
         }
 
         panel_for_from = new JPanel();
@@ -185,31 +393,41 @@ public class QuestionsBrowser extends JFrame {
                 Object nodeInfo = selectedNodeTreeFrom.getUserObject();
 
                 if (nodeInfo instanceof QuestionMultipleChoice && selectedNodeTreeFrom.isLeaf()) {
-                    questionSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                    questionMultChoiceSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                    questionShortAnswerSelectedNodeTreeFrom = null;
+                    testSelectedNodeTreeFrom = null;
+                } else if (nodeInfo instanceof QuestionShortAnswer && selectedNodeTreeFrom.isLeaf()) {
+                    questionShortAnswerSelectedNodeTreeFrom = (QuestionShortAnswer) nodeInfo;
+                    questionMultChoiceSelectedNodeTreeFrom = null;
                     testSelectedNodeTreeFrom = null;
                 } else {
                     testSelectedNodeTreeFrom = (Test) nodeInfo;
-                    questionSelectedNodeTreeFrom = null;
+                    questionMultChoiceSelectedNodeTreeFrom = null;
+                    questionShortAnswerSelectedNodeTreeFrom = null;
                 }
             }
         });
         TreeFromQuestions.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
-                    if (questionSelectedNodeTreeFrom != null) {
-                        JList list = copyToList;
-                        activateQuestionMultipleChoice(list,questionSelectedNodeTreeFrom);
+                    if (questionMultChoiceSelectedNodeTreeFrom != null) {
+                        JList list = rightJlist;
+                        broadcastQuestionMultipleChoice(list, questionMultChoiceSelectedNodeTreeFrom);
+                    } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
+                        JList list = rightJlist;
+                        broadcastQuestionShortAnswer(list, questionShortAnswerSelectedNodeTreeFrom);
                     }
                 }
             }
         });
         TreeFromQuestions.setCellRenderer(new DefaultTreeCellRenderer() {
             private JLabel label;
+
             @Override
             public Component getTreeCellRendererComponent(JTree tree,
                                                           Object value, boolean selected, boolean expanded,
                                                           boolean isLeaf, int row, boolean focused) {
-                label=(JLabel)super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
+                label = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
                 Object o = ((DefaultMutableTreeNode) value).getUserObject();
                 if (o instanceof QuestionMultipleChoice) {
                     QuestionMultipleChoice question = (QuestionMultipleChoice) o;
@@ -227,257 +445,214 @@ public class QuestionsBrowser extends JFrame {
                         label.setIcon(null);
                     }
                     label.setText(question.getQUESTION());
+                } else if (o instanceof QuestionShortAnswer) {
+                    QuestionShortAnswer question = (QuestionShortAnswer) o;
+                    ImageIcon newIcon = null;
+                    ImageIcon icon = new ImageIcon(question.getIMAGE());
+                    Image img = icon.getImage();
+                    if (img.getWidth(null) > 0) {
+                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D g = bi.createGraphics();
+                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                        BufferedImage scaledImage = Scalr.resize(bi, 40);
+                        newIcon = new ImageIcon(scaledImage);
+                        label.setIcon(newIcon);
+                    } else {
+                        label.setIcon(null);
+                    }
+                    label.setText(question.getQUESTION());
                 } else if (o instanceof Test) {
                     label.setIcon(UIManager.getIcon("FileChooser.homeFolderIcon"));
-                    label.setText("" + ((Test)((DefaultMutableTreeNode) value).getUserObject()).getTestName());
+                    label.setText("" + ((Test) ((DefaultMutableTreeNode) value).getUserObject()).getTestName());
                 } else {
-                    System.out.println("problem rendering tree cell: object neither question nor test");
+                    System.out.println("problem rendering tree cell: object neither question multchoice, question short answer nor test");
                 }
                 return label;
             }
         });
-        JScrollPane sp = new JScrollPane(TreeFromQuestions);
-        sp.setAlignmentX(0f);
-        panel_for_from.add(sp);
-
-        //implement a button to add a new question to the database
-        JButton new_quest_button = new JButton("create a question");
-        new_quest_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                AddNewQuestion new_quest = new AddNewQuestion(genericQuestionList, questionList, multipleChoicesQuestList, from_questions, from_IDs, TreeFromQuestions);
-            }
-        });
-        panel_for_from.add(new_quest_button);
-
-        parentFrame.add(panel_for_from, BorderLayout.WEST);
-
-
-        copyToList = new JList<ListEntry>(copy_question);
-        copyToList.setTransferHandler(new ToTransferHandler(TransferHandler.COPY));
-        copyToList.setDropMode(DropMode.INSERT);
-        copyToList.setCellRenderer(new ListEntryCellRenderer());
-
-        panel_for_copy = new JPanel();
-        panel_for_copy.setLayout(new BoxLayout(panel_for_copy, BoxLayout.Y_AXIS));
-        JScrollPane sp2 = new JScrollPane(copyToList);
-        sp2.setAlignmentX(0f);
-        panel_for_copy.add(sp2);
-        panel_for_copy.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-        panel_questlist.setLayout(new FlowLayout());
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, sp2);
-        panel_questlist.add(splitPane);
-        System.out.println("width: " + splitpaneWidth + "; height: " + splitpaneHeight);
-        splitPane.setPreferredSize(new Dimension(splitpaneWidth,splitpaneHeight));
-        splitPane.setDividerLocation(splitpaneWidth / 2);
-        panel_questlist.add(panel_for_from);
-        panel_questlist.add(panel_for_copy);
-
-        //implement a button to remove a question from the panel for from
-        JButton delete_question_from_button = new JButton("remove the selected question or test");
-        delete_question_from_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (selectedNodeTreeFrom != null) {
-                    try {
-                        if (selectedNodeTreeFrom.getUserObject() instanceof QuestionMultipleChoice) {
-                            DbTableQuestionMultipleChoice.removeMultipleChoiceQuestionWithID(String.valueOf(questionSelectedNodeTreeFrom.getID()));
-                        } else if (selectedNodeTreeFrom.getUserObject() instanceof Test) {
-                            DbTableTests.removeTestWithID(String.valueOf(testSelectedNodeTreeFrom.getIdTest()));
-                        } else {
-                            System.out.println("problem deleting treenode; object neither question nor test");
-                        }
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    }
-                    DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
-                    model.removeNodeFromParent(selectedNodeTreeFrom);
-                    multipleChoicesQuestList.remove(questionSelectedNodeTreeFrom);
-                }
-            }
-        });
-        panel_for_from.add(delete_question_from_button);
-
-        //implement a button to create a test/quiz in the panel for from
-        JButton create_test_button = new JButton("create a test/quiz");
-        create_test_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    DbTableTests.addTest("new quiz/test");
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-                Test newTest = DbTableTests.getLastTests();
-                DefaultTreeModel model = (DefaultTreeModel) TreeFromQuestions.getModel();
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-                model.insertNodeInto(new DefaultMutableTreeNode(newTest), root, root.getChildCount());
-            }
-        });
-        panel_for_from.add(create_test_button);
-
-        //implement a button to activate a question or a test
-        JButton activate_button = new JButton("activate the question or test/quiz");
-        activate_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (testSelectedNodeTreeFrom != null) {
-                    for (int i = 0; i < testSelectedNodeTreeFrom.getIdsQuestions().size(); i++) {
-                        Boolean found = false;
-                        int j = 0;
-                        for (; !found && j < multipleChoicesQuestList.size(); j++) {
-                            if (multipleChoicesQuestList.get(j).getID() == testSelectedNodeTreeFrom.getIdsQuestions().get(i)) {
-                                found = true;
-                            }
-                        }
-                        QuestionMultipleChoice questionToActivate = multipleChoicesQuestList.get(j-1);
-                        activateQuestionMultipleChoice(copyToList,questionToActivate);
-                    }
-                } else {
-                    activateQuestionMultipleChoice(copyToList, questionSelectedNodeTreeFrom);
-                }
-            }
-        });
-        panel_for_from.add(activate_button);
-
-        //implement a button to send the questions from the panel for copy
-        JButton send_questions_button = new JButton("Force sync questions with devices");
-        send_questions_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    network_singleton.SendQuestionList(questionList, multipleChoicesQuestList, copy_IDs);
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        });
-        panel_for_copy.add(send_questions_button);
-
-        //implement a button to send the highlighted question
-        JButton send_questID_button = new JButton("activate the question for students");
-        send_questID_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int id_to_send = Integer.valueOf(copy_IDs.get(copyToList.getSelectedIndex()));
-                try {
-                    System.out.println("sending question id");
-                    network_singleton.SendQuestionID(id_to_send);
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        });
-        panel_for_copy.add(send_questID_button);
-
-        //implement a button to remove a question from the panel for copy
-        JButton delete_question_button = new JButton("remove the selected question");
-        delete_question_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int index = copyToList.getSelectedIndex();
-                network_singleton.removeQuestion(index);
-                copy_question.remove(index);
-                copy_IDs.remove(index);
-            }
-        });
-        panel_for_copy.add(delete_question_button);
-
-        //((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-
-        //getContentPane().setPreferredSize(new Dimension(320, 315));
+        questionTreeScrollPane.setViewportView(TreeFromQuestions);
+        questionTreeScrollPane.setAlignmentX(0f);
     }
 
-    class ToTransferHandler extends TransferHandler {
-        int action;
+    private void subjectBrowsingUI(JPanel panel_questlist) {
+        subjectBrowsingPanel = new JPanel();
+        subjectBrowsingLayout = new GridBagLayout();
+        subjectBrowsingPanel.setLayout(subjectBrowsingLayout);
+        createSubjectButton = new JButton("create a new subject");
+        createSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddNewSubject addNewSubject = new AddNewSubject(questionsBrowser);
+            }
+        });
+        editSubjectButton = new JButton("edit the subject");
+        editSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedSubjectNode != null) {
+                    EditSubject editSubject = new EditSubject(selectedSubjectNode, questionsBrowser);
+                }
+            }
+        });
+        filterQuestionWithSubjectButton = new JButton("Filter questions with subject");
+        filterQuestionWithSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedSubjectNode != null) {
+                    buildQuestionsTree(selectedSubjectNode.getUserObject().toString());
+                }
+            }
+        });
 
-        public ToTransferHandler(int action) {
-            this.action = action;
+        GridBagConstraints createSubjectButtonConstraints = new GridBagConstraints();
+        createSubjectButtonConstraints.gridx = 0;
+        createSubjectButtonConstraints.gridy = 0;
+        subjectBrowsingPanel.add(createSubjectButton,createSubjectButtonConstraints);
+
+        GridBagConstraints editSubjectButtonConstraints = new GridBagConstraints();
+        editSubjectButtonConstraints.gridx = 0;
+        editSubjectButtonConstraints.gridy = 1;
+        subjectBrowsingPanel.add(editSubjectButton, editSubjectButtonConstraints);
+
+        GridBagConstraints filterQuestionWithSubjectButtonConstraints = new GridBagConstraints();
+        filterQuestionWithSubjectButtonConstraints.gridx = 0;
+        filterQuestionWithSubjectButtonConstraints.gridy = 2;
+        subjectBrowsingPanel.add(filterQuestionWithSubjectButton, filterQuestionWithSubjectButtonConstraints);
+        subjectTreeUI();
+        panel_questlist.add(subjectBrowsingPanel);
+    }
+
+
+
+    private void subjectTreeUI() {
+        scrollPaneSubjects = new JScrollPane();
+        buildSubjectTree();
+        scrollPaneSubjects.setAlignmentX(0f);
+        scrollPaneSubjects.setPreferredSize(new Dimension((int)(splitpaneWidth * 0.7),(int)(splitpaneHeight*0.7)));
+
+        GridBagConstraints scrollPaneSubjectsConstraints = new GridBagConstraints();
+        scrollPaneSubjectsConstraints.gridx = 1;
+        scrollPaneSubjectsConstraints.gridy = 0;
+        scrollPaneSubjectsConstraints.gridheight = 3;
+        subjectBrowsingPanel.add(scrollPaneSubjects,scrollPaneSubjectsConstraints);
+    }
+
+    public void buildSubjectTree() {
+        topSubjectTreeNode.removeAllChildren();
+        //add nodes
+        Vector<String> topSubjects = DbTableSubject.getSubjectsWithParent("");
+        for (int i = 0; i < topSubjects.size(); i++) {
+            DefaultMutableTreeNode parentSubjectNode = new DefaultMutableTreeNode(topSubjects.get(i));
+            topSubjectTreeNode.add(parentSubjectNode);
+            addChildSubjectNode(parentSubjectNode);
         }
 
-        public boolean canImport(TransferHandler.TransferSupport support) {
-            // for the demo, we'll only support drops (not clipboard paste)
-            if (!support.isDrop()) {
-                return false;
-            }
+        subjectsTree = new JTree(topSubjectTreeNode);
+        subjectsTree.setToggleClickCount(1);
+        subjectsTree.setRootVisible(true);
+        subjectsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        subjectsTree.setDragEnabled(true);
+        subjectsTree.setDropMode(DropMode.ON);
+        subjectsTree.setTransferHandler(new TreeTransferHandler());
+        subjectsTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                //Returns the last path element of the selection.
+                //This method is useful only when the selection model allows a single selection.
+                selectedSubjectNode = (DefaultMutableTreeNode) subjectsTree.getLastSelectedPathComponent();
 
-            // we only import Strings
-            if (!support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                return false;
+                if (selectedSubjectNode == null)
+                    //Nothing is selected.
+                    return;
             }
+        });
+        scrollPaneSubjects.setViewportView(subjectsTree);
+    }
 
-            boolean actionSupported = (action & support.getSourceDropActions()) == action;
-            if (actionSupported) {
-                support.setDropAction(action);
-                return true;
+    private void addChildSubjectNode (DefaultMutableTreeNode parentNode) {
+        Vector<String> childSubjects = DbTableSubject.getSubjectsWithParent(parentNode.getUserObject().toString());
+        for (int i = 0; i < childSubjects.size(); i++) {
+            DefaultMutableTreeNode childParentNode = new DefaultMutableTreeNode(childSubjects.get(i));
+            parentNode.add(childParentNode);
+            TreeNode[] pathToNode = parentNode.getPath();
+            Vector<String> pathToNodeVector = new Vector<>();
+            for (int j = 0; j < pathToNode.length; j++) {
+                pathToNodeVector.add(pathToNode[j].toString());
             }
-
-            return false;
+            if (!pathToNodeVector.contains(childParentNode.getUserObject().toString())) {
+                addChildSubjectNode(childParentNode);
+            }
         }
+    }
 
-        public boolean importData(TransferHandler.TransferSupport support) {
-            // if we can't handle the import, say so
-            if (!canImport(support)) {
-                return false;
+    private void broadcastQuestionMultipleChoice(JList list, QuestionMultipleChoice questionMultipleChoice) {
+        if (!IDsFromBroadcastedQuestions.contains(String.valueOf(questionMultipleChoice.getID()))) {
+            DefaultListModel model = (DefaultListModel) list.getModel();
+            int index = model.size();
+
+            //resize image from db to icon size
+            ImageIcon icon = new ImageIcon(questionMultipleChoice.getIMAGE());
+            Image img = icon.getImage();
+            ImageIcon newIcon = null;
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
             }
+            ListEntry newListEntry = new ListEntry(questionMultipleChoice.getQUESTION(), newIcon);
+            model.insertElementAt(newListEntry, index);
+            own_networkcommunication.getClassroom().addQuestMultChoice(questionMultipleChoice);
+            IDsFromBroadcastedQuestions.add(String.valueOf(questionMultipleChoice.getID()));
 
-            // fetch the drop location
-            //JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
+            Rectangle rect = list.getCellBounds(index, index);
+            list.scrollRectToVisible(rect);
+            list.setSelectedIndex(index);
+            list.requestFocusInWindow();
 
-            //int index = dl.getIndex();
-
-            // fetch the data and bail if this fails
-            String data;
             try {
-                data = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
-            } catch (UnsupportedFlavorException e) {
-                return false;
-            } catch (java.io.IOException e) {
-                return false;
+                own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
+                own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            JList list = (JList) support.getComponent();
-            activateQuestionMultipleChoice(list, multipleChoicesQuestList.get(from_IDs.indexOf(copy_IDs.get(copy_IDs.size() - 1))));
-
-            return true;
-        }
-
-        public Question getSelectedQuestion() {
-            JList copyTo = new JList(copy_question);
-            int indexOfQuestion = copyTo.getSelectedIndex();
-            Question questionToReturn;
-            questionToReturn = questionList.get(indexOfQuestion);
-            return questionToReturn;
+        } else {
+            JOptionPane.showMessageDialog(null, "Unfortunately, you cannot use a question twice in the same set", "Warning", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    private void activateQuestionMultipleChoice(JList list, QuestionMultipleChoice questionMultipleChoice) {
-        DefaultListModel model = (DefaultListModel) list.getModel();
-        int index = model.size();
+    private void broadcastQuestionShortAnswer(JList list, QuestionShortAnswer questionShortAnswer) {
+        if (!IDsFromBroadcastedQuestions.contains(String.valueOf(questionShortAnswer.getID()))) {
+            DefaultListModel model = (DefaultListModel) list.getModel();
+            int index = model.size();
 
-        //resize image from db to icon size
-        ImageIcon icon = new ImageIcon(questionMultipleChoice.getIMAGE());
-        Image img = icon.getImage();
-        ImageIcon newIcon = null;
-        if (img.getWidth(null) > 0) {
-            BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = bi.createGraphics();
-            g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-            BufferedImage scaledImage = Scalr.resize(bi, 40);
-            newIcon = new ImageIcon(scaledImage);
+            //resize image from db to icon size
+            ImageIcon icon = new ImageIcon(questionShortAnswer.getIMAGE());
+            Image img = icon.getImage();
+            ImageIcon newIcon = null;
+            if (img.getWidth(null) > 0) {
+                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                BufferedImage scaledImage = Scalr.resize(bi, 40);
+                newIcon = new ImageIcon(scaledImage);
+            }
+            ListEntry newListEntry = new ListEntry(questionShortAnswer.getQUESTION(), newIcon);
+            model.insertElementAt(newListEntry, index);
+            own_networkcommunication.getClassroom().addQuestShortAnswer(questionShortAnswer);
+            IDsFromBroadcastedQuestions.add(String.valueOf(questionShortAnswer.getID()));
+
+            Rectangle rect = list.getCellBounds(index, index);
+            list.scrollRectToVisible(rect);
+            list.setSelectedIndex(index);
+            list.requestFocusInWindow();
+
+            try {
+                own_networkcommunication.sendShortAnswerQuestionWithID(questionShortAnswer.getID(), null);
+                own_networkcommunication.addQuestion(questionShortAnswer.getQUESTION());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Unfortunately, you cannot use a question twice in the same set", "Warning", JOptionPane.INFORMATION_MESSAGE);
         }
-        ListEntry newListEntry = new ListEntry(questionMultipleChoice.getQUESTION(), newIcon);
-        model.insertElementAt(newListEntry, index);
-        own_networkcommunication.getClassroom().addQuestMultChoice(multipleChoicesQuestList.get(index));
-        copy_IDs.add(String.valueOf(questionMultipleChoice.getID()));
-
-        Rectangle rect = list.getCellBounds(index, index);
-        list.scrollRectToVisible(rect);
-        list.setSelectedIndex(index);
-        list.requestFocusInWindow();
-
-        try {
-            own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
-            own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        activeQuestionIDs.add(String.valueOf(questionMultipleChoice.getID()));
     }
 }

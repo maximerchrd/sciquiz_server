@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="sciquiz_server">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/out/artifacts/sciquiz_server_jar/sciquiz_server.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

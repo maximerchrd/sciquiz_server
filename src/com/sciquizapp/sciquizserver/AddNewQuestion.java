@@ -1,11 +1,11 @@
 package com.sciquizapp.sciquizserver;
 
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import com.sciquizapp.sciquizserver.database_management.*;
-import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
-import tools.ListEntry;
 import tools.Scalr;
 
 import java.awt.*;
@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -26,38 +27,39 @@ import javax.swing.tree.DefaultTreeModel;
 
 
 public class AddNewQuestion extends JPanel implements ActionListener{
-	JLabel question_label;
-	JLabel answer1_label;
-	JTextArea question_text;
-	JCheckBox answer1_checkbox;
-	JTextArea answer1_text;
-	JButton answer1_delete_button;
-	JComboBox questiontype_list;
-	Vector<JLabel> labelVector;
-	Vector<JCheckBox> checkboxVector;
-	Vector<JTextArea> textfieldVector;
-	final Vector<JTextArea> subjectsVector;
-	final Vector<JTextArea> objectivesVector;
+	private JLabel question_label;
+	private JLabel answer1_label;
+	private JTextArea question_text;
+	private JCheckBox answer1_checkbox;
+	private JTextArea answer1_text;
+	private JButton answer1_delete_button;
+	private JComboBox questiontype_list;
+	private Vector<JLabel> labelVector;
+	private Vector<JCheckBox> checkboxVector;
+	private Vector<JTextArea> textfieldVector;
+	private final Vector<JComboBox> subjectsVector;
+	private final Vector<JComboBox> objectivesVector;
 	private JFileChooser mFileChooser;
 	private String mFilePath = "";
-	int new_correct_answer_index = 0;
-	int new_subject_index = 0;
-	int new_objective_index = 0;
-	int bottom_index = 7;
-	final int MAX_ANSWERS = 10;
-	JPanel panel;
-	final JFrame new_question_frame;
-	int window_width;
-	int window_height;
-	GridBagLayout columnsLayout;
-	Object[] questiontypes;
-	JButton save_quest_button;
-	JButton add_image_button;
+	private int new_correct_answer_index = 0;
+	private int new_subject_index = 0;
+	private int new_objective_index = 0;
+	private int bottom_index = 7;
+	private final int MAX_ANSWERS = 10;
+	private JPanel panel;
+	private final JFrame new_question_frame;
+	private int window_width;
+	private int window_height;
+	private GridBagLayout columnsLayout;
+	private Object[] questiontypes;
+	private JButton save_quest_button;
+	private JButton add_image_button;
+	private JTextArea imagePathTextArea;
+	final private QuestionsBrowser mQuestionsBrowser;
 
 
-	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final List<Question> arg_questionList,
-						  final List<QuestionMultipleChoice> arg_multChoiceQuestionList, final DefaultListModel arg_from_questions,
-						  final DefaultListModel<String> arg_from_IDs, final JTree tree) {
+	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final JTree tree, final QuestionsBrowser questionsBrowser) {
+		mQuestionsBrowser = questionsBrowser;
 		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
@@ -65,12 +67,13 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		new_question_frame.add( panel );
 		panel.setAutoscrolls(true);
 		new_question_frame.pack();
-		questiontypes = new Object[]{"question ? choix multiples","question ? r?ponse br?ve"};
+		questiontypes = new Object[]{"multiple choice question","short answer question"};
 		questiontype_list = new JComboBox(questiontypes);
 		question_label = new JLabel("Question:");
 		question_text = new JTextArea("	");
 		answer1_checkbox = new JCheckBox();
-		answer1_label = new JLabel("Réponse 1:");
+		answer1_label = new JLabel("Answer 1:");
+
 		answer1_text = new JTextArea("	");
 		checkboxVector = new Vector<>();
 		labelVector = new Vector<>();
@@ -78,15 +81,31 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		subjectsVector = new Vector<>();
 		objectivesVector = new Vector<>();
 		GridBagConstraints add_image_button_constraints = new GridBagConstraints();
+		GridBagConstraints imagePathText_constraints = new GridBagConstraints();
 		GridBagConstraints save_quest_button_constraints = new GridBagConstraints();
-		add_image_button = new JButton("ajouter une image");
-		save_quest_button = new JButton("ajouter la question");
+		add_image_button = new JButton("add a picture");
+		imagePathTextArea = new JTextArea();
+		save_quest_button = new JButton("save the question");
 
 
 		columnsLayout = new GridBagLayout();
 		panel.setLayout(columnsLayout);
 
 
+		questiontype_list.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						JComboBox combo = (JComboBox)e.getSource();
+						String questionType = (String)combo.getSelectedItem();
+						for (int i = 0; questionType.contentEquals("short answer question") && i < checkboxVector.size(); i++) {
+							checkboxVector.get(i).setVisible(false);
+						}
+						for (int i = 0; questionType.contentEquals("multiple choice question") && i < checkboxVector.size(); i++) {
+							checkboxVector.get(i).setVisible(true);
+						}
+					}
+				}
+		);
 		GridBagConstraints questiontype_list_constraints = new GridBagConstraints();
 		questiontype_list_constraints.gridwidth = 3;
 		questiontype_list_constraints.gridx = 0;
@@ -147,14 +166,17 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		panel.add(answer1_delete_button,answer1_delete_button_constraints);
 
 		//implement a button to add a correct answer
-		JButton add_correct_answer_button = new JButton("Ajouter une r?ponse");
+		JButton add_correct_answer_button = new JButton("Add an answer");
 		add_correct_answer_button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e1) {
 				if (new_correct_answer_index < MAX_ANSWERS - 1) {
-					JLabel new_answer_label = new JLabel("R?ponse " + (new_correct_answer_index + 2) + ":");
+					JLabel new_answer_label = new JLabel("Answer " + (new_correct_answer_index + 2) + ":");
 					JCheckBox new_checkbox = new JCheckBox();
 					checkboxVector.add(new_checkbox);
+					if (questiontype_list.getSelectedItem().toString().contentEquals("short answer question")) {
+						checkboxVector.get(checkboxVector.size() - 1).setVisible(false);
+					}
 					JTextArea new_answer_text = new JTextArea("	");
 					JButton new_delete_answer_button = new JButton("x");
 					new_delete_answer_button.addActionListener(new ActionListener() {
@@ -201,8 +223,10 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 
 					add_image_button_constraints.gridy += 2;
+					imagePathText_constraints.gridy += 2;
 					save_quest_button_constraints.gridy += 2;
 					columnsLayout.setConstraints(add_image_button, add_image_button_constraints);
+					columnsLayout.setConstraints(imagePathTextArea, imagePathText_constraints);
 					columnsLayout.setConstraints(save_quest_button, save_quest_button_constraints);
 					panel.revalidate();
 					panel.repaint();
@@ -219,7 +243,6 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 		addSubjectUI();
 		addObjectiveUI();
-
 
 		//implement a button to add a picture
 		add_image_button.addActionListener(new ActionListener()
@@ -261,12 +284,19 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 				//Reset the file chooser for the next time it's shown.
 				mFileChooser.setSelectedFile(null);
+
+				imagePathTextArea.setText(mFilePath);
 			}
 		});
-		add_image_button_constraints.gridwidth = 3;
+		add_image_button_constraints.gridwidth = 2;
 		add_image_button_constraints.gridx = 0;
 		add_image_button_constraints.gridy = bottom_index - 1;
 		panel.add(add_image_button, add_image_button_constraints);
+
+		imagePathTextArea.setText("        ");
+		imagePathText_constraints.gridx = 2;
+		imagePathText_constraints.gridy = bottom_index - 1;
+		panel.add(imagePathTextArea, imagePathText_constraints);
 
 		//implement a button to add a new question to the database
 		final DBManager new_db_man = new DBManager();
@@ -282,24 +312,74 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 
 				for (int i = 0; i < subjectsVector.size(); i++) {
 					try {
-						DbTableSubject.addSubject(subjectsVector.get(i).getText().replace("'","''"));
+						DbTableSubject.addSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'","''"));
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}
 				for (int i = 0; i < objectivesVector.size(); i++) {
 					try {
-						DbTableLearningObjectives.addObjective(objectivesVector.get(i).getText().replace("'","''"),1);
+						DbTableLearningObjectives.addObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'","''"),1);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}
 
 				//add question to database according to question type
-				if (questiontype_list.getSelectedItem().toString().equals("question ? r?ponse br?ve")) {
-					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer("chimie", "1", question_text.getText(), answer1_text.getText(), mFilePath);
+				if (questiontype_list.getSelectedItem().toString().equals("short answer question")) {
+					QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer();
+					new_questshortanswer.setQUESTION(question_text.getText().replace("'","''"));
+					if (mFilePath.length() > 0) {
+						new_questshortanswer.setIMAGE(mFilePath);
+					}
+					ArrayList<String> answerOptions = new ArrayList<String>();
+					for (int i = 0; i < textfieldVector.size(); i++) {
+						if (textfieldVector.get(i).toString().length() > 0) {
+							answerOptions.add(textfieldVector.get(i).getText().replace("'","''"));
+						}
+					}
+					new_questshortanswer.setANSWER(answerOptions);
+					String idGlobal = "-1";
+					try {
+						idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					new_questshortanswer.setID(Integer.valueOf(idGlobal));
+					arg_genericQuestionList.add(new QuestionGeneric(new_questshortanswer.getID(), 1));
 
-				} else if (questiontype_list.getSelectedItem().toString().equals("question ? choix multiples")) {
+					//resize image of question to fit icon size
+					ImageIcon icon = new ImageIcon(new_questshortanswer.getIMAGE());
+					Image img = icon.getImage();
+					ImageIcon newIcon = null;
+					if (img.getWidth(null) > 0) {
+						BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+						Graphics2D g = bi.createGraphics();
+						g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+						BufferedImage scaledImage = Scalr.resize(bi, 40);
+						newIcon = new ImageIcon(scaledImage);
+					}
+
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+					model.insertNodeInto(new DefaultMutableTreeNode(new_questshortanswer), root, root.getChildCount());
+					model.reload();
+
+					for (int i = 0; i < subjectsVector.size(); i++) {
+						try {
+							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'","''"));
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+					for (int i = 0; i < objectivesVector.size(); i++) {
+						try {
+							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'","''"));
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+				} else if (questiontype_list.getSelectedItem().toString().equals("multiple choice question")) {
 					int number_correct_answers = 0;
 					String temp_option;
 					for (int i = 0; i < checkboxVector.size(); i++) {
@@ -317,16 +397,12 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 					new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
 					try {
 						DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-					try {
 						new_questmultchoice.setID(DbTableQuestionMultipleChoice.getLastIDGlobal());
+
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
-					arg_multChoiceQuestionList.add(new_questmultchoice);
-					arg_genericQuestionList.add(new QuestionGeneric("MULTQ",arg_multChoiceQuestionList.size()-1));
+					arg_genericQuestionList.add(new QuestionGeneric(new_questmultchoice.getID(),0));
 
 					//resize image of question to fit icon size
 					ImageIcon icon = new ImageIcon(new_questmultchoice.getIMAGE());
@@ -339,43 +415,33 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 						BufferedImage scaledImage = Scalr.resize(bi, 40);
 						newIcon = new ImageIcon(scaledImage);
 					}
-					arg_from_questions.addElement(new ListEntry(new_questmultchoice.getQUESTION(),newIcon));
 
 					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
 					model.insertNodeInto(new DefaultMutableTreeNode(new_questmultchoice), root, root.getChildCount());
-					arg_from_IDs.addElement(String.valueOf(arg_multChoiceQuestionList.get(arg_multChoiceQuestionList.size() - 1).getID()));
+					model.reload();
 
 					for (int i = 0; i < subjectsVector.size(); i++) {
 						try {
-							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getText().replace("'","''"));
+							DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'","''"));
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
 					}
 					for (int i = 0; i < objectivesVector.size(); i++) {
 						try {
-							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getText().replace("'","''"));
+							DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'","''"));
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
 					}
 
 				} else {
-					Question new_quest = new Question("chimie", "1", question_text.getText(), answer1_text.getText(),
-							options_vector.get(1), options_vector.get(2), options_vector.get(3),options_vector.get(0),mFilePath);
-					try {
-						new_db_man.addQuestion(new_quest);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					arg_questionList.add(new_quest);
-					arg_from_questions.addElement(new_quest.getQUESTION());
-					arg_from_IDs.addElement(String.valueOf(arg_questionList.get(arg_questionList.size() - 1).getID()));
+					System.out.println("Problem saving question: question type not supported");
 				}
-//				DefaultListModel<String>  jlist_model = (DefaultListModel<String>) arg_dragFrom.getModel();
-//				arg_dragFrom.setModel(jlist_model);
+
+				mQuestionsBrowser.buildSubjectTree();
+
 				new_question_frame.dispatchEvent(new WindowEvent(new_question_frame, WindowEvent.WINDOW_CLOSING));
 			}
 		});
@@ -394,7 +460,15 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		{
 			public void actionPerformed(ActionEvent e1)
 			{
-				JTextArea new_objective_text = new JTextArea("	");
+				JComboBox new_objective_text = new JComboBox();
+				Vector<String> allObjectives = DbTableLearningObjectives.getAllObjectives();
+				Object[] elements = new Object[allObjectives.size()];
+				for (int i = 0; i < allObjectives.size(); i++) {
+					elements[i] = allObjectives.get(i);
+				}
+				AutoCompleteSupport.install(new_objective_text, GlazedLists.eventListOf(elements));
+				new_objective_text.setPreferredSize(new Dimension(300,25));
+				panel.add(new_objective_text);
 				objectivesVector.add(new_objective_text);
 				JButton new_delete_objective_button = new JButton("x");
 				new_delete_objective_button.addActionListener(new ActionListener() {
@@ -440,7 +514,14 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 		{
 			public void actionPerformed(ActionEvent e1)
 			{
-				JTextArea new_subject_text = new JTextArea("	");
+				JComboBox new_subject_text = new JComboBox();
+				Vector<String> allSubjects = DbTableSubject.getAllSubjects();
+				Object[] elements = new Object[allSubjects.size()];
+				for (int i = 0; i < allSubjects.size(); i++) {
+					elements[i] = allSubjects.get(i);
+				}
+				AutoCompleteSupport.install(new_subject_text, GlazedLists.eventListOf(elements));
+				new_subject_text.setPreferredSize(new Dimension(200,25));
 				subjectsVector.add(new_subject_text);
 				JButton new_delete_subject_button = new JButton("x");
 				new_delete_subject_button.addActionListener(new ActionListener() {

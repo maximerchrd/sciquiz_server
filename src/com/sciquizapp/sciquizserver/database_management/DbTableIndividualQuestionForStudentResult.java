@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver.database_management;
 
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.*;
@@ -32,7 +34,7 @@ public class DbTableIndividualQuestionForStudentResult {
             System.exit(0);
         }
     }
-    static public double addIndividualQuestionForStudentResult(int id_global, String student_name, String answers) {
+    static public double addIndividualQuestionForStudentResult(int id_global, String student_name, String answers, String answerType) {
         double quantitative_evaluation = -1;
         answers = answers.replace("'","''");
         Connection c = null;
@@ -51,38 +53,48 @@ public class DbTableIndividualQuestionForStudentResult {
             stmt.executeUpdate(sql);
 
 
-            // correcting the answers and evaluate the multiple choice question in %
-            String[] student_answers_array = answers.split("\\|\\|\\|");
-            int number_answers = 0;
-            String query = "SELECT OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS FROM multiple_choice_questions WHERE ID_GLOBAL = " + id_global + ";";
-            ResultSet rs = stmt.executeQuery(query);
-            Vector<String> all_options_vector = new Vector<>();
-            for (int i = 1; i < 11; i++) {
-                if (!rs.getString(i).equals(" ")) {
-                    all_options_vector.add(rs.getString(i));
-                    number_answers++;
+            if (answerType.contains("ANSW0")) {
+                // correcting the answers and evaluate the multiple choice question in %
+                String[] student_answers_array = answers.split("\\|\\|\\|");
+                int number_answers = 0;
+                String query = "SELECT OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS FROM multiple_choice_questions WHERE ID_GLOBAL = " + id_global + ";";
+                ResultSet rs = stmt.executeQuery(query);
+                Vector<String> all_options_vector = new Vector<>();
+                for (int i = 1; i < 11; i++) {
+                    if (!rs.getString(i).equals(" ")) {
+                        all_options_vector.add(rs.getString(i));
+                        number_answers++;
+                    }
                 }
-            }
-            String[] right_answers_array = new String[rs.getInt(11)];
-            for (int i = 0; i < rs.getInt(11); i++) {
-                right_answers_array[i] = rs.getString(i+1);
-            }
-            int number_rignt_checked_answers_from_student = 0;
-            for (int i = 0; i < right_answers_array.length; i++) {
-                if (Arrays.asList(student_answers_array).contains(right_answers_array[i])) {
-                    number_rignt_checked_answers_from_student++;
+                String[] right_answers_array = new String[rs.getInt(11)];
+                for (int i = 0; i < rs.getInt(11); i++) {
+                    right_answers_array[i] = rs.getString(i + 1);
                 }
-            }
-            int number_right_unchecked_answers_from_student = 0;
-            for (int i = 0; i < number_answers; i++) {
-                if (!Arrays.asList(right_answers_array).contains(all_options_vector.get(i)) && !Arrays.asList(student_answers_array).contains(all_options_vector.get(i))) {
-                    number_right_unchecked_answers_from_student++;
+                int number_rignt_checked_answers_from_student = 0;
+                for (int i = 0; i < right_answers_array.length; i++) {
+                    if (Arrays.asList(student_answers_array).contains(right_answers_array[i])) {
+                        number_rignt_checked_answers_from_student++;
+                    }
                 }
-            }
-            quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
+                int number_right_unchecked_answers_from_student = 0;
+                for (int i = 0; i < number_answers; i++) {
+                    if (!Arrays.asList(right_answers_array).contains(all_options_vector.get(i)) && !Arrays.asList(student_answers_array).contains(all_options_vector.get(i))) {
+                        number_right_unchecked_answers_from_student++;
+                    }
+                }
+                quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
 
-            if (quantitative_evaluation < 100) {
+                if (quantitative_evaluation < 100) {
+                    quantitative_evaluation = 0;
+                }
+            } else if (answerType.contains("ANSW1")) {
+                QuestionShortAnswer questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(id_global);
                 quantitative_evaluation = 0;
+                for (int i = 0; i < questionShortAnswer.getANSWER().size() && quantitative_evaluation == 0; i++) {
+                    if (answers.contentEquals(questionShortAnswer.getANSWER().get(i))) {
+                        quantitative_evaluation = 100;
+                    }
+                }
             }
 
             System.out.println("student result: " + quantitative_evaluation);
@@ -143,5 +155,66 @@ public class DbTableIndividualQuestionForStudentResult {
         }
         resultsFile.close();
         return "done";
+    }
+
+    static public String getEvalForQuestionAndStudentIDs (Integer globalID, Integer globalStudentID) {
+        String evaluation = "";
+        String identifier = "";
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String query = "SELECT ID_DIRECT_EVAL,QUANTITATIVE_EVAL FROM individual_question_for_student_result " +
+                "WHERE (ID_STUDENT_GLOBAL='" + globalStudentID + "' AND ID_GLOBAL='" + globalID + "');";
+        try {
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                evaluation = rs.getString("QUANTITATIVE_EVAL");
+                identifier = rs.getString("ID_DIRECT_EVAL");
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return evaluation + "///" + identifier;
+    }
+
+    static public void setEvalForQuestionAndStudentIDs (Double eval, String identifier) {
+        Double evaluation = -1.0;
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String sql = "UPDATE individual_question_for_student_result SET QUANTITATIVE_EVAL = '" + eval + "' " +
+                "WHERE ID_DIRECT_EVAL = '" + identifier + "';";
+
+        try {
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

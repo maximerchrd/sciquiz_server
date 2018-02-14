@@ -1,6 +1,7 @@
 package com.sciquizapp.sciquizserver;
 
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
+import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,17 +13,25 @@ public class Classroom {
     private ArrayList<Student> students_array = null;
     private ArrayList<String> students_addresses = null;
     private ArrayList<QuestionMultipleChoice> current_set_quest_mult_choice = null;
+    private ArrayList<QuestionShortAnswer> current_set_quest_short_answer = null;
 
     public Classroom() {
         students_array = new ArrayList<Student>();
         students_addresses = new ArrayList<String>();
         current_set_quest_mult_choice = new ArrayList<QuestionMultipleChoice>();
+        current_set_quest_short_answer = new ArrayList<QuestionShortAnswer>();
     }
     public void addQuestMultChoice(QuestionMultipleChoice questionMultipleChoice) {
         current_set_quest_mult_choice.add(questionMultipleChoice);
     }
+    public void addQuestShortAnswer(QuestionShortAnswer questionShortAnswer) {
+        current_set_quest_short_answer.add(questionShortAnswer);
+    }
     public ArrayList<QuestionMultipleChoice> getCurrent_set_quest_mult_choice() {
         return current_set_quest_mult_choice;
+    }
+    public ArrayList<QuestionShortAnswer> getCurrent_set_quest_short_answer() {
+        return current_set_quest_short_answer;
     }
     public void addStudent(Student student) {
         students_array.add(student);
