@@ -3,6 +3,7 @@ package com.sciquizapp.sciquizserver.database_management;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Vector;
 
 /**
  * Created by maximerichard on 24.11.17.
@@ -47,6 +48,11 @@ public class DbTableRelationSubjectSubject {
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
+        }
+
+        Vector<String> questionIDs = DbTableRelationQuestionSubject.getQuestionsIdsForSubject(subjectChild);
+        for (int i = 0; i < questionIDs.size(); i++) {
+            DbTableRelationQuestionSubject.addRelationQuestionSubject(Integer.valueOf(questionIDs.get(i)),"");
         }
     }
 

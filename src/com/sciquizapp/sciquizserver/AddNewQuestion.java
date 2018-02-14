@@ -27,37 +27,39 @@ import javax.swing.tree.DefaultTreeModel;
 
 
 public class AddNewQuestion extends JPanel implements ActionListener{
-	JLabel question_label;
-	JLabel answer1_label;
-	JTextArea question_text;
-	JCheckBox answer1_checkbox;
-	JTextArea answer1_text;
-	JButton answer1_delete_button;
-	JComboBox questiontype_list;
-	Vector<JLabel> labelVector;
-	Vector<JCheckBox> checkboxVector;
-	Vector<JTextArea> textfieldVector;
-	final Vector<JComboBox> subjectsVector;
-	final Vector<JComboBox> objectivesVector;
+	private JLabel question_label;
+	private JLabel answer1_label;
+	private JTextArea question_text;
+	private JCheckBox answer1_checkbox;
+	private JTextArea answer1_text;
+	private JButton answer1_delete_button;
+	private JComboBox questiontype_list;
+	private Vector<JLabel> labelVector;
+	private Vector<JCheckBox> checkboxVector;
+	private Vector<JTextArea> textfieldVector;
+	private final Vector<JComboBox> subjectsVector;
+	private final Vector<JComboBox> objectivesVector;
 	private JFileChooser mFileChooser;
 	private String mFilePath = "";
-	int new_correct_answer_index = 0;
-	int new_subject_index = 0;
-	int new_objective_index = 0;
-	int bottom_index = 7;
-	final int MAX_ANSWERS = 10;
-	JPanel panel;
-	final JFrame new_question_frame;
-	int window_width;
-	int window_height;
-	GridBagLayout columnsLayout;
-	Object[] questiontypes;
-	JButton save_quest_button;
-	JButton add_image_button;
-	JTextArea imagePathTextArea;
+	private int new_correct_answer_index = 0;
+	private int new_subject_index = 0;
+	private int new_objective_index = 0;
+	private int bottom_index = 7;
+	private final int MAX_ANSWERS = 10;
+	private JPanel panel;
+	private final JFrame new_question_frame;
+	private int window_width;
+	private int window_height;
+	private GridBagLayout columnsLayout;
+	private Object[] questiontypes;
+	private JButton save_quest_button;
+	private JButton add_image_button;
+	private JTextArea imagePathTextArea;
+	final private QuestionsBrowser mQuestionsBrowser;
 
 
-	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final JTree tree) {
+	public AddNewQuestion(final List<QuestionGeneric> arg_genericQuestionList, final JTree tree, final QuestionsBrowser questionsBrowser) {
+		mQuestionsBrowser = questionsBrowser;
 		new_question_frame = new JFrame(Language.translate(Language.ADDNEWQUESTION));
 		window_width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.8);
 		window_height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
@@ -436,8 +438,9 @@ public class AddNewQuestion extends JPanel implements ActionListener{
 				} else {
 					System.out.println("Problem saving question: question type not supported");
 				}
-//				DefaultListModel<String>  jlist_model = (DefaultListModel<String>) arg_dragFrom.getModel();
-//				arg_dragFrom.setModel(jlist_model);
+
+				mQuestionsBrowser.buildSubjectTree();
+
 				new_question_frame.dispatchEvent(new WindowEvent(new_question_frame, WindowEvent.WINDOW_CLOSING));
 			}
 		});

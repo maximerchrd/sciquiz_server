@@ -164,4 +164,52 @@ public class DbTableSubject {
 
         return subjects;
     }
+
+    static public Boolean isSubject(String subject) {
+        Vector<String> subjects = new Vector<>();
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        String query = "SELECT SUBJECT FROM subjects WHERE SUBJECT='" + subject + "';";
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                subjects.add(rs.getString("SUBJECT"));
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+
+        if (subjects.size() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static public Vector<String> getAllParentsSubjects (String subject) {
+        Vector<String> allParentsSubjects = new Vector<>();
+        recursiveGetParentsSubjects(subject,allParentsSubjects);
+
+        return allParentsSubjects;
+    }
+    static private Vector<String> recursiveGetParentsSubjects (String subject, Vector<String> allParentsSubjects) {
+        Vector<String> parentSubjects = getSubjectsWithChild(subject);
+        for (int i = 0; i < parentSubjects.size(); i++) {
+            if (!allParentsSubjects.contains(parentSubjects.get(i))) {
+                allParentsSubjects.add(parentSubjects.get(i));
+            }
+            recursiveGetParentsSubjects(parentSubjects.get(i), allParentsSubjects);
+        }
+        return parentSubjects;
+    }
 }

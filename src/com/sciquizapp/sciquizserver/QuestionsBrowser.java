@@ -84,6 +84,7 @@ public class QuestionsBrowser extends JFrame {
     private List<DefaultMutableTreeNode> testsNodeList = new ArrayList<DefaultMutableTreeNode>();
     private List<Test> testsList = new ArrayList<Test>();
     private List<QuestionGeneric> leftGenericQuestionList = new ArrayList<QuestionGeneric>();
+    private JScrollPane questionTreeScrollPane;
 
     //members for right questions list
     static public Vector<String> IDsFromBroadcastedQuestions = new Vector<>();
@@ -128,179 +129,15 @@ public class QuestionsBrowser extends JFrame {
         subjectBrowsingUI(panel_questlist);
 
         own_networkcommunication = network_singleton;
-        try {
-            leftGenericQuestionList = DbTableQuestionGeneric.getAllGenericQuestions();
-            testsList = DbTableTests.getAllTests();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        for (int i = 0; i < testsList.size(); i++) {
-            DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(testsList.get(i));
-            topTreeNode.add(newTreeNode);
-            testsNodeList.add(newTreeNode);
-        }
-        for (int i = 0; i < leftGenericQuestionList.size(); i++) {
-            QuestionMultipleChoice questionMultipleChoice = null;
-            QuestionShortAnswer questionShortAnswer = null;
-            if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 0) {
-                try {
-                    questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(leftGenericQuestionList.get(i).getGlobalID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 1) {
-                try {
-                    questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(leftGenericQuestionList.get(i).getGlobalID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Problem reading generic question list: question type not supported");
-            }
-
-            String imagePath = questionMultipleChoice == null ? questionShortAnswer.getIMAGE() : questionMultipleChoice.getIMAGE();
-            String questionText = questionMultipleChoice == null ? questionShortAnswer.getQUESTION() : questionMultipleChoice.getQUESTION();
-            Integer globalID = questionMultipleChoice == null ? questionShortAnswer.getID() : questionMultipleChoice.getID();
-
-            ImageIcon newIcon = null;
-            ImageIcon icon = new ImageIcon(imagePath);
-            Image img = icon.getImage();
-            if (img.getWidth(null) > 0) {
-                BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = bi.createGraphics();
-                g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                BufferedImage scaledImage = Scalr.resize(bi, 40);
-                newIcon = new ImageIcon(scaledImage);
-            }
-            leftQuestionListModel.addElement(new ListEntry(questionText, newIcon));
-
-            Boolean questionAdded = false;
-            for (int j = 0; !questionAdded && j < testsList.size(); j++) {
-                if (testsList.get(j).getIdsQuestions().contains(globalID)) {
-                    DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
-                            new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
-                    testsNodeList.get(j).add(newTreeNode);
-                    questionAdded = true;
-                }
-            }
-            if (!questionAdded) {
-                DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
-                        new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
-                topTreeNode.add(newTreeNode);
-            }
-        }
-
-        panel_for_from = new JPanel();
-        panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
-        TreeFromQuestions = new JTree(topTreeNode);
-        TreeFromQuestions.setToggleClickCount(1);
-        TreeFromQuestions.setRootVisible(false);
-        TreeFromQuestions.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        TreeFromQuestions.setDragEnabled(true);
-        TreeFromQuestions.setDropMode(DropMode.ON);
-        TreeFromQuestions.setTransferHandler(new TreeTransferHandler());
-
-        TreeFromQuestions.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                //Returns the last path element of the selection.
-                //This method is useful only when the selection model allows a single selection.
-                selectedNodeTreeFrom = (DefaultMutableTreeNode) TreeFromQuestions.getLastSelectedPathComponent();
-
-                if (selectedNodeTreeFrom == null)
-                    //Nothing is selected.
-                    return;
-
-                Object nodeInfo = selectedNodeTreeFrom.getUserObject();
-
-                if (nodeInfo instanceof QuestionMultipleChoice && selectedNodeTreeFrom.isLeaf()) {
-                    questionMultChoiceSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
-                    questionShortAnswerSelectedNodeTreeFrom = null;
-                    testSelectedNodeTreeFrom = null;
-                } else if (nodeInfo instanceof QuestionShortAnswer && selectedNodeTreeFrom.isLeaf()) {
-                    questionShortAnswerSelectedNodeTreeFrom = (QuestionShortAnswer) nodeInfo;
-                    questionMultChoiceSelectedNodeTreeFrom = null;
-                    testSelectedNodeTreeFrom = null;
-                } else {
-                    testSelectedNodeTreeFrom = (Test) nodeInfo;
-                    questionMultChoiceSelectedNodeTreeFrom = null;
-                    questionShortAnswerSelectedNodeTreeFrom = null;
-                }
-            }
-        });
-        TreeFromQuestions.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                if (evt.getClickCount() == 2) {
-                    if (questionMultChoiceSelectedNodeTreeFrom != null) {
-                        JList list = rightJlist;
-                        broadcastQuestionMultipleChoice(list, questionMultChoiceSelectedNodeTreeFrom);
-                    } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
-                        JList list = rightJlist;
-                        broadcastQuestionShortAnswer(list, questionShortAnswerSelectedNodeTreeFrom);
-                    }
-                }
-            }
-        });
-        TreeFromQuestions.setCellRenderer(new DefaultTreeCellRenderer() {
-            private JLabel label;
-
-            @Override
-            public Component getTreeCellRendererComponent(JTree tree,
-                                                          Object value, boolean selected, boolean expanded,
-                                                          boolean isLeaf, int row, boolean focused) {
-                label = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
-                Object o = ((DefaultMutableTreeNode) value).getUserObject();
-                if (o instanceof QuestionMultipleChoice) {
-                    QuestionMultipleChoice question = (QuestionMultipleChoice) o;
-                    ImageIcon newIcon = null;
-                    ImageIcon icon = new ImageIcon(question.getIMAGE());
-                    Image img = icon.getImage();
-                    if (img.getWidth(null) > 0) {
-                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                        Graphics2D g = bi.createGraphics();
-                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                        BufferedImage scaledImage = Scalr.resize(bi, 40);
-                        newIcon = new ImageIcon(scaledImage);
-                        label.setIcon(newIcon);
-                    } else {
-                        label.setIcon(null);
-                    }
-                    label.setText(question.getQUESTION());
-                } else if (o instanceof QuestionShortAnswer) {
-                    QuestionShortAnswer question = (QuestionShortAnswer) o;
-                    ImageIcon newIcon = null;
-                    ImageIcon icon = new ImageIcon(question.getIMAGE());
-                    Image img = icon.getImage();
-                    if (img.getWidth(null) > 0) {
-                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                        Graphics2D g = bi.createGraphics();
-                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
-                        BufferedImage scaledImage = Scalr.resize(bi, 40);
-                        newIcon = new ImageIcon(scaledImage);
-                        label.setIcon(newIcon);
-                    } else {
-                        label.setIcon(null);
-                    }
-                    label.setText(question.getQUESTION());
-                } else if (o instanceof Test) {
-                    label.setIcon(UIManager.getIcon("FileChooser.homeFolderIcon"));
-                    label.setText("" + ((Test) ((DefaultMutableTreeNode) value).getUserObject()).getTestName());
-                } else {
-                    System.out.println("problem rendering tree cell: object neither question multchoice, question short answer nor test");
-                }
-                return label;
-            }
-        });
-        JScrollPane sp = new JScrollPane(TreeFromQuestions);
-        sp.setAlignmentX(0f);
-        panel_for_from.add(sp);
+        questionTreeScrollPane = new JScrollPane();
+        buildQuestionsTree("");
+        panel_for_from.add(questionTreeScrollPane);
 
         //implement a button to add a new question to the database
         JButton new_quest_button = new JButton("create a question");
         new_quest_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddNewQuestion new_quest = new AddNewQuestion(leftGenericQuestionList, TreeFromQuestions);
+                AddNewQuestion new_quest = new AddNewQuestion(leftGenericQuestionList, TreeFromQuestions, questionsBrowser);
             }
         });
         panel_for_from.add(new_quest_button);
@@ -341,7 +178,7 @@ public class QuestionsBrowser extends JFrame {
         panel_for_copy.add(sp2);
         panel_for_copy.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
         panel_questlist.setLayout(new FlowLayout());
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp, sp2);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, questionTreeScrollPane, sp2);
         panel_questlist.add(splitPane);
         System.out.println("width: " + splitpaneWidth + "; height: " + splitpaneHeight);
         splitPane.setPreferredSize(new Dimension(splitpaneWidth, splitpaneHeight));
@@ -461,6 +298,182 @@ public class QuestionsBrowser extends JFrame {
         panel_for_copy.add(delete_question_button);
     }
 
+    private void buildQuestionsTree(String selectedSubject) {
+        topTreeNode.removeAllChildren();
+        if (!DbTableSubject.isSubject(selectedSubject)) {
+            selectedSubject = "";
+        }
+        try {
+            leftGenericQuestionList = DbTableQuestionGeneric.getAllGenericQuestions();
+            testsList = DbTableTests.getAllTests();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        for (int i = 0; i < testsList.size(); i++) {
+            DefaultMutableTreeNode newTreeNode = new DefaultMutableTreeNode(testsList.get(i));
+            topTreeNode.add(newTreeNode);
+            testsNodeList.add(newTreeNode);
+        }
+        for (int i = 0; i < leftGenericQuestionList.size(); i++) {
+            Vector<String> questionSubjects = DbTableSubject.getSubjectsForQuestionID(leftGenericQuestionList.get(i).getGlobalID());
+            if (selectedSubject.length() == 0 || questionSubjects.contains(selectedSubject)) {
+                QuestionMultipleChoice questionMultipleChoice = null;
+                QuestionShortAnswer questionShortAnswer = null;
+                if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 0) {
+                    try {
+                        questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(leftGenericQuestionList.get(i).getGlobalID());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (leftGenericQuestionList.get(i).getIntTypeOfQuestion() == 1) {
+                    try {
+                        questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(leftGenericQuestionList.get(i).getGlobalID());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Problem reading generic question list: question type not supported");
+                }
+
+                String imagePath = questionMultipleChoice == null ? questionShortAnswer.getIMAGE() : questionMultipleChoice.getIMAGE();
+                String questionText = questionMultipleChoice == null ? questionShortAnswer.getQUESTION() : questionMultipleChoice.getQUESTION();
+                Integer globalID = questionMultipleChoice == null ? questionShortAnswer.getID() : questionMultipleChoice.getID();
+
+                ImageIcon newIcon = null;
+                ImageIcon icon = new ImageIcon(imagePath);
+                Image img = icon.getImage();
+                if (img.getWidth(null) > 0) {
+                    BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g = bi.createGraphics();
+                    g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                    BufferedImage scaledImage = Scalr.resize(bi, 40);
+                    newIcon = new ImageIcon(scaledImage);
+                }
+                leftQuestionListModel.addElement(new ListEntry(questionText, newIcon));
+
+                Boolean questionAdded = false;
+                for (int j = 0; !questionAdded && j < testsList.size(); j++) {
+                    if (testsList.get(j).getIdsQuestions().contains(globalID)) {
+                        DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
+                                new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
+                        testsNodeList.get(j).add(newTreeNode);
+                        questionAdded = true;
+                    }
+                }
+                if (!questionAdded) {
+                    DefaultMutableTreeNode newTreeNode = questionMultipleChoice == null ?
+                            new DefaultMutableTreeNode(questionShortAnswer) : new DefaultMutableTreeNode(questionMultipleChoice);
+                    topTreeNode.add(newTreeNode);
+                }
+            }
+        }
+
+        panel_for_from = new JPanel();
+        panel_for_from.setLayout(new BoxLayout(panel_for_from, BoxLayout.Y_AXIS));
+        TreeFromQuestions = new JTree(topTreeNode);
+        TreeFromQuestions.setToggleClickCount(1);
+        TreeFromQuestions.setRootVisible(false);
+        TreeFromQuestions.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        TreeFromQuestions.setDragEnabled(true);
+        TreeFromQuestions.setDropMode(DropMode.ON);
+        TreeFromQuestions.setTransferHandler(new TreeTransferHandler());
+
+        TreeFromQuestions.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                //Returns the last path element of the selection.
+                //This method is useful only when the selection model allows a single selection.
+                selectedNodeTreeFrom = (DefaultMutableTreeNode) TreeFromQuestions.getLastSelectedPathComponent();
+
+                if (selectedNodeTreeFrom == null)
+                    //Nothing is selected.
+                    return;
+
+                Object nodeInfo = selectedNodeTreeFrom.getUserObject();
+
+                if (nodeInfo instanceof QuestionMultipleChoice && selectedNodeTreeFrom.isLeaf()) {
+                    questionMultChoiceSelectedNodeTreeFrom = (QuestionMultipleChoice) nodeInfo;
+                    questionShortAnswerSelectedNodeTreeFrom = null;
+                    testSelectedNodeTreeFrom = null;
+                } else if (nodeInfo instanceof QuestionShortAnswer && selectedNodeTreeFrom.isLeaf()) {
+                    questionShortAnswerSelectedNodeTreeFrom = (QuestionShortAnswer) nodeInfo;
+                    questionMultChoiceSelectedNodeTreeFrom = null;
+                    testSelectedNodeTreeFrom = null;
+                } else {
+                    testSelectedNodeTreeFrom = (Test) nodeInfo;
+                    questionMultChoiceSelectedNodeTreeFrom = null;
+                    questionShortAnswerSelectedNodeTreeFrom = null;
+                }
+            }
+        });
+        TreeFromQuestions.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    if (questionMultChoiceSelectedNodeTreeFrom != null) {
+                        JList list = rightJlist;
+                        broadcastQuestionMultipleChoice(list, questionMultChoiceSelectedNodeTreeFrom);
+                    } else if (questionShortAnswerSelectedNodeTreeFrom != null) {
+                        JList list = rightJlist;
+                        broadcastQuestionShortAnswer(list, questionShortAnswerSelectedNodeTreeFrom);
+                    }
+                }
+            }
+        });
+        TreeFromQuestions.setCellRenderer(new DefaultTreeCellRenderer() {
+            private JLabel label;
+
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree,
+                                                          Object value, boolean selected, boolean expanded,
+                                                          boolean isLeaf, int row, boolean focused) {
+                label = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
+                Object o = ((DefaultMutableTreeNode) value).getUserObject();
+                if (o instanceof QuestionMultipleChoice) {
+                    QuestionMultipleChoice question = (QuestionMultipleChoice) o;
+                    ImageIcon newIcon = null;
+                    ImageIcon icon = new ImageIcon(question.getIMAGE());
+                    Image img = icon.getImage();
+                    if (img.getWidth(null) > 0) {
+                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D g = bi.createGraphics();
+                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                        BufferedImage scaledImage = Scalr.resize(bi, 40);
+                        newIcon = new ImageIcon(scaledImage);
+                        label.setIcon(newIcon);
+                    } else {
+                        label.setIcon(null);
+                    }
+                    label.setText(question.getQUESTION());
+                } else if (o instanceof QuestionShortAnswer) {
+                    QuestionShortAnswer question = (QuestionShortAnswer) o;
+                    ImageIcon newIcon = null;
+                    ImageIcon icon = new ImageIcon(question.getIMAGE());
+                    Image img = icon.getImage();
+                    if (img.getWidth(null) > 0) {
+                        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                        Graphics2D g = bi.createGraphics();
+                        g.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+                        BufferedImage scaledImage = Scalr.resize(bi, 40);
+                        newIcon = new ImageIcon(scaledImage);
+                        label.setIcon(newIcon);
+                    } else {
+                        label.setIcon(null);
+                    }
+                    label.setText(question.getQUESTION());
+                } else if (o instanceof Test) {
+                    label.setIcon(UIManager.getIcon("FileChooser.homeFolderIcon"));
+                    label.setText("" + ((Test) ((DefaultMutableTreeNode) value).getUserObject()).getTestName());
+                } else {
+                    System.out.println("problem rendering tree cell: object neither question multchoice, question short answer nor test");
+                }
+                return label;
+            }
+        });
+        questionTreeScrollPane.setViewportView(TreeFromQuestions);
+        questionTreeScrollPane.setAlignmentX(0f);
+    }
+
     private void subjectBrowsingUI(JPanel panel_questlist) {
         subjectBrowsingPanel = new JPanel();
         subjectBrowsingLayout = new GridBagLayout();
@@ -480,6 +493,13 @@ public class QuestionsBrowser extends JFrame {
             }
         });
         filterQuestionWithSubjectButton = new JButton("Filter questions with subject");
+        filterQuestionWithSubjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selectedSubjectNode != null) {
+                    buildQuestionsTree(selectedSubjectNode.getUserObject().toString());
+                }
+            }
+        });
 
         GridBagConstraints createSubjectButtonConstraints = new GridBagConstraints();
         createSubjectButtonConstraints.gridx = 0;
@@ -498,6 +518,8 @@ public class QuestionsBrowser extends JFrame {
         subjectTreeUI();
         panel_questlist.add(subjectBrowsingPanel);
     }
+
+
 
     private void subjectTreeUI() {
         scrollPaneSubjects = new JScrollPane();

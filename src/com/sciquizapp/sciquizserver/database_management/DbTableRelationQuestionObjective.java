@@ -43,4 +43,27 @@ public class DbTableRelationQuestionObjective {
             System.exit(0);
         }
     }
+
+    static public void addRelationQuestionObjective(Integer questionID, String objective) throws Exception {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = 	"INSERT INTO question_objective_relation (ID_GLOBAL, ID_OBJECTIVE_GLOBAL) " +
+                    "SELECT t1.ID_GLOBAL,t2.ID_OBJECTIVE_GLOBAL FROM generic_questions t1, learning_objectives t2 " +
+                    "WHERE t1.ID_GLOBAL = '" + questionID + "' " +
+                    "AND t2.OBJECTIVE='" + objective + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
 }

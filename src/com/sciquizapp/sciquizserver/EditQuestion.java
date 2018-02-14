@@ -270,14 +270,15 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
+                            DbTableRelationQuestionSubject.addRelationQuestionSubject(edited_questshortanswer.getID(),
+                                    subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
                     }
                     for (int i = 0; i < objectivesVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"));
+                            DbTableRelationQuestionObjective.addRelationQuestionObjective(edited_questshortanswer.getID(), objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
@@ -324,14 +325,16 @@ public class EditQuestion extends JPanel implements ActionListener {
 
                     for (int i = 0; i < subjectsVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionSubject.addRelationQuestionSubject(subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
+                            DbTableRelationQuestionSubject.addRelationQuestionSubject(edited_questmultchoice.getID(),
+                                    subjectsVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
                     }
                     for (int i = 0; i < objectivesVector.size(); i++) {
                         try {
-                            DbTableRelationQuestionObjective.addRelationQuestionObjective(objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"));
+                            DbTableRelationQuestionObjective.addRelationQuestionObjective(edited_questmultchoice.getID(),
+                                    objectivesVector.get(i).getSelectedItem().toString().replace("'", "''"));
                         } catch (Exception e1) {
                             e1.printStackTrace();
                         }
