@@ -12,26 +12,15 @@
  */
 
 package com.sciquizapp.sciquizserver;
-import java.awt.*;
 import java.io.IOException;
-
-import javax.swing.*;
 
 import com.sciquizapp.sciquizserver.database_management.DBManager;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.embed.swing.SwingNode;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -59,7 +48,7 @@ public class MyServer extends Application{
 
         Scene scene = new Scene(new StackPane());
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LearningTracker.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("views/LearningTracker.fxml"));
         scene.setRoot(loader.load());
         ClassroomActivityTabController controller = loader.getController();
         controller.init();

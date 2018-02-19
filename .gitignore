@@ -21,3 +21,5 @@ res/drawable/Scan 6.jpeg
 out/artifacts/sciquiz_server_jar/sciquiz_server.jar
 
 out/*
+
+*.class

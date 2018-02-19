@@ -1,6 +1,5 @@
 package com.sciquizapp.sciquizserver;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
@@ -89,7 +88,7 @@ public class ClassroomActivityTabController {
                 tablePanelConstraints.gridy = 0;
                 parent.add(displayTablePanel, tablePanelConstraints);
 
-                DisplayStats displayStats = new DisplayStats();
+                DisplayStatsController displayStats = new DisplayStatsController();
                 GridBagConstraints displayStatsConstraints = new GridBagConstraints();
                 displayStatsConstraints.gridx = 1;
                 displayStatsConstraints.gridy = 1;
