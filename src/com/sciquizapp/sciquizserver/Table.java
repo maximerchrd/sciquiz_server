@@ -193,28 +193,32 @@ public class Table extends JPanel {
 			columnNumber++;
 		}
 
-		//if statement to prevent from answering more than once to the current question
-		if (model2.getValueAt(rowNumber, columnNumber) == null) {
-			System.out.println("evaluation: " + evaluation);
-			if (evaluation == 100) {
-				policeColor.get(columnNumber).set(rowNumber,"green");
-			} else {
-				policeColor.get(columnNumber).set(rowNumber,"red");
-			}
-			table.getCellRenderer(rowNumber,columnNumber);
-			model2.setValueAt(answer, rowNumber, columnNumber);
+		if (columnNumber >= model2.getColumnCount()) {
+			System.out.println("Question stored in the database doesn't correspond to the question answered by a student");
+		} else {
+			//if statement to prevent from answering more than once to the current question
+			if (model2.getValueAt(rowNumber, columnNumber) == null) {
+				System.out.println("evaluation: " + evaluation);
+				if (evaluation == 100) {
+					policeColor.get(columnNumber).set(rowNumber, "green");
+				} else {
+					policeColor.get(columnNumber).set(rowNumber, "red");
+				}
+				table.getCellRenderer(rowNumber, columnNumber);
+				model2.setValueAt(answer, rowNumber, columnNumber);
 
-			// evaluation
-			Boolean found = false;
-			for (int i = 0; i < studentArrayList.size() && !found; i++) {
-				if (studentArrayList.get(i).getName().contentEquals(student.getName())) {
-					found = true;
-					String eval = model2.getValueAt(rowNumber, 2).toString();
-					Double oldEval = Double.valueOf(eval);
-					Double newEval = oldEval * studentArrayList.get(i).getNumberOfAnswers() + evaluation;
-					newEval = newEval / (studentArrayList.get(i).getNumberOfAnswers() + 1);
-					model2.setValueAt(Math.round(newEval),rowNumber,2);
-					studentArrayList.get(i).increaseNumberOfAnswers();
+				// evaluation
+				Boolean found = false;
+				for (int i = 0; i < studentArrayList.size() && !found; i++) {
+					if (studentArrayList.get(i).getName().contentEquals(student.getName())) {
+						found = true;
+						String eval = model2.getValueAt(rowNumber, 2).toString();
+						Double oldEval = Double.valueOf(eval);
+						Double newEval = oldEval * studentArrayList.get(i).getNumberOfAnswers() + evaluation;
+						newEval = newEval / (studentArrayList.get(i).getNumberOfAnswers() + 1);
+						model2.setValueAt(Math.round(newEval), rowNumber, 2);
+						studentArrayList.get(i).increaseNumberOfAnswers();
+					}
 				}
 			}
 		}

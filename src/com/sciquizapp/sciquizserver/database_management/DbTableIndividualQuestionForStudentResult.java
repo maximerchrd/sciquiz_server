@@ -60,32 +60,38 @@ public class DbTableIndividualQuestionForStudentResult {
                 String query = "SELECT OPTION0,OPTION1,OPTION2,OPTION3,OPTION4,OPTION5,OPTION6,OPTION7,OPTION8,OPTION9,NB_CORRECT_ANS FROM multiple_choice_questions WHERE ID_GLOBAL = " + id_global + ";";
                 ResultSet rs = stmt.executeQuery(query);
                 Vector<String> all_options_vector = new Vector<>();
-                for (int i = 1; i < 11; i++) {
-                    if (!rs.getString(i).equals(" ")) {
-                        all_options_vector.add(rs.getString(i));
-                        number_answers++;
-                    }
-                }
-                String[] right_answers_array = new String[rs.getInt(11)];
-                for (int i = 0; i < rs.getInt(11); i++) {
-                    right_answers_array[i] = rs.getString(i + 1);
-                }
-                int number_rignt_checked_answers_from_student = 0;
-                for (int i = 0; i < right_answers_array.length; i++) {
-                    if (Arrays.asList(student_answers_array).contains(right_answers_array[i])) {
-                        number_rignt_checked_answers_from_student++;
-                    }
-                }
-                int number_right_unchecked_answers_from_student = 0;
-                for (int i = 0; i < number_answers; i++) {
-                    if (!Arrays.asList(right_answers_array).contains(all_options_vector.get(i)) && !Arrays.asList(student_answers_array).contains(all_options_vector.get(i))) {
-                        number_right_unchecked_answers_from_student++;
-                    }
-                }
-                quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
+                int count = 0;
 
-                if (quantitative_evaluation < 100) {
-                    quantitative_evaluation = 0;
+                if (rs.next()) {
+                    for (int i = 1; i < 11; i++) {
+                        if (!rs.getString(i).equals(" ")) {
+                            all_options_vector.add(rs.getString(i));
+                            number_answers++;
+                        }
+                    }
+                    String[] right_answers_array = new String[rs.getInt(11)];
+                    for (int i = 0; i < rs.getInt(11); i++) {
+                        right_answers_array[i] = rs.getString(i + 1);
+                    }
+                    int number_rignt_checked_answers_from_student = 0;
+                    for (int i = 0; i < right_answers_array.length; i++) {
+                        if (Arrays.asList(student_answers_array).contains(right_answers_array[i])) {
+                            number_rignt_checked_answers_from_student++;
+                        }
+                    }
+                    int number_right_unchecked_answers_from_student = 0;
+                    for (int i = 0; i < number_answers; i++) {
+                        if (!Arrays.asList(right_answers_array).contains(all_options_vector.get(i)) && !Arrays.asList(student_answers_array).contains(all_options_vector.get(i))) {
+                            number_right_unchecked_answers_from_student++;
+                        }
+                    }
+                    quantitative_evaluation = 100 * (number_rignt_checked_answers_from_student + number_right_unchecked_answers_from_student) / number_answers;
+
+                    if (quantitative_evaluation < 100) {
+                        quantitative_evaluation = 0;
+                    }
+                } else {
+                    System.out.println("problem writing result: probably no corresponding question ID");
                 }
             } else if (answerType.contains("ANSW1")) {
                 QuestionShortAnswer questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(id_global);
