@@ -109,4 +109,16 @@ public class Classroom {
         }
         return students_addresses.size();
     }
+
+
+    public Student getStudentWithID(Integer studentID) {
+        Student student = new Student();
+        for (int i = 0; i < students_array.size(); i++) {
+            if (String.valueOf(studentID).contentEquals(String.valueOf(students_array.get(i).getStudentID()))) {
+                System.out.println("equal");
+                student = students_array.get(i);
+            }
+        }
+        return student;
+    }
 }

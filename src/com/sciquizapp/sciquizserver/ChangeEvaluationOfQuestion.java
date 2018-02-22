@@ -23,7 +23,7 @@ public class ChangeEvaluationOfQuestion extends JPanel implements ActionListener
     JButton SaveNewEval;
 
 
-    public ChangeEvaluationOfQuestion(Integer globalID, Integer globalStudentID) {
+    public ChangeEvaluationOfQuestion(Integer globalID, Integer globalStudentID, NetworkCommunication networkCommunication) {
         ChangeEvaluationFrame = new JFrame("Change Evaluation");
         changeEvaluationPanel = new JPanel();
         gridBagLayout = new GridBagLayout();
@@ -65,6 +65,7 @@ public class ChangeEvaluationOfQuestion extends JPanel implements ActionListener
         SaveNewEval.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent e) {
                   DbTableIndividualQuestionForStudentResult.setEvalForQuestionAndStudentIDs(Double.valueOf(NewEvalTextArea.getText()),identifier);
+                  networkCommunication.UpdateEvaluation(Double.valueOf(NewEvalTextArea.getText()),globalID, globalStudentID);
                   ChangeEvaluationFrame.dispatchEvent(new WindowEvent(ChangeEvaluationFrame, WindowEvent.WINDOW_CLOSING));
               }
         });

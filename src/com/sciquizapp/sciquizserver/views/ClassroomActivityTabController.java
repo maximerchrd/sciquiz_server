@@ -84,7 +84,7 @@ public class ClassroomActivityTabController {
                 parent.add(panel_for_questlist,questionsBrowserConstraints);
 
                 DisplayTableUsersVsQuestions displayTablePanel = new DisplayTableUsersVsQuestions(new GridBagLayout(),
-                        false, screenWidth, screenHeight, TableUserVsQuest);
+                        false, screenWidth, screenHeight, TableUserVsQuest, CommunicationWithClients);
                 GridBagConstraints tablePanelConstraints = new GridBagConstraints();
                 tablePanelConstraints.gridx = 1;
                 tablePanelConstraints.gridy = 0;

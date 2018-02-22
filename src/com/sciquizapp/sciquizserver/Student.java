@@ -12,7 +12,7 @@ import java.net.InetAddress;
  */
 public class Student {
     private RemoteDevice mRemoteDevice = null;
-    private String mAddress = "no address";
+    private String mMacAddress = "no address";
     private InetAddress mInetAddress = null;
     private String mName = "no name";
     private StreamConnection mConnection = null;
@@ -28,13 +28,13 @@ public class Student {
     public Student() {
         numberOfAnswers = 0;
     }
-    public Student(String arg_address, String arg_name) {
-        mAddress = arg_address;
+    public Student(String arg_MacAddress, String arg_name) {
+        mMacAddress = arg_MacAddress;
         mName = arg_name;
         numberOfAnswers = 0;
     }
     public Student(String arg_address, String arg_name, StreamConnection arg_connection, Boolean connectedByBT) {
-        mAddress = arg_address;
+        mMacAddress = arg_address;
         mName = arg_name;
         mConnection = arg_connection;
         mConnectedByBT = connectedByBT;
@@ -50,8 +50,8 @@ public class Student {
     public void setInetAddress(InetAddress arg_inetaddress) {
         mInetAddress = arg_inetaddress;
     }
-    public void setAddress(String arg_address) {
-        mAddress = arg_address;
+    public void setAddress(String arg_MacAddress) {
+        mMacAddress = arg_MacAddress;
     }
     public void setName(String arg_name) {
         mName = arg_name;
@@ -82,7 +82,7 @@ public class Student {
         return mInetAddress;
     }
     public String getAddress() {
-        return mAddress;
+        return mMacAddress;
     }
     public  String getName() {
         return  mName;

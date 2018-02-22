@@ -582,7 +582,6 @@ public class NetworkCommunication {
                 while (bytesread >= 0) {
                     try {
                         byte[] in_bytearray = new byte[1000];
-                        //System.out.println("listening to " + aClass.getStudents_array().get(j).getAddress());
                         bytesread = answerInStream.read(in_bytearray);
                         System.out.println(bytesread + " bytes read");
                         if (bytesread >= 1000) System.out.println("Answer too large for bytearray");
@@ -598,10 +597,13 @@ public class NetworkCommunication {
                                 SendEvaluation(eval,Integer.valueOf(answerString.split("///")[5]), arg_student);
                                 mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
                             } else if (answerString.split("///")[0].contains("CONN")) {
-                                Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
+                                Student student = arg_student;
+                                student.setAddress(answerString.split("///")[1]);
+                                student.setName(answerString.split("///")[2]);
                                 Integer studentID = DbTableStudents.addStudent(answerString.split("///")[1], answerString.split("///")[2]);
                                 student.setStudentID(studentID);
                                 mTableQuestionVsUser.addUser(student, true);
+                                aClass.updateStudent(student);
                             } else if (answerString.split("///")[0].contains("DISC")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                                 mTableQuestionVsUser.userDisconnected(student);
@@ -622,6 +624,32 @@ public class NetworkCommunication {
 
     private void SendEvaluation(double evaluation, int questionID, Student student) {
         String evalToSend = "EVAL///" + evaluation + "///" + questionID + "///";
+        System.out.println("sending: " + evalToSend);
+        byte[] bytes = new byte[40];
+        int bytes_length = 0;
+        try {
+            bytes_length = evalToSend.getBytes("UTF-8").length;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < bytes_length; i++) {
+            try {
+                bytes[i] = evalToSend.getBytes("UTF-8")[i];
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            student.getOutputStream().write(bytes, 0, bytes.length);
+            student.getOutputStream().flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void UpdateEvaluation(double evaluation, Integer questionID, Integer studentID) {
+        Student student = aClass.getStudentWithID(studentID);
+        String evalToSend = "UPDEV///" + evaluation + "///" + questionID + "///";
         System.out.println("sending: " + evalToSend);
         byte[] bytes = new byte[40];
         int bytes_length = 0;

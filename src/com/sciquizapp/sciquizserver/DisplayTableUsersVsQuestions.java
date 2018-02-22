@@ -14,7 +14,8 @@ import java.util.Vector;
  * Created by maximerichard on 22.01.18.
  */
 public class DisplayTableUsersVsQuestions extends JPanel {
-    public DisplayTableUsersVsQuestions(LayoutManager layout, boolean isDoubleBuffered, int screenWidth, int screenHeight, Table tableUserVsQuest) {
+    public DisplayTableUsersVsQuestions(LayoutManager layout, boolean isDoubleBuffered, int screenWidth, int screenHeight,
+                                        Table tableUserVsQuest, NetworkCommunication networkCommunication) {
         super(layout, isDoubleBuffered);
 
         JComboBox chooseClass = null;
@@ -87,7 +88,7 @@ public class DisplayTableUsersVsQuestions extends JPanel {
                 try {
                     Student student = tableUserVsQuest.getStudentWithRow(tableUserVsQuest.getTable().getSelectedRow());
                     Integer globalID = Integer.parseInt(QuestionsBrowser.IDsFromBroadcastedQuestions.get(tableUserVsQuest.getTable().getSelectedColumn() - 3));
-                    ChangeEvaluationOfQuestion changeEvaluationOfQuestion = new ChangeEvaluationOfQuestion(globalID, student.getStudentID());
+                    ChangeEvaluationOfQuestion changeEvaluationOfQuestion = new ChangeEvaluationOfQuestion(globalID, student.getStudentID(), networkCommunication);
                     System.out.println("student: " + student.getName() + " row: " + tableUserVsQuest.getTable().getSelectedRow());
                 } catch (Exception e) {
                     e.printStackTrace();

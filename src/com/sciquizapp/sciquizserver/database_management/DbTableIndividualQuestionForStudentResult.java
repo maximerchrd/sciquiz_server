@@ -197,7 +197,6 @@ public class DbTableIndividualQuestionForStudentResult {
     }
 
     static public void setEvalForQuestionAndStudentIDs (Double eval, String identifier) {
-        Double evaluation = -1.0;
         Connection c = null;
         Statement stmt = null;
         try {
