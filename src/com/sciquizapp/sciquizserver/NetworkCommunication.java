@@ -393,6 +393,7 @@ public class NetworkCommunication {
             question_text += questionMultipleChoice.getOPT8() + "///";
             question_text += questionMultipleChoice.getOPT9() + "///";
             question_text += questionMultipleChoice.getID() + "///";
+            question_text += questionMultipleChoice.getNB_CORRECT_ANS() + "///";
             Vector<String> subjectsVector = DbTableSubject.getSubjectsForQuestionID(questionID);
             int l = 0;
             for(l = 0; l < subjectsVector.size(); l++) {
@@ -479,6 +480,16 @@ public class NetworkCommunication {
         if (questionShortAnswer.getQUESTION().length() > 0) {
             String question_text = questionShortAnswer.getQUESTION() + "///";
             question_text += questionShortAnswer.getID() + "///";
+
+            //add answers
+            ArrayList<String> answersArray = questionShortAnswer.getANSWER();
+            for (int i = 0; i < answersArray.size(); i++) {
+                question_text += answersArray.get(i) + "|||";
+            }
+            if (answersArray.size() == 0) question_text += " ";
+            question_text += "///";
+
+            //add subjects
             Vector<String> subjectsVector = DbTableSubject.getSubjectsForQuestionID(questionID);
             int l = 0;
             for(l = 0; l < subjectsVector.size(); l++) {
@@ -486,6 +497,8 @@ public class NetworkCommunication {
             }
             if (l == 0) question_text += " ";
             question_text += "///";
+
+            //add objectives
             Vector<String> objectivesVector = DbTableLearningObjectives.getObjectiveForQuestionID(questionShortAnswer.getID());
             for(l = 0; l < objectivesVector.size(); l++) {
                 question_text += objectivesVector.get(l) + "|||";
