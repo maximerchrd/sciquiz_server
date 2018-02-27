@@ -117,5 +117,6 @@ public class DisplayStatsController implements Initializable {
         bar_chart.getData().addAll(series1);
         bar_chart.setPrefWidth(chartScrollPane.getWidth());
         bar_chart.setPrefHeight(chartScrollPane.getHeight());
+        bar_chart.setAnimated(false);
     }
 }
