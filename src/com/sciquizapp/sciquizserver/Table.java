@@ -205,6 +205,8 @@ public class Table extends JPanel {
 					policeColor.get(columnNumber).set(rowNumber, "red");
 				}
 				table.getCellRenderer(rowNumber, columnNumber);
+				answer = answer.substring(0, answer.length() - 3);
+				answer = answer.replace("|||",";");
 				model2.setValueAt(answer, rowNumber, columnNumber);
 
 				// evaluation
