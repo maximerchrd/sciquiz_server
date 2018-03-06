@@ -115,20 +115,15 @@ public class NetworkCommunication {
                                         student.setOutputStream(skt.getOutputStream());
                                         aClass.updateStudent(student);
                                         listenForClient(aClass.getStudents_array().get(aClass.indexOfStudentWithAddress(student.getInetAddress().toString())));
+                                        for (int i = 0; i < QuestionsBrowser.IDsFromBroadcastedQuestions.size(); i++) {
+                                            try {
+                                                sendMultipleChoiceWithID(Integer.parseInt(QuestionsBrowser.IDsFromBroadcastedQuestions.get(i)),student.getOutputStream());
+                                                sendShortAnswerQuestionWithID(Integer.parseInt(QuestionsBrowser.IDsFromBroadcastedQuestions.get(i)),student.getOutputStream());
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
                                     }
-
-                                    //open outputstream and instream
-                                    //aClass.getStudents_array().get(aClass.getClassSize() - 1).openStreams();
-                                    //serverOutStream = connection.openOutputStream();
-                                    //inStream = connection.openInputStream();
-
-
-                                    //SendNewConnectionResponse();
-                                    //while (true) {
-
-                                    //}
-
-
                                 } catch (IOException e1) {
                                     e1.printStackTrace();
                                 }
