@@ -23,7 +23,7 @@ public class DbTableStudents {
                     " DATE_BIRTH      TEXT     NOT NULL, " +
                     " QUANTITATIVE_EVAL      TEXT     NOT NULL, " +
                     " QUALITATIVE_EVAL           TEXT    NOT NULL, " +
-                    " UNIQUE (MAC_ADDRESS))";
+                    " UNIQUE (FIRST_NAME))";
             statement.executeUpdate(sql);
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );

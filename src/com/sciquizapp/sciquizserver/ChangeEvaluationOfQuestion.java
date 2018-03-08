@@ -32,50 +32,52 @@ public class ChangeEvaluationOfQuestion extends JPanel implements ActionListener
         ChangeEvaluationFrame.add(changeEvaluationPanel);
 
         String evalAndIdentifier = DbTableIndividualQuestionForStudentResult.getEvalForQuestionAndStudentIDs(globalID, globalStudentID);
-        Double oldEval = Double.valueOf(evalAndIdentifier.split("///")[0]);
-        String identifier = evalAndIdentifier.split("///")[1];
-        OldEvalLabel = new JLabel("Current evaluation:");
-        GridBagConstraints OldEvalLabel_constraints = new GridBagConstraints();
-        OldEvalLabel_constraints.gridx = 0;
-        OldEvalLabel_constraints.gridy = 0;
-        changeEvaluationPanel.add(OldEvalLabel, OldEvalLabel_constraints);
+        if (evalAndIdentifier != null && evalAndIdentifier.split("///").length > 1) {
+            Double oldEval = Double.valueOf(evalAndIdentifier.split("///")[0]);
+            String identifier = evalAndIdentifier.split("///")[1];
+            OldEvalLabel = new JLabel("Current evaluation:");
+            GridBagConstraints OldEvalLabel_constraints = new GridBagConstraints();
+            OldEvalLabel_constraints.gridx = 0;
+            OldEvalLabel_constraints.gridy = 0;
+            changeEvaluationPanel.add(OldEvalLabel, OldEvalLabel_constraints);
 
-        OldEvalTextArea = new JTextArea(String.valueOf(oldEval));
-        OldEvalTextArea.setEditable(false);
-        GridBagConstraints OldEvalTextArea_constraints = new GridBagConstraints();
-        OldEvalTextArea_constraints.gridx = 1;
-        OldEvalTextArea_constraints.gridy = 0;
-        changeEvaluationPanel.add(OldEvalTextArea, OldEvalTextArea_constraints);
+            OldEvalTextArea = new JTextArea(String.valueOf(oldEval));
+            OldEvalTextArea.setEditable(false);
+            GridBagConstraints OldEvalTextArea_constraints = new GridBagConstraints();
+            OldEvalTextArea_constraints.gridx = 1;
+            OldEvalTextArea_constraints.gridy = 0;
+            changeEvaluationPanel.add(OldEvalTextArea, OldEvalTextArea_constraints);
 
-        NewEvalLabel = new JLabel("Modified evaluation:");
-        GridBagConstraints NewEvalLabel_constraints = new GridBagConstraints();
-        NewEvalLabel_constraints.gridx = 0;
-        NewEvalLabel_constraints.gridy = 1;
-        changeEvaluationPanel.add(NewEvalLabel, NewEvalLabel_constraints);
+            NewEvalLabel = new JLabel("Modified evaluation:");
+            GridBagConstraints NewEvalLabel_constraints = new GridBagConstraints();
+            NewEvalLabel_constraints.gridx = 0;
+            NewEvalLabel_constraints.gridy = 1;
+            changeEvaluationPanel.add(NewEvalLabel, NewEvalLabel_constraints);
 
-        NewEvalTextArea = new JTextArea("");
-        NewEvalTextArea.setPreferredSize(new Dimension(40,15));
-        NewEvalTextArea.setEditable(true);
-        GridBagConstraints NewEvalTextArea_constraints = new GridBagConstraints();
-        NewEvalTextArea_constraints.gridx = 1;
-        NewEvalTextArea_constraints.gridy = 1;
-        changeEvaluationPanel.add(NewEvalTextArea, NewEvalTextArea_constraints);
+            NewEvalTextArea = new JTextArea("");
+            NewEvalTextArea.setPreferredSize(new Dimension(40, 15));
+            NewEvalTextArea.setEditable(true);
+            GridBagConstraints NewEvalTextArea_constraints = new GridBagConstraints();
+            NewEvalTextArea_constraints.gridx = 1;
+            NewEvalTextArea_constraints.gridy = 1;
+            changeEvaluationPanel.add(NewEvalTextArea, NewEvalTextArea_constraints);
 
-        SaveNewEval = new JButton("Save New Evaluation");
-        SaveNewEval.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                  DbTableIndividualQuestionForStudentResult.setEvalForQuestionAndStudentIDs(Double.valueOf(NewEvalTextArea.getText()),identifier);
-                  networkCommunication.UpdateEvaluation(Double.valueOf(NewEvalTextArea.getText()),globalID, globalStudentID);
-                  ChangeEvaluationFrame.dispatchEvent(new WindowEvent(ChangeEvaluationFrame, WindowEvent.WINDOW_CLOSING));
-              }
-        });
-        GridBagConstraints SaveNewEval_constraints = new GridBagConstraints();
-        SaveNewEval_constraints.gridx = 0;
-        SaveNewEval_constraints.gridy = 2;
-        changeEvaluationPanel.add(SaveNewEval, SaveNewEval_constraints);
+            SaveNewEval = new JButton("Save New Evaluation");
+            SaveNewEval.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    DbTableIndividualQuestionForStudentResult.setEvalForQuestionAndStudentIDs(Double.valueOf(NewEvalTextArea.getText()), identifier);
+                    networkCommunication.UpdateEvaluation(Double.valueOf(NewEvalTextArea.getText()), globalID, globalStudentID);
+                    ChangeEvaluationFrame.dispatchEvent(new WindowEvent(ChangeEvaluationFrame, WindowEvent.WINDOW_CLOSING));
+                }
+            });
+            GridBagConstraints SaveNewEval_constraints = new GridBagConstraints();
+            SaveNewEval_constraints.gridx = 0;
+            SaveNewEval_constraints.gridy = 2;
+            changeEvaluationPanel.add(SaveNewEval, SaveNewEval_constraints);
 
-        ChangeEvaluationFrame.setBounds(0,0,250,200);
-        ChangeEvaluationFrame.setVisible(true);
+            ChangeEvaluationFrame.setBounds(0, 0, 250, 200);
+            ChangeEvaluationFrame.setVisible(true);
+        }
      }
 
     @Override
