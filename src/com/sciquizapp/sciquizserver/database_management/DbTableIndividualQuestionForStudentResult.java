@@ -1,10 +1,12 @@
 package com.sciquizapp.sciquizserver.database_management;
 
+import com.sciquizapp.sciquizserver.SingleResultForTable;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -194,6 +196,51 @@ public class DbTableIndividualQuestionForStudentResult {
             e.printStackTrace();
         }
         return evaluation + "///" + identifier;
+    }
+
+    static public ArrayList<SingleResultForTable> getAllSingleResults () {
+        ArrayList<SingleResultForTable> resultsArray = new ArrayList<>();
+        String evaluation = "";
+        String idGlobal = "";
+        String studentID = "";
+        String answers = "";
+        String date = "";
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String query = "SELECT ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,QUANTITATIVE_EVAL FROM individual_question_for_student_result;";
+        try {
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                evaluation = rs.getString("QUANTITATIVE_EVAL");
+                idGlobal = rs.getString("ID_GLOBAL");
+                studentID = rs.getString("ID_STUDENT_GLOBAL");
+                answers = rs.getString("ANSWERS");
+                date = rs.getString("DATE");
+                String name = "";
+                String question = "";
+                String query2 = "SELECT ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,QUANTITATIVE_EVAL FROM individual_question_for_student_result;";
+
+                SingleResultForTable tempSingleResult = new SingleResultForTable();
+
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return  resultsArray;
     }
 
     static public void setEvalForQuestionAndStudentIDs (Double eval, String identifier) {
