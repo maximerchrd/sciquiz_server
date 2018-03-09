@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.bluetooth.*;
+import javax.swing.*;
 
 
 /**
@@ -596,6 +597,11 @@ public class NetworkCommunication {
                                 student.setAddress(answerString.split("///")[1]);
                                 student.setName(answerString.split("///")[2]);
                                 Integer studentID = DbTableStudents.addStudent(answerString.split("///")[1], answerString.split("///")[2]);
+                                if (studentID == -2) {
+                                    JOptionPane.showMessageDialog(mTableQuestionVsUser,
+                                            student.getName() + " is trying to connect but has a different " +
+                                                    "device identifier than the student with the same name already registered.");
+                                }
                                 student.setStudentID(studentID);
                                 mTableQuestionVsUser.addUser(student, true);
                                 aClass.updateStudent(student);

@@ -30,6 +30,15 @@ public class DbTableStudents {
             System.exit(0);
         }
     }
+
+    /**
+     * Method that adds a student if the name is not already in the table
+     * @param address
+     * @param name
+     * @return the ID of the student OR -1 if there was a problem
+     * OR -2 if the student is already in the table and the mac address doesn't correspond to the
+     * name already there
+     */
     static public Integer addStudent(String address, String name) {
         Integer studentID = -1;
         Connection c = null;
@@ -45,15 +54,32 @@ public class DbTableStudents {
                     2000000 + "','" +
                     address + "','" +
                     name + "','none','none','none','none');";
-            stmt.executeUpdate(sql);
-            sql = "UPDATE students SET ID_STUDENT_GLOBAL = 2000000 + ID_STUDENT WHERE ID_STUDENT = (SELECT MAX(ID_STUDENT) FROM students)";
-            stmt.executeUpdate(sql);
-            sql = "UPDATE students SET FIRST_NAME = '" + name + "' WHERE MAC_ADDRESS = '" + address + "';";
-            stmt.executeUpdate(sql);
-            String query = "SELECT ID_STUDENT_GLOBAL FROM students WHERE ID_STUDENT = (SELECT MAX(ID_STUDENT) FROM students);";
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                studentID = rs.getInt("ID_STUDENT_GLOBAL");
+            int nbLinesChanged = stmt.executeUpdate(sql);
+            if (nbLinesChanged > 0) {
+                sql = "UPDATE students SET ID_STUDENT_GLOBAL = 2000000 + ID_STUDENT WHERE ID_STUDENT = (SELECT MAX(ID_STUDENT) FROM students)";
+                stmt.executeUpdate(sql);
+                String query = "SELECT ID_STUDENT_GLOBAL FROM students WHERE ID_STUDENT = (SELECT MAX(ID_STUDENT) FROM students);";
+                ResultSet rs = stmt.executeQuery(query);
+                while (rs.next()) {
+                    studentID = rs.getInt("ID_STUDENT_GLOBAL");
+                }
+            } else {
+                String query = "SELECT ID_STUDENT_GLOBAL FROM students WHERE FIRST_NAME = '" + name + "';";
+                ResultSet rs = stmt.executeQuery(query);
+                while (rs.next()) {
+                    studentID = rs.getInt("ID_STUDENT_GLOBAL");
+                }
+                query = "SELECT MAC_ADDRESS FROM students WHERE FIRST_NAME = '" + name + "';";
+                rs = stmt.executeQuery(query);
+                String macAddress = "";
+                while (rs.next()) {
+                    macAddress = rs.getString("MAC_ADDRESS");
+                }
+                if (!macAddress.contentEquals(address)) {
+                    sql = "UPDATE students SET MAC_ADDRESS = '" + address + "' WHERE ID_STUDENT_GLOBAL = '" + studentID + "';";
+                    stmt.executeUpdate(sql);
+                    studentID = -2;
+                }
             }
             stmt.close();
             c.commit();
