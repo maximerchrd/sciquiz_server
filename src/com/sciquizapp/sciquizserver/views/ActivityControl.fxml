@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="384.0" prefWidth="912.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="119.0" text="Label IP" />
+      <Button layoutX="133.0" layoutY="9.0" mnemonicParsing="false" text="Refresh IP address" />
+      <Button layoutX="14.0" layoutY="44.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="191.0" text="Create a new subject" />
+      <Button layoutX="14.0" layoutY="77.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="191.0" text="Edit the subject" />
+      <Button layoutX="14.0" layoutY="112.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="191.0" text="Delete the subject" />
+      <Button layoutX="14.0" layoutY="145.0" mnemonicParsing="false" text="Filter questions with subject" />
+      <TreeView layoutX="205.0" layoutY="44.0" prefHeight="181.0" prefWidth="200.0" />
+      <SplitPane dividerPositions="0.5141955835962145" layoutX="425.0" layoutY="14.0" prefHeight="169.0" prefWidth="426.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <ListView layoutY="3.0" prefHeight="167.0" prefWidth="214.0" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <ListView layoutX="7.0" prefHeight="167.0" prefWidth="147.0" />
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+      <Button layoutX="425.0" layoutY="183.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="176.0" text="Create a question" />
+      <Button layoutX="425.0" layoutY="212.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="176.0" text="Edit the question" />
+      <Button layoutX="425.0" layoutY="239.0" mnemonicParsing="false" text="Remove the question/test" />
+      <Button layoutX="427.0" layoutY="266.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="176.0" text="Create a test/quiz" />
+      <Button layoutX="644.0" layoutY="183.0" mnemonicParsing="false" text="Activate the question for students" />
+      <Button layoutX="644.0" layoutY="233.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="227.0" text="Remove the question" />
+   </children>
+</AnchorPane>

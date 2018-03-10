@@ -12,7 +12,8 @@
   <tabs>
     <Tab id="classroom_activity_tab" fx:id="classroom_activity_tab" closable="false" text="Classroom Activity">
       <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+          <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+          <fx:include source="ClassroomActivityTab.fxml" />
       </content>
     </Tab>
     <Tab closable="false" text="Results Overview">

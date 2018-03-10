@@ -51,8 +51,8 @@ public class MyServer extends Application{
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("views/LearningTracker.fxml"));
         scene.setRoot(loader.load());
-        ClassroomActivityTabController controller = loader.getController();
-        controller.init();
+        //ClassroomActivityTabController controller = loader.getController();
+        //controller.init();
 
 
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
