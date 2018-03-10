@@ -1,15 +1,4 @@
-Anonyme2;2018-02-04;100.0;1;1|||;
-Anonyme2;2018-02-04;100.0;1;1|||;
-Anonyme2;2018-02-05;0.0;1;;
-Anonyme2;2018-02-05;100.0;?;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;0.0;test6;;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;100.0;test6;a|||;
-Anonyme2;2018-02-05;32.0;test6;a|||;
+Name;Date;Question;Evaluation;Student's answer;Correct answer;Incorrect answer;Subjects;Objectives
+Alex;2018-03-10;asdf;100.0;a|||c|||;a,;d,;asdfads,;rqwereqrdgf,
+Alex;2018-03-10;asdf;0.0;c|||;a,;d,;asdfads,;rqwereqrdgf,
+Alex;2018-03-10;asdf;100.0;a|||;a,;d,;asdfads,;rqwereqrdgf,

@@ -23,6 +23,6 @@
             </TableView>
          </content>
       </ScrollPane>
-      <Button layoutX="14.0" layoutY="14.0" minHeight="0.0" minWidth="0.0" mnemonicParsing="false" text="Export results" AnchorPane.leftAnchor="14.0" />
+      <Button layoutX="14.0" layoutY="14.0" minHeight="0.0" minWidth="0.0" mnemonicParsing="false" onAction="#exportResults" text="Export results" AnchorPane.leftAnchor="14.0" />
    </children>
 </AnchorPane>
