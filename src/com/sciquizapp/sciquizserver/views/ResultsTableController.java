@@ -11,6 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 /**
@@ -45,10 +46,9 @@ public class ResultsTableController implements Initializable {
 
     void addResults() {
         ObservableList<SingleResultForTable> data = resultsTable.getItems();
-        SingleResultForTable singleResultForTable = new SingleResultForTable();
-
-        singleResultForTable.setName("Exam Peul");
-        data.add(singleResultForTable);
-
+        ArrayList<SingleResultForTable> resultsList = DbTableIndividualQuestionForStudentResult.getAllSingleResults();
+        for (int i = 0; i < resultsList.size(); i++) {
+            data.add(resultsList.get(i));
+        }
     }
 }

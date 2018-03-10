@@ -1,6 +1,7 @@
 package com.sciquizapp.sciquizserver.database_management;
 
 import com.sciquizapp.sciquizserver.SingleResultForTable;
+import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
 
 import java.io.FileNotFoundException;
@@ -31,14 +32,15 @@ public class DbTableIndividualQuestionForStudentResult {
                     " TEST_BELONGING        TEXT    NOT NULL, " +
                     " WEIGHTS_OF_ANSWERS    TEXT    NOT NULL) ";
             statement.executeUpdate(sql);
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
+
     static public double addIndividualQuestionForStudentResult(int id_global, String student_name, String answers, String answerType) {
         double quantitative_evaluation = -1;
-        answers = answers.replace("'","''");
+        answers = answers.replace("'", "''");
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -47,11 +49,11 @@ public class DbTableIndividualQuestionForStudentResult {
             c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
             c.setAutoCommit(false);
             stmt = c.createStatement();
-            String sql = 	"INSERT INTO individual_question_for_student_result (ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,TIME_FOR_SOLVING,QUESTION_WEIGHT,EVAL_TYPE," +
+            String sql = "INSERT INTO individual_question_for_student_result (ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,TIME_FOR_SOLVING,QUESTION_WEIGHT,EVAL_TYPE," +
                     "QUANTITATIVE_EVAL,QUALITATIVE_EVAL,TEST_BELONGING,WEIGHTS_OF_ANSWERS) " +
                     "VALUES ('" + id_global + "','-1',date('now'),'" + answers + "','none','none','none','none','none','none','none');";
             stmt.executeUpdate(sql);
-            sql = "UPDATE individual_question_for_student_result SET ID_STUDENT_GLOBAL = (SELECT ID_STUDENT_GLOBAL FROM students WHERE FIRST_NAME = "+ "'" + student_name + "') WHERE ID_DIRECT_EVAL = (SELECT MAX(ID_DIRECT_EVAL) FROM individual_question_for_student_result);";
+            sql = "UPDATE individual_question_for_student_result SET ID_STUDENT_GLOBAL = (SELECT ID_STUDENT_GLOBAL FROM students WHERE FIRST_NAME = " + "'" + student_name + "') WHERE ID_DIRECT_EVAL = (SELECT MAX(ID_DIRECT_EVAL) FROM individual_question_for_student_result);";
             stmt.executeUpdate(sql);
 
 
@@ -111,8 +113,8 @@ public class DbTableIndividualQuestionForStudentResult {
             stmt.close();
             c.commit();
             c.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
         return quantitative_evaluation;
@@ -165,7 +167,7 @@ public class DbTableIndividualQuestionForStudentResult {
         return "done";
     }
 
-    static public String getEvalForQuestionAndStudentIDs (Integer globalID, Integer globalStudentID) {
+    static public String getEvalForQuestionAndStudentIDs(Integer globalID, Integer globalStudentID) {
         String evaluation = "";
         String identifier = "";
         Connection c = null;
@@ -198,7 +200,7 @@ public class DbTableIndividualQuestionForStudentResult {
         return evaluation + "///" + identifier;
     }
 
-    static public ArrayList<SingleResultForTable> getAllSingleResults () {
+    static public ArrayList<SingleResultForTable> getAllSingleResults() {
         ArrayList<SingleResultForTable> resultsArray = new ArrayList<>();
         String evaluation = "";
         String idGlobal = "";
@@ -218,32 +220,90 @@ public class DbTableIndividualQuestionForStudentResult {
             e.printStackTrace();
         }
 
-        String query = "SELECT ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,QUANTITATIVE_EVAL FROM individual_question_for_student_result;";
+        String query = "SELECT ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,QUANTITATIVE_EVAL FROM individual_question_for_student_result ORDER BY ID_DIRECT_EVAL DESC;";
         try {
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                evaluation = rs.getString("QUANTITATIVE_EVAL");
-                idGlobal = rs.getString("ID_GLOBAL");
-                studentID = rs.getString("ID_STUDENT_GLOBAL");
-                answers = rs.getString("ANSWERS");
-                date = rs.getString("DATE");
+            ResultSet rs0 = stmt.executeQuery(query);
+            while (rs0.next()) {
+                SingleResultForTable tempSingleResult = new SingleResultForTable();
+                evaluation = rs0.getString("QUANTITATIVE_EVAL");
+                idGlobal = rs0.getString("ID_GLOBAL");
+                studentID = rs0.getString("ID_STUDENT_GLOBAL");
+                answers = rs0.getString("ANSWERS");
+                date = rs0.getString("DATE");
                 String name = "";
                 String question = "";
-                String query2 = "SELECT ID_GLOBAL,ID_STUDENT_GLOBAL,DATE,ANSWERS,QUANTITATIVE_EVAL FROM individual_question_for_student_result;";
-
-                SingleResultForTable tempSingleResult = new SingleResultForTable();
-
+                QuestionMultipleChoice questionMultipleChoice;
+                QuestionShortAnswer questionShortAnswer;
+                int questionType = DbTableQuestionGeneric.getQuestionTypeFromIDGlobal (idGlobal);
+                name = DbTableStudents.getStudentNameWithID(Integer.valueOf(studentID));
+                if (questionType == 0) {
+                    questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(Integer.valueOf(idGlobal));
+                    questionMultipleChoice.setSubjects(DbTableSubject.getSubjectsForQuestionID(Integer.valueOf(idGlobal)));
+                    questionMultipleChoice.setObjectives(DbTableLearningObjectives.getObjectiveForQuestionID(Integer.valueOf(idGlobal)));
+                    tempSingleResult.setName(name);
+                    tempSingleResult.setDate(date);
+                    tempSingleResult.setEvaluation(evaluation);
+                    tempSingleResult.setQuestion(questionMultipleChoice.getQUESTION());
+                    tempSingleResult.setStudentsAnswer(answers);
+                    String correctAnswers = "";
+                    for (int i = 0; i < questionMultipleChoice.getCorrectAnswers().size(); i++) {
+                        correctAnswers += questionMultipleChoice.getCorrectAnswers().get(i) + ";";
+                    }
+                    tempSingleResult.setCorrectAnswer(correctAnswers);
+                    String incorrectAnswers = "";
+                    for (int i = 0; i < questionMultipleChoice.getIncorrectAnswers().size(); i++) {
+                        incorrectAnswers += questionMultipleChoice.getIncorrectAnswers().get(i) + ";";
+                    }
+                    tempSingleResult.setIncorrectAnswer(incorrectAnswers);
+                    String subjects = "";
+                    for (int i = 0; i < questionMultipleChoice.getSubjects().size(); i++) {
+                        subjects += questionMultipleChoice.getSubjects().get(i) + ";";
+                    }
+                    tempSingleResult.setSubjects(subjects);
+                    String objectives = "";
+                    for (int i = 0; i < questionMultipleChoice.getObjectives().size(); i++) {
+                        objectives += questionMultipleChoice.getObjectives().get(i) + ";";
+                    }
+                    tempSingleResult.setObjectives(objectives);
+                } else {
+                    questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(Integer.valueOf(idGlobal));
+                    questionShortAnswer.setSubjects(DbTableSubject.getSubjectsForQuestionID(Integer.valueOf(idGlobal)));
+                    questionShortAnswer.setObjectives(DbTableLearningObjectives.getObjectiveForQuestionID(Integer.valueOf(idGlobal)));
+                    tempSingleResult.setName(name);
+                    tempSingleResult.setDate(date);
+                    tempSingleResult.setEvaluation(evaluation);
+                    tempSingleResult.setQuestion(questionShortAnswer.getQUESTION());
+                    tempSingleResult.setStudentsAnswer(answers);
+                    String correctAnswers = "";
+                    for (int i = 0; i < questionShortAnswer.getANSWER().size(); i++) {
+                        correctAnswers += questionShortAnswer.getANSWER().get(i) + ";";
+                    }
+                    tempSingleResult.setCorrectAnswer(correctAnswers);
+                    String subjects = "";
+                    for (int i = 0; i < questionShortAnswer.getSubjects().size(); i++) {
+                        subjects += questionShortAnswer.getSubjects().get(i) + ";";
+                    }
+                    tempSingleResult.setSubjects(subjects);
+                    String objectives = "";
+                    for (int i = 0; i < questionShortAnswer.getObjectives().size(); i++) {
+                        objectives += questionShortAnswer.getObjectives().get(i) + ";";
+                    }
+                    tempSingleResult.setObjectives(objectives);
+                }
+                resultsArray.add(tempSingleResult);
             }
             stmt.close();
             c.commit();
             c.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return  resultsArray;
+        return resultsArray;
     }
 
-    static public void setEvalForQuestionAndStudentIDs (Double eval, String identifier) {
+    static public void setEvalForQuestionAndStudentIDs(Double eval, String identifier) {
         Connection c = null;
         Statement stmt = null;
         try {

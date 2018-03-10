@@ -1,5 +1,7 @@
 package com.sciquizapp.sciquizserver.questions;
 
+import com.sun.deploy.config.VerboseDefaultConfig;
+
 import java.util.Vector;
 
 public class QuestionMultipleChoice {
@@ -193,25 +195,45 @@ public class QuestionMultipleChoice {
 		return NB_CORRECT_ANS;
 	}
 	public Vector<String> getAnswers () {
-		answers.add(OPT0);
-		answers.add(OPT1);
-		answers.add(OPT2);
-		answers.add(OPT3);
-		answers.add(OPT4);
-		answers.add(OPT5);
-		answers.add(OPT6);
-		answers.add(OPT7);
-		answers.add(OPT8);
-		answers.add(OPT9);
+		if (answers.size() < 1) {
+			answers.add(OPT0);
+			answers.add(OPT1);
+			answers.add(OPT2);
+			answers.add(OPT3);
+			answers.add(OPT4);
+			answers.add(OPT5);
+			answers.add(OPT6);
+			answers.add(OPT7);
+			answers.add(OPT8);
+			answers.add(OPT9);
 
-		for (int i = 0; i < answers.size(); i++) {
-			if (answers.get(i).contentEquals("") || answers.get(i).contentEquals(" ")) {
-				answers.remove(i);
-				i--;
+			for (int i = 0; i < answers.size(); i++) {
+				if (answers.get(i).contentEquals("") || answers.get(i).contentEquals(" ")) {
+					answers.remove(i);
+					i--;
+				}
 			}
+			return answers;
+		} else {
+			return answers;
+		}
+	}
+	public Vector<String> getCorrectAnswers () {
+		Vector<String> correctAnswers = (Vector<String>) getAnswers().clone();
+
+		for (int i = NB_CORRECT_ANS; i < answers.size(); i++) {
+			correctAnswers.remove(NB_CORRECT_ANS);
 		}
 
-		return answers;
+		return correctAnswers;
+	}
+	public Vector<String> getIncorrectAnswers () {
+		Vector<String> incorrectAnswers = (Vector<String>) getAnswers().clone();
+		for (int i = 0; i < NB_CORRECT_ANS; i++) {
+			incorrectAnswers.remove(0);
+		}
+
+		return incorrectAnswers;
 	}
 	public String getIMAGE() {
 		return IMAGE;

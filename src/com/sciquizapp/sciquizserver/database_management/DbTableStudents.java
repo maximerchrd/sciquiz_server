@@ -115,6 +115,33 @@ public class DbTableStudents {
 
         return student_names;
     }
+
+    static public String getStudentNameWithID(int studentID) {
+        String studentName = "";
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String query = "SELECT FIRST_NAME FROM students WHERE ID_STUDENT_GLOBAL='" + studentID + "';";
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                studentName =rs.getString("FIRST_NAME");
+            }
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
+        return studentName;
+    }
+
     static public Vector<Vector<String>> getStudentResultsPerSubject(String student_name) {
         Vector<String> student_ids = new Vector<>();
         Vector<String> subjects = new Vector<>();
