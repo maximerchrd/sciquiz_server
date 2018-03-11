@@ -15,8 +15,6 @@ package com.sciquizapp.sciquizserver;
 import java.io.IOException;
 
 import com.sciquizapp.sciquizserver.database_management.DBManager;
-import com.sciquizapp.sciquizserver.views.ClassroomActivityTabController;
-import com.sciquizapp.sciquizserver.views.QuestionSendingController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
