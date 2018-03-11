@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import com.sciquizapp.sciquizserver.database_management.DBManager;
 import com.sciquizapp.sciquizserver.views.ClassroomActivityTabController;
+import com.sciquizapp.sciquizserver.views.QuestionSendingController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -65,6 +66,20 @@ public class MyServer extends Application{
 
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        //start bluetooth network in new thread
+        NetworkCommunication CommunicationWithClients = new NetworkCommunication();
+        try {
+            CommunicationWithClients.startServer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*FXMLLoader loaderQuestionSending = new FXMLLoader(getClass().getResource("views/QuestionSending.fxml"));
+        loaderQuestionSending.load();
+        QuestionSendingController questionSendingController = loaderQuestionSending.getController();
+
+        questionSendingController.setParams(CommunicationWithClients);*/
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

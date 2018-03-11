@@ -23,6 +23,7 @@ import javax.swing.*;
  * Created by maximerichard on 03/02/17.
  */
 public class NetworkCommunication {
+    static public NetworkCommunication networkCommunicationSingleton;
     private Table mTableQuestionVsUser = null;
     private UUID uuid = null;
     private String connectionString;
@@ -50,9 +51,11 @@ public class NetworkCommunication {
 
     public NetworkCommunication(Table TableQuestionVsUser) {
         mTableQuestionVsUser = TableQuestionVsUser;
+        networkCommunicationSingleton = this;
     }
 
     public NetworkCommunication() {
+        networkCommunicationSingleton = this;
     }
 
     /**

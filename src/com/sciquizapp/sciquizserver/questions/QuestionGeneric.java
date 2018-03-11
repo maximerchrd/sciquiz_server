@@ -5,6 +5,8 @@ package com.sciquizapp.sciquizserver.questions;
  */
 public class QuestionGeneric {
     private String typeOfQuestion;
+    private String question;
+    private String imagePath;
     private int intTypeOfQuestion;
     private int indexInList;
     private int globalID;
@@ -13,6 +15,8 @@ public class QuestionGeneric {
         indexInList = -1;
         globalID = -1;
         intTypeOfQuestion = -1;
+        question = "question not initialized";
+        imagePath = "";
     }
     public QuestionGeneric(String typeoflist, int indexinlist) {
         typeOfQuestion = typeoflist;
@@ -28,16 +32,29 @@ public class QuestionGeneric {
     public void setGlobalID(int globalID) {
         this.globalID = globalID;
     }
-    public void setTypeOfList(String typeofquestion) {
+    public void setTypeOfQuestion(String typeofquestion) {
         typeOfQuestion = typeofquestion;
     }
     public int getIntTypeOfQuestion() {
         return intTypeOfQuestion;
     }
+    public String getQuestion() {
+        return question;
+    }
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+    public void setQuestion(String question) {
+        this.question = question;
+    }
     public void setIndexInList(int indexinlist) {
         indexInList = indexinlist;
     }
-    public String getTypeOfList() {
+    public String getTypeOfQuestion() {
         return typeOfQuestion;
     }
     public int getIndexInList() {
@@ -45,5 +62,9 @@ public class QuestionGeneric {
     }
     public void setIntTypeOfQuestion(int intTypeOfQuestion) {
         this.intTypeOfQuestion = intTypeOfQuestion;
+    }
+    @Override
+    public String toString()  {
+        return this.question;
     }
 }
