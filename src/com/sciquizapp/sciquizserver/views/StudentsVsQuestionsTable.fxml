@@ -6,9 +6,9 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="242.0" prefWidth="609.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ScrollPane minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="136.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ScrollPane minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <content>
-            <TableView id="studentsQuestionsTable" fx:id="studentsQuestionsTable" minHeight="0.0" minWidth="0.0" prefHeight="230.0" prefWidth="1392.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView id="studentsQuestionsTable" fx:id="studentsQuestionsTable" minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
                   <TableColumn fx:id="Students" prefWidth="180.0" text="Students" />
                   <TableColumn fx:id="Status" prefWidth="75.0" text="Status" />
@@ -21,5 +21,10 @@
             </TableView>
          </content>
       </ScrollPane>
+      <ComboBox layoutX="14.0" layoutY="14.0" prefHeight="27.0" prefWidth="193.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+      <Button layoutX="21.0" layoutY="46.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="193.0" text="Create a new class" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="35.0" />
+      <Button layoutX="21.0" layoutY="85.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="193.0" text="Save students to class" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="65.0" />
+      <Button layoutX="21.0" layoutY="121.0" mnemonicParsing="false" text="Remove students from class" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="95.0" />
+      <Button layoutX="36.0" layoutY="157.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="193.0" text="Edit evaluation" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="125.0" />
    </children>
 </AnchorPane>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="QuestionSending" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TreeView layoutX="231.0" layoutY="54.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="231.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="54.0" />
+      <Button layoutX="24.0" layoutY="155.0" mnemonicParsing="false" text="Filter questions with subject" AnchorPane.topAnchor="155.0" />
+      <Button layoutX="24.0" layoutY="122.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="191.0" text="Delete the subject" AnchorPane.topAnchor="122.0" />
+      <Button layoutX="24.0" layoutY="87.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="191.0" text="Edit the subject" AnchorPane.topAnchor="87.0" />
+      <Button layoutX="24.0" layoutY="54.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="191.0" text="Create a new subject" AnchorPane.topAnchor="54.0" />
+      <Button layoutX="143.0" layoutY="19.0" mnemonicParsing="false" text="Refresh IP address" />
+      <Label layoutX="24.0" layoutY="24.0" prefHeight="17.0" prefWidth="119.0" text="Label IP" />
+   </children>
+</AnchorPane>
