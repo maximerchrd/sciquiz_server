@@ -1,5 +1,6 @@
 package com.sciquizapp.sciquizserver.controllers;
 
+import com.sciquizapp.sciquizserver.Student;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,5 +24,8 @@ public class LearningTrackerController implements Initializable {
     }
     public void addQuestion(String question, Integer id) {
         ClassroomActivityTabController.addQuestion(question,id);
+    }
+    public void addUser(Student UserStudent, Boolean connection) {
+        ClassroomActivityTabController.addUser(UserStudent,connection);
     }
 }

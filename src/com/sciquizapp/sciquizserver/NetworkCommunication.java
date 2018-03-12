@@ -546,7 +546,8 @@ public class NetworkCommunication {
                                                     "device identifier than the student with the same name already registered.");
                                 }
                                 student.setStudentID(studentID);
-                                mTableQuestionVsUser.addUser(student, true);
+                                //mTableQuestionVsUser.addUser(student, true);
+                                learningTrackerController.addUser(student,true);
                                 aClass.updateStudent(student);
                             } else if (answerString.split("///")[0].contains("DISC")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
