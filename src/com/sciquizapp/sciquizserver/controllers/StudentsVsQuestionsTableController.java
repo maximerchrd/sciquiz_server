@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
  * Created by maximerichard on 12.03.18.
  */
 public class StudentsVsQuestionsTableController implements Initializable {
-    final int MAX_NUMBER_COLUMNS = 300;
     private ArrayList<String> questions;
     private ArrayList<Integer> questionsIDs;
     @FXML private TableView<SingleStudentAnswersLine> studentsQuestionsTable;
@@ -32,15 +31,14 @@ public class StudentsVsQuestionsTableController implements Initializable {
     public void addQuestion(String question, Integer ID) {
         // Add extra columns if necessary:
         System.out.println("adding column");
-        studentsQuestionsTable.getColumns().get(5).setText("!!!" + question);
+        TableColumn column = new TableColumn(question);
+        studentsQuestionsTable.getColumns().add(column);
+        questions.add(question);
+        questionsIDs.add(ID);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        for (int i = 0; i < MAX_NUMBER_COLUMNS; i++) {
-            TableColumn<SingleStudentAnswersLine, String> column = new TableColumn("bla");
-            studentsQuestionsTable.getColumns().add(column);
-        }
-        studentsQuestionsTable.getColumns().get(4).setText("ouaich enfin");
+
     }
 }

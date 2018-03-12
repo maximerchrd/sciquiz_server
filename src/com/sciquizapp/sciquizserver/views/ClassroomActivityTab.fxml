@@ -15,7 +15,9 @@
                </children></AnchorPane>
             <AnchorPane minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
+
                   <fx:include fx:id="studentsQuestionsTable" source="StudentsVsQuestionsTable.fxml" />
+
                </children>
             </AnchorPane>
          </items>

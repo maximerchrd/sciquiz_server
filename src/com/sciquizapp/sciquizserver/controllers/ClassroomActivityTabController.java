@@ -23,7 +23,8 @@ public class ClassroomActivityTabController implements Initializable {
     static int screenWidth = 0;
     static int screenHeight = 0;
 
-    @FXML private StudentsVsQuestionsTableController studentsVsQuestionsTableController;
+    @FXML private AnchorPane studentsQuestionsTable;
+    @FXML private StudentsVsQuestionsTableController studentsQuestionsTableController;
     @FXML private Tab classroom_activity_tab;
 
     @Override
@@ -106,6 +107,6 @@ public class ClassroomActivityTabController implements Initializable {
     }
 
     public void addQuestion(String question, Integer id) {
-        studentsVsQuestionsTableController.addQuestion(question,id);
+        studentsQuestionsTableController.addQuestion(question,id);
     }
 }
