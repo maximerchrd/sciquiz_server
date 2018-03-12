@@ -4,19 +4,15 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="242.0" prefWidth="609.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="242.0" prefWidth="609.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sciquizapp.sciquizserver.controllers.StudentsVsQuestionsTableController">
    <children>
       <ScrollPane minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <content>
-            <TableView id="studentsQuestionsTable" fx:id="studentsQuestionsTable" minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView id="studentsQuestionsTable" fx:id="studentsQuestionsTable" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
                   <TableColumn fx:id="Students" prefWidth="180.0" text="Students" />
                   <TableColumn fx:id="Status" prefWidth="75.0" text="Status" />
                   <TableColumn fx:id="Eval" prefWidth="180.0" text="Evaluation" />
-                  <TableColumn fx:id="Question1" prefWidth="150.0" text="" />
-                  <TableColumn fx:id="Question2" prefWidth="150.0" text="" />
-                  <TableColumn fx:id="Question3" prefWidth="150.0" text="" />
-                  <TableColumn fx:id="Question4" prefWidth="150.0" text="" />
               </columns>
             </TableView>
          </content>

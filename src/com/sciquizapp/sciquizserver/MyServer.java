@@ -14,6 +14,9 @@
 package com.sciquizapp.sciquizserver;
 import java.io.IOException;
 
+import com.sciquizapp.sciquizserver.controllers.ClassroomActivityTabController;
+import com.sciquizapp.sciquizserver.controllers.LearningTrackerController;
+import com.sciquizapp.sciquizserver.controllers.StudentsVsQuestionsTableController;
 import com.sciquizapp.sciquizserver.database_management.DBManager;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -50,6 +53,7 @@ public class MyServer extends Application{
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("views/LearningTracker.fxml"));
         scene.setRoot(loader.load());
+
         //ClassroomActivityTabController controller = loader.getController();
         //controller.init();
 
@@ -65,19 +69,17 @@ public class MyServer extends Application{
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        //start bluetooth network in new thread
-        NetworkCommunication CommunicationWithClients = new NetworkCommunication();
+        //start server
+
+        LearningTrackerController learningTrackerController = loader.getController();
+        NetworkCommunication CommunicationWithClients = new NetworkCommunication(learningTrackerController);
         try {
             CommunicationWithClients.startServer();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        /*FXMLLoader loaderQuestionSending = new FXMLLoader(getClass().getResource("views/QuestionSending.fxml"));
-        loaderQuestionSending.load();
-        QuestionSendingController questionSendingController = loaderQuestionSending.getController();
 
-        questionSendingController.setParams(CommunicationWithClients);*/
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

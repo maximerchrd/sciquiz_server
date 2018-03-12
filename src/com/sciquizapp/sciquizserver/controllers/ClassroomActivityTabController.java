@@ -3,21 +3,32 @@ package com.sciquizapp.sciquizserver.controllers;
 import com.sciquizapp.sciquizserver.*;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableColumn;
+import javafx.scene.layout.AnchorPane;
 
 import javax.swing.*;
+import javax.swing.text.TableView;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Created by maximerichard on 19.02.18.
  */
-public class ClassroomActivityTabController {
+public class ClassroomActivityTabController implements Initializable {
 
     static int screenWidth = 0;
     static int screenHeight = 0;
-    @FXML
-    private Tab classroom_activity_tab;
+
+    @FXML private StudentsVsQuestionsTableController studentsVsQuestionsTableController;
+    @FXML private Tab classroom_activity_tab;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+    }
 
     public void init() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -92,5 +103,9 @@ public class ClassroomActivityTabController {
                 swingNode.setContent(parent);
             }
         });
+    }
+
+    public void addQuestion(String question, Integer id) {
+        studentsVsQuestionsTableController.addQuestion(question,id);
     }
 }

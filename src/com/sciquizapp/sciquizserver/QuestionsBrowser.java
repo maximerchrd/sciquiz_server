@@ -610,7 +610,7 @@ public class QuestionsBrowser extends JFrame {
 
             try {
                 own_networkcommunication.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
-                own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION());
+                own_networkcommunication.addQuestion(questionMultipleChoice.getQUESTION(), questionMultipleChoice.getID());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -647,7 +647,7 @@ public class QuestionsBrowser extends JFrame {
 
             try {
                 own_networkcommunication.sendShortAnswerQuestionWithID(questionShortAnswer.getID(), null);
-                own_networkcommunication.addQuestion(questionShortAnswer.getQUESTION());
+                own_networkcommunication.addQuestion(questionShortAnswer.getQUESTION(), questionShortAnswer.getID());
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -1,5 +1,8 @@
 package com.sciquizapp.sciquizserver;
 
+import com.sciquizapp.sciquizserver.controllers.ClassroomActivityTabController;
+import com.sciquizapp.sciquizserver.controllers.LearningTrackerController;
+import com.sciquizapp.sciquizserver.controllers.StudentsVsQuestionsTableController;
 import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.Question;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
@@ -24,6 +27,7 @@ import javax.swing.*;
  */
 public class NetworkCommunication {
     static public NetworkCommunication networkCommunicationSingleton;
+    private LearningTrackerController learningTrackerController = null;
     private Table mTableQuestionVsUser = null;
     private UUID uuid = null;
     private String connectionString;
@@ -51,6 +55,11 @@ public class NetworkCommunication {
 
     public NetworkCommunication(Table TableQuestionVsUser) {
         mTableQuestionVsUser = TableQuestionVsUser;
+        networkCommunicationSingleton = this;
+    }
+
+    public NetworkCommunication(LearningTrackerController learningTrackerController) {
+        this.learningTrackerController = learningTrackerController;
         networkCommunicationSingleton = this;
     }
 
@@ -102,7 +111,6 @@ public class NetworkCommunication {
                                         student.setOutputStream(skt.getOutputStream());
                                         aClass.addStudentIfNotInClass(student);
                                         System.out.println("aClass.size() = " + aClass.getClassSize() + " adding student: " + student.getInetAddress().toString());
-                                        //mTableQuestionVsUser.addUser(student.getInetAddress().toString());
                                         SendNewConnectionResponse(student.getOutputStream(), false);
                                         SendQuestionList(null, null, null);
                                         for (int i = 0; i < QuestionsBrowser.IDsFromBroadcastedQuestions.size(); i++) {
@@ -165,71 +173,6 @@ public class NetworkCommunication {
         }
     }
 
-    public void SendQuestion(Question arg_quest, Boolean isQuiz) throws IOException {
-        //send question to spp client
-
-        //add a row in the table for the new question and answers
-
-
-        mTableQuestionVsUser.addQuestion(arg_quest.getQUESTION());
-        //make string and bytearray from question and answers
-        String question_text = arg_quest.getQUESTION() + "///";
-        question_text += arg_quest.getOPTA() + "///";
-        question_text += arg_quest.getOPTB() + "///";
-        question_text += arg_quest.getOPTC() + "///";
-        question_text += arg_quest.getOPTD() + "///";
-        question_text += arg_quest.getIMAGE().split("/")[arg_quest.getIMAGE().split("/").length - 1];
-        byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
-
-        // send file : the sizes of the file and of the text are given in the first 40 bytes (separated by ":")
-
-        //writing of the first 40 bytes
-        File myFile = new File(arg_quest.getIMAGE());
-        int intfileLength = (int) myFile.length();
-        int textbyteslength = bytearraytext.length;
-        byte[] bytearray = new byte[40 + textbyteslength + intfileLength];
-        String fileLength;
-        if (isQuiz) {
-            fileLength = "QUIZZ";
-        } else {
-            fileLength = "QUEST";
-        }
-        fileLength += ":" + String.valueOf((int) myFile.length());
-        fileLength += ":" + String.valueOf(textbyteslength);
-        byte[] bytearraystring = fileLength.getBytes(Charset.forName("UTF-8"));
-        for (int i = 0; i < bytearraystring.length; i++) {
-            bytearray[i] = bytearraystring[i];
-        }
-
-        //copy the textbytes into the array which will be sent
-        for (int i = 0; i < bytearraytext.length; i++) {
-            bytearray[i + 40] = bytearraytext[i];
-        }
-
-        //write the file into the bytearray   !!! tested up to 630000 bytes, does not work with file of 4,7MB
-        fis = new FileInputStream(myFile);
-        bis = new BufferedInputStream(fis);
-        int arraylength = bytearray.length;
-        bis.read(bytearray, 40 + textbyteslength, intfileLength);
-        System.out.println("Sending " + arg_quest.getIMAGE() + "(" + (int) myFile.length() + " bytes)");
-        System.out.println("Sending " + arraylength + " bytes in total");
-        ArrayList<Student> StudentsArray = aClass.getStudents_array();
-        System.out.println(StudentsArray.size());
-        for (int i = 0; i < StudentsArray.size(); i++) {
-            OutputStream tempOutputStream = StudentsArray.get(i).getOutputStream();
-            try {
-                tempOutputStream.write(bytearray, 0, arraylength);
-                tempOutputStream.flush();
-            } catch (IOException ex2) {
-                ex2.printStackTrace();
-            }
-        }
-        System.out.println("Done.");
-        //} else {
-        //	System.out.println("StreamConnection variable is null. No device connected in mode int�ractif. \n");
-        //}
-    }
-
     /**
      * method that sends the questions listed on the right panel to the clients
      *
@@ -286,7 +229,7 @@ public class NetworkCommunication {
                     }
                 }
                 System.out.println("Done.");
-                mTableQuestionVsUser.addQuestion(questionList.get(j).getQUESTION());
+                learningTrackerController.addQuestion(questionList.get(j).getQUESTION(),questionList.get(j).getID());
             }
         }
         if (multipleChoiceQuestionList != null) {
@@ -588,10 +531,7 @@ public class NetworkCommunication {
                             String answerString = new String(in_bytearray, 0, bytesread, "UTF-8");
                             System.out.println(answerString);
                             if (answerString.split("///")[0].contains("ANSW")) {
-                                //Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
                                 arg_student.setName(answerString.split("///")[2]);
-                                //Student student = aClass.getStudents_array().get(j);
-                                //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3]);
                                 double eval = DbTableIndividualQuestionForStudentResult.addIndividualQuestionForStudentResult(Integer.valueOf(answerString.split("///")[5]),answerString.split("///")[2],answerString.split("///")[3],answerString.split("///")[0]);
                                 SendEvaluation(eval,Integer.valueOf(answerString.split("///")[5]), arg_student);
                                 mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
@@ -702,7 +642,7 @@ public class NetworkCommunication {
     public void removeQuestion(int index) {
         mTableQuestionVsUser.removeQuestion(index);
     }
-    public void addQuestion(String question) {
-        mTableQuestionVsUser.addQuestion(question);
+    public void addQuestion(String question, Integer ID) {
+        learningTrackerController.addQuestion(question, ID);
     }
 }

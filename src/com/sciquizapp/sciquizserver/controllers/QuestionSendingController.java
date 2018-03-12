@@ -173,7 +173,7 @@ public class QuestionSendingController extends Window implements Initializable {
         NetworkCommunication.networkCommunicationSingleton.getClassroom().addQuestMultChoice(questionMultipleChoice);
         try {
             NetworkCommunication.networkCommunicationSingleton.sendMultipleChoiceWithID(questionMultipleChoice.getID(), null);
-            NetworkCommunication.networkCommunicationSingleton.addQuestion(questionMultipleChoice.getQUESTION());
+            NetworkCommunication.networkCommunicationSingleton.addQuestion(questionMultipleChoice.getQUESTION(), questionMultipleChoice.getID());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,7 +184,7 @@ public class QuestionSendingController extends Window implements Initializable {
         NetworkCommunication.networkCommunicationSingleton.getClassroom().addQuestShortAnswer(questionShortAnswer);
         try {
             NetworkCommunication.networkCommunicationSingleton.sendShortAnswerQuestionWithID(questionShortAnswer.getID(), null);
-            NetworkCommunication.networkCommunicationSingleton.addQuestion(questionShortAnswer.getQUESTION());
+            NetworkCommunication.networkCommunicationSingleton.addQuestion(questionShortAnswer.getQUESTION(), questionShortAnswer.getID());
         } catch (IOException e) {
             e.printStackTrace();
         }
