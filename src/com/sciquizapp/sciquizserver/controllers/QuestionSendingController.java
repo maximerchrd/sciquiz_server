@@ -154,10 +154,12 @@ public class QuestionSendingController extends Window implements Initializable {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/CreateQuestion.fxml"));
         Parent root1 = null;
         try {
-            root1 = (Parent) fxmlLoader.load();
+            root1 = fxmlLoader.load();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        CreateQuestionController controller = fxmlLoader.<CreateQuestionController>getController();
+        controller.initVariables(genericQuestionsList, allQuestionsTree);
         Stage stage = new Stage();
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initStyle(StageStyle.DECORATED);

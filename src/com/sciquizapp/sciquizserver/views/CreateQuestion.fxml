@@ -20,7 +20,7 @@
                               <Insets top="20.0" />
                            </VBox.margin>
                         </Label>
-                        <TextArea prefHeight="72.0" prefWidth="200.0" promptText="Type your question here" />
+                        <TextArea fx:id="questionText" prefHeight="72.0" prefWidth="200.0" promptText="Type your question here" />
                         <HBox prefHeight="31.0" prefWidth="197.0">
                            <children>
                               <Label prefHeight="25.0" prefWidth="106.0" text="Possible answers" />
@@ -44,7 +44,17 @@
                               <TextField prefHeight="27.0" />
                            </children>
                         </HBox>
-                        <Button mnemonicParsing="false" text="Save Question">
+                        <HBox prefHeight="33.0" prefWidth="197.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#addPicture" prefHeight="27.0" prefWidth="154.0" text="Add Picture" />
+                              <TextField fx:id="imagePath">
+                                 <HBox.margin>
+                                    <Insets left="5.0" />
+                                 </HBox.margin>
+                              </TextField>
+                           </children>
+                        </HBox>
+                        <Button mnemonicParsing="false" onAction="#saveQuestion" text="Save Question">
                            <VBox.margin>
                               <Insets left="40.0" top="20.0" />
                            </VBox.margin>

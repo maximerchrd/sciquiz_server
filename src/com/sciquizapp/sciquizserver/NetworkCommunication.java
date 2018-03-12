@@ -178,7 +178,7 @@ public class NetworkCommunication {
         question_text += arg_quest.getOPTB() + "///";
         question_text += arg_quest.getOPTC() + "///";
         question_text += arg_quest.getOPTD() + "///";
-        question_text += arg_quest.getIMAGE().split("/")[2];
+        question_text += arg_quest.getIMAGE().split("/")[arg_quest.getIMAGE().split("/").length - 1];
         byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
 
         // send file : the sizes of the file and of the text are given in the first 40 bytes (separated by ":")
@@ -244,7 +244,7 @@ public class NetworkCommunication {
                 question_text += questionList.get(j).getOPTC() + "///";
                 question_text += questionList.get(j).getOPTD() + "///";
                 if (!questionList.get(j).getIMAGE().equals("none")) {
-                    question_text += questionList.get(j).getIMAGE().split("/")[2];
+                    question_text += questionList.get(j).getIMAGE().split("/")[questionList.get(j).getIMAGE().split("/").length - 1];
                 }
                 byte[] bytearraytext = question_text.getBytes(Charset.forName("UTF-8"));
 
@@ -323,7 +323,7 @@ public class NetworkCommunication {
                     int intfileLength = 0;
                     File myFile = null;
                     if (!multipleChoiceQuestionList.get(j).getIMAGE().equals("none")) {
-                        question_text += multipleChoiceQuestionList.get(j).getIMAGE().split("/")[2];
+                        question_text += multipleChoiceQuestionList.get(j).getIMAGE().split("/")[multipleChoiceQuestionList.get(j).getIMAGE().split("/").length - 1];
                         myFile = new File(multipleChoiceQuestionList.get(j).getIMAGE());
                         intfileLength = (int) myFile.length();
                     } else {
@@ -412,7 +412,7 @@ public class NetworkCommunication {
             int intfileLength = 0;
             File myFile = null;
             if (!questionMultipleChoice.getIMAGE().equals("none")) {
-                question_text += questionMultipleChoice.getIMAGE().split("/")[2];
+                question_text += questionMultipleChoice.getIMAGE().split("/")[questionMultipleChoice.getIMAGE().split("/").length - 1];
                 myFile = new File(questionMultipleChoice.getIMAGE());
                 intfileLength = (int) myFile.length();
             } else {
@@ -510,7 +510,7 @@ public class NetworkCommunication {
             int intfileLength = 0;
             File myFile = null;
             if (!questionShortAnswer.getIMAGE().equals("none")) {
-                question_text += questionShortAnswer.getIMAGE().split("/")[2];
+                question_text += questionShortAnswer.getIMAGE().split("/")[questionShortAnswer.getIMAGE().split("/").length - 1];
                 myFile = new File(questionShortAnswer.getIMAGE());
                 intfileLength = (int) myFile.length();
             } else {
