@@ -107,12 +107,24 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
     }
 
     public void addUser(Student UserStudent, Boolean connection) {
-        SingleStudentAnswersLine singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(),"connected","0");
-        for (int i = 0; i < questions.size(); i++) {
-            singleStudentAnswersLine.addAnswer();
+        if (!students.contains(UserStudent.getName())) {
+            SingleStudentAnswersLine singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(), "connected", "0");
+            for (int i = 0; i < questions.size(); i++) {
+                singleStudentAnswersLine.addAnswer();
+            }
+            studentsQuestionsTable.getItems().add(singleStudentAnswersLine);
+            students.add(UserStudent.getName());
+        } else {
+            int indexStudent = -1;
+            for (int i = 0; i < studentsQuestionsTable.getItems().size(); i++) {
+                if (studentsQuestionsTable.getItems().get(i).getStudent().contentEquals(UserStudent.getName())) indexStudent = i;
+            }
+            if (indexStudent >= 0) {
+                SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(indexStudent);
+                singleStudentAnswersLine.setStatus("connected");
+                studentsQuestionsTable.getItems().set(indexStudent,singleStudentAnswersLine);
+            }
         }
-        studentsQuestionsTable.getItems().add(singleStudentAnswersLine);
-        students.add(UserStudent.getName());
     }
 
     public void addAnswerForUser(Student student, String answer, String question, double evaluation, Integer questionId) {
@@ -150,8 +162,9 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         for (int i = 0; i < studentsQuestionsTable.getItems().size(); i++) {
             if (studentsQuestionsTable.getItems().get(i).getStudent().contentEquals(student.getName())) indexStudent = i;
         }
-        if (indexStudent <= 0) {
-            SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(0);
+        System.out.println("user disconnected: " + student.getName() + "; index in table: " + indexStudent);
+        if (indexStudent >= 0) {
+            SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(indexStudent);
             singleStudentAnswersLine.setStatus("disconnected");
             studentsQuestionsTable.getItems().set(indexStudent,singleStudentAnswersLine);
         }
