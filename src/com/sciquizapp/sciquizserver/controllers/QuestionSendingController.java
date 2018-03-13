@@ -25,10 +25,7 @@ import org.apache.commons.io.FileUtils;
 import sun.nio.ch.Net;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
@@ -211,7 +208,109 @@ public class QuestionSendingController extends Window implements Initializable {
                 insertQuestionShortAnswer(question);
             }
         }
+    }
 
+    public void exportQuestions() {
+        ArrayList<QuestionGeneric> questionGenericArrayList = new ArrayList<>();
+        try {
+            questionGenericArrayList = DbTableQuestionGeneric.getAllGenericQuestions();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter("questions/questions.csv", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        writer.println("Questions Type (0 = question multiple choice, 1 = question short answer);Question text;Right Answers;Other Options;Picture;Subjects;Objectives");
+        for (int i = 0; i < questionGenericArrayList.size(); i++) {
+            if (questionGenericArrayList.get(i).getIntTypeOfQuestion() == 1) {
+                String question = "1;";
+                QuestionShortAnswer questionShortAnswer = DbTableQuestionShortAnswer.getShortAnswerQuestionWithId(questionGenericArrayList.get(i).getGlobalID());
+
+                //copy image file to correct directory
+                if (questionShortAnswer.getIMAGE().length() > 0 && !questionShortAnswer.getIMAGE().contentEquals("none")) {
+                    File source = new File(questionShortAnswer.getIMAGE());
+                    File dest = new File("questions/" + questionShortAnswer.getIMAGE());
+                    try {
+                        FileUtils.copyFile(source, dest);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                question += questionShortAnswer.getQUESTION();
+                question += ";";
+                ArrayList<String> answers = questionShortAnswer.getANSWER();
+                for (int j = 0; j < answers.size(); j++) {
+                    question += answers.get(j) + "///";
+                }
+                question += ";;";       //because short answer questions don't have "other options" -> double ;;
+                question += questionShortAnswer.getIMAGE();
+                question += ";";
+                Vector<String> subjects = questionShortAnswer.getSubjects();
+                for (int j = 0; j < subjects.size(); j++) {
+                    question += subjects.get(j) + "///";
+                }
+                question += ";";
+                Vector<String> objectives = questionShortAnswer.getObjectives();
+                for (int j = 0; j < objectives.size(); j++) {
+                    question += objectives.get(j) + "///";
+                }
+                question += ";";
+                writer.println(question);
+            } else if (questionGenericArrayList.get(i).getIntTypeOfQuestion() == 0) {
+                String question = "0;";
+                QuestionMultipleChoice questionMultipleChoice = new QuestionMultipleChoice();
+                try {
+                    questionMultipleChoice = DbTableQuestionMultipleChoice.getMultipleChoiceQuestionWithID(questionGenericArrayList.get(i).getGlobalID());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                //copy image file to correct directory
+                if (questionMultipleChoice.getIMAGE().length() > 0 && !questionMultipleChoice.getIMAGE().contentEquals("none")) {
+                    File source = new File(questionMultipleChoice.getIMAGE());
+                    File dest = new File("questions/" + questionMultipleChoice.getIMAGE());
+                    try {
+                        FileUtils.copyFile(source, dest);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                question += questionMultipleChoice.getQUESTION();
+                question += ";";
+                Vector<String> answers = questionMultipleChoice.getCorrectAnswers();
+                for (int j = 0; j < answers.size(); j++) {
+                    question += answers.get(j) + "///";
+                }
+                question += ";";
+                Vector<String> incorrectOptions = questionMultipleChoice.getIncorrectAnswers();
+                for (int j = 0; j < incorrectOptions.size(); j++) {
+                    question += incorrectOptions.get(j) + "///";
+                }
+                question += ";";
+                question += questionMultipleChoice.getIMAGE();
+                question += ";";
+                Vector<String> subjects = questionMultipleChoice.getSubjects();
+                for (int j = 0; j < subjects.size(); j++) {
+                    question += subjects.get(j) + "///";
+                }
+                question += ";";
+                Vector<String> objectives = questionMultipleChoice.getObjectives();
+                for (int j = 0; j < objectives.size(); j++) {
+                    question += objectives.get(j) + "///";
+                }
+                question += ";";
+                writer.println(question);
+            }
+
+        }
+        writer.close();
     }
 
     //OTHER METHODS
@@ -228,11 +327,11 @@ public class QuestionSendingController extends Window implements Initializable {
         QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question[1].replace("'", "''"), options_vector.get(0).replace("'", "''"),
                 options_vector.get(1).replace("'", "''"), options_vector.get(2).replace("'", "''"), options_vector.get(3).replace("'", "''"), options_vector.get(4).replace("'", "''"),
                 options_vector.get(5).replace("'", "''"), options_vector.get(6).replace("'", "''"), options_vector.get(7).replace("'", "''"), options_vector.get(8).replace("'", "''"),
-                options_vector.get(9).replace("'", "''"), "pictures/" + question[4].replace("'", "''"));
+                options_vector.get(9).replace("'", "''"), question[4].replace("'", "''"));
         new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
 
         //copy image file to correct directory
-        if (!new_questmultchoice.getIMAGE().contentEquals("pictures/")) {
+        if (new_questmultchoice.getIMAGE().length() > 0 && !new_questmultchoice.getIMAGE().contains("none")) {
             File source = new File("questions/" + new_questmultchoice.getIMAGE());
             File dest = new File(new_questmultchoice.getIMAGE());
             try {
@@ -293,7 +392,7 @@ public class QuestionSendingController extends Window implements Initializable {
         QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer();
         new_questshortanswer.setQUESTION(question[1].replace("'", "''"));
         if (question[4].length() > 0) {
-            new_questshortanswer.setIMAGE("pictures/" + question[4]);
+            new_questshortanswer.setIMAGE(question[4]);
         }
         ArrayList<String> answerOptions = new ArrayList<String>();
         String[] rightAnswers = question[2].split("///");
@@ -306,7 +405,7 @@ public class QuestionSendingController extends Window implements Initializable {
         new_questshortanswer.setANSWER(answerOptions);
 
         //copy image file to correct directory
-        if (!new_questshortanswer.getIMAGE().contentEquals("pictures/")) {
+        if (new_questshortanswer.getIMAGE().length() > 0 && !new_questshortanswer.getIMAGE().contains("none")) {
             File source = new File("questions/" + new_questshortanswer.getIMAGE());
             File dest = new File(new_questshortanswer.getIMAGE());
             try {

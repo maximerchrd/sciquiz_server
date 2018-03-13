@@ -28,7 +28,7 @@
         </items>
       </SplitPane>
       <Button layoutX="86.0" layoutY="167.0" mnemonicParsing="false" onAction="#broadcastQuestionForStudents" prefHeight="27.0" prefWidth="176.0" text="Broadcast question" AnchorPane.bottomAnchor="125.0" />
-      <Button layoutX="315.0" layoutY="280.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="227.0" text="Export questions" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="305.0" AnchorPane.rightAnchor="5.0" />
+      <Button layoutX="315.0" layoutY="280.0" mnemonicParsing="false" onAction="#exportQuestions" prefHeight="27.0" prefWidth="227.0" text="Export questions" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="305.0" AnchorPane.rightAnchor="5.0" />
       <Button layoutX="305.0" layoutY="247.0" mnemonicParsing="false" onAction="#importQuestions" prefHeight="27.0" prefWidth="227.0" text="Import questions" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="305.0" AnchorPane.rightAnchor="5.0" />
    </children>
 </AnchorPane>
