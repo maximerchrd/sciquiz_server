@@ -86,6 +86,26 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         });
     }
 
+    public void removeQuestion(int index) {
+        for (int i = 0; i < studentsQuestionsTable.getItems().size(); i++) {
+            studentsQuestionsTable.getItems().get(i).getAnswers().remove(index);
+        }
+        studentsQuestionsTable.getColumns().remove(index + 3);
+        questions.remove(index);
+        questionsIDs.remove(index);
+
+        for (int i = 3 + index; i < studentsQuestionsTable.getColumns().size(); i++) {
+            TableColumn column = studentsQuestionsTable.getColumns().get(i);
+            final int questionIndex = i - 3;
+            column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<SingleStudentAnswersLine, String>, ObservableValue<String>>() {
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<SingleStudentAnswersLine, String> p) {
+                    // p.getValue() returns the Person instance for a particular TableView row
+                    return p.getValue().getAnswers().get(questionIndex);
+                }
+            });
+        }
+    }
+
     public void addUser(Student UserStudent, Boolean connection) {
         SingleStudentAnswersLine singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(),"connected","0");
         for (int i = 0; i < questions.size(); i++) {

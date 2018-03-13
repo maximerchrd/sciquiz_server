@@ -642,7 +642,7 @@ public class NetworkCommunication {
     }
 
     public void removeQuestion(int index) {
-        mTableQuestionVsUser.removeQuestion(index);
+        learningTrackerController.removeQuestion(index);
     }
     public void addQuestion(String question, Integer ID) {
         learningTrackerController.addQuestion(question, ID);

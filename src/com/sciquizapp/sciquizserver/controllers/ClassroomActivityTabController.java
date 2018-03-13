@@ -115,4 +115,7 @@ public class ClassroomActivityTabController implements Initializable {
     public void addAnswerForUser(Student student, String answer, String question, double evaluation, Integer questionId) {
         studentsQuestionsTableController.addAnswerForUser(student,answer,question,evaluation,questionId);
     }
+    public void removeQuestion(int index) {
+        studentsQuestionsTableController.removeQuestion(index);
+    }
 }

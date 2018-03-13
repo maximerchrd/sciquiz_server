@@ -168,6 +168,13 @@ public class QuestionSendingController extends Window implements Initializable {
         stage.show();
     }
 
+    public void removeQuestion() {
+        int index = readyQuestionsList.getSelectionModel().getSelectedIndex();
+        NetworkCommunication.networkCommunicationSingleton.removeQuestion(index);
+        IDsFromBroadcastedQuestions.remove(index);
+        readyQuestionsList.getItems().remove(index);
+    }
+
     //OTHER METHODS
     private void broadcastQuestionMultipleChoice(QuestionMultipleChoice questionMultipleChoice) {
         NetworkCommunication.networkCommunicationSingleton.getClassroom().addQuestMultChoice(questionMultipleChoice);

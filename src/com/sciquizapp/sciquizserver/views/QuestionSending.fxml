@@ -7,7 +7,7 @@
 
 <AnchorPane fx:id="QuestionSending" style="-fx-background-color: #E8E8E8;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sciquizapp.sciquizserver.controllers.QuestionSendingController">
    <children>
-      <Button layoutX="305.0" layoutY="270.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="227.0" text="Remove the question" AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="305.0" AnchorPane.rightAnchor="5.0" />
+      <Button layoutX="305.0" layoutY="270.0" mnemonicParsing="false" onAction="#removeQuestion" prefHeight="27.0" prefWidth="227.0" text="Remove the question" AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="305.0" AnchorPane.rightAnchor="5.0" />
       <Button layoutX="305.0" layoutY="220.0" mnemonicParsing="false" onAction="#activateQuestionForStudents" text="Activate question for students" AnchorPane.bottomAnchor="95.0" AnchorPane.leftAnchor="305.0" AnchorPane.rightAnchor="5.0" />
       <Button layoutX="86.0" layoutY="316.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="176.0" text="Create a test/quiz" AnchorPane.bottomAnchor="5.0" />
       <Button layoutX="86.0" layoutY="277.0" mnemonicParsing="false" text="Remove the question/test" AnchorPane.bottomAnchor="35.0" />
