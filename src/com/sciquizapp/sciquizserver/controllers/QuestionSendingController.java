@@ -2,9 +2,7 @@ package com.sciquizapp.sciquizserver.controllers;
 
 import com.sciquizapp.sciquizserver.NetworkCommunication;
 import com.sciquizapp.sciquizserver.Test;
-import com.sciquizapp.sciquizserver.database_management.DbTableQuestionGeneric;
-import com.sciquizapp.sciquizserver.database_management.DbTableQuestionMultipleChoice;
-import com.sciquizapp.sciquizserver.database_management.DbTableQuestionShortAnswer;
+import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
@@ -23,15 +21,21 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import org.apache.commons.io.FileUtils;
 import sun.nio.ch.Net;
 
 import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.lang.*;
 
 /**
  * Created by maximerichard on 01.03.18.
@@ -175,7 +179,208 @@ public class QuestionSendingController extends Window implements Initializable {
         readyQuestionsList.getItems().remove(index);
     }
 
+    public void importQuestions() {
+        List<String> input = readFile("questions/questions.csv");
+        input.remove(0);
+        for (int i = 0; i < input.size(); i++) {
+            String[] question = input.get(i).split(";");
+
+            //insert subjects
+            String[] subjects = question[5].split("///");
+            for (int j = 0; j < subjects.length; j++) {
+                try {
+                    DbTableSubject.addSubject(subjects[j].replace("'","''"));
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            //insert objectives
+            String[] objectives = question[6].split("///");
+            for (int j = 0; j < objectives.length; j++) {
+                try {
+                    DbTableLearningObjectives.addObjective(objectives[j].replace("'","''"),1);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            if (question[0].contentEquals("0")) {
+                insertQuestionMultipleChoice(question);
+            } else {
+                insertQuestionShortAnswer(question);
+            }
+        }
+
+    }
+
     //OTHER METHODS
+    private void insertQuestionMultipleChoice(String[] question) {
+        Vector<String> options_vector = new Vector<String>();
+        for (int i = 0; i < 10; i++) options_vector.add(" ");
+        String[] rightAnswers = question[2].split("///");
+        String[] otherOptions = question[3].split("///");
+        String[] allOptions = concatenate(rightAnswers, otherOptions);
+        for (int i = 0; i < 10 && i < allOptions.length && !allOptions[i].contentEquals(" "); i++) {
+            options_vector.set(i, allOptions[i]);
+        }
+        int number_correct_answers = rightAnswers.length;
+        QuestionMultipleChoice new_questmultchoice = new QuestionMultipleChoice("1", question[1].replace("'", "''"), options_vector.get(0).replace("'", "''"),
+                options_vector.get(1).replace("'", "''"), options_vector.get(2).replace("'", "''"), options_vector.get(3).replace("'", "''"), options_vector.get(4).replace("'", "''"),
+                options_vector.get(5).replace("'", "''"), options_vector.get(6).replace("'", "''"), options_vector.get(7).replace("'", "''"), options_vector.get(8).replace("'", "''"),
+                options_vector.get(9).replace("'", "''"), "pictures/" + question[4].replace("'", "''"));
+        new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
+        try {
+            DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
+            new_questmultchoice.setID(DbTableQuestionMultipleChoice.getLastIDGlobal());
+
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+
+        //copy image file to correct directory
+        File source = new File("questions/" + new_questmultchoice.getIMAGE());
+        File dest = new File(new_questmultchoice.getIMAGE());
+        try {
+            FileUtils.copyFile(source, dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //insert question in tree view
+        QuestionGeneric questionGeneric = new QuestionGeneric(new_questmultchoice.getID(), 0);
+        questionGeneric.setQuestion(new_questmultchoice.getQUESTION());
+        questionGeneric.setImagePath(new_questmultchoice.getIMAGE());
+        questionGeneric.setTypeOfQuestion("0");
+        genericQuestionsList.add(questionGeneric);
+        Node questionImage = null;
+        questionImage = new ImageView(new Image("file:" + new_questmultchoice.getIMAGE(), 20, 20, true, false));
+        TreeItem<QuestionGeneric> itemChild;
+        if (new_questmultchoice.getIMAGE().length() < 1) {
+            itemChild = new TreeItem<>(questionGeneric);
+        } else {
+            itemChild = new TreeItem<>(questionGeneric, questionImage);
+        }
+        allQuestionsTree.getRoot().getChildren().add(itemChild);
+
+        //adding subjects relations
+        String[] subjects = question[5].split("///");
+        for (int i = 0; i < subjects.length; i++) {
+            try {
+                DbTableRelationQuestionSubject.addRelationQuestionSubject(subjects[i].replace("'", "''"));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        //adding objectives relations
+        String[] objectives = question[6].split("///");
+        for (int i = 0; i < objectives.length; i++) {
+            try {
+                DbTableRelationQuestionObjective.addRelationQuestionObjective(objectives[i].replace("'", "''"));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
+
+    private void insertQuestionShortAnswer(String[] question) {
+        QuestionShortAnswer new_questshortanswer = new QuestionShortAnswer();
+        new_questshortanswer.setQUESTION(question[1].replace("'", "''"));
+        if (question[4].length() > 0) {
+            new_questshortanswer.setIMAGE("pictures/" + question[4]);
+        }
+        ArrayList<String> answerOptions = new ArrayList<String>();
+        String[] rightAnswers = question[2].split("///");
+        for (int i = 0; i < rightAnswers.length; i++) {
+            String answerOption = rightAnswers[i];
+            if (answerOption.length() > 0) {
+                answerOptions.add(answerOption.replace("'", "''"));
+            }
+        }
+        new_questshortanswer.setANSWER(answerOptions);
+        String idGlobal = "-1";
+        try {
+            idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        new_questshortanswer.setID(Integer.valueOf(idGlobal));
+
+        //copy image file to correct directory
+        File source = new File("questions/" + new_questshortanswer.getIMAGE());
+        File dest = new File(new_questshortanswer.getIMAGE());
+        try {
+            FileUtils.copyFile(source, dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //put the question in the treeView
+        QuestionGeneric questionGeneric = new QuestionGeneric(new_questshortanswer.getID(), 1);
+        questionGeneric.setQuestion(new_questshortanswer.getQUESTION());
+        questionGeneric.setImagePath(new_questshortanswer.getIMAGE());
+        questionGeneric.setTypeOfQuestion("1");
+        genericQuestionsList.add(questionGeneric);
+        Node questionImage = null;
+        questionImage = new ImageView(new Image("file:" + new_questshortanswer.getIMAGE(), 20, 20, true, false));
+        TreeItem<QuestionGeneric> itemChild;
+        if (new_questshortanswer.getIMAGE().length() < 1) {
+            itemChild = new TreeItem<>(questionGeneric);
+        } else {
+            itemChild = new TreeItem<>(questionGeneric, questionImage);
+        }
+        allQuestionsTree.getRoot().getChildren().add(itemChild);
+
+        //adding subjects relations
+        String[] subjects = question[5].split("///");
+        for (int i = 0; i < subjects.length; i++) {
+            try {
+                DbTableRelationQuestionSubject.addRelationQuestionSubject(subjects[i].replace("'", "''"));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        //adding objectives relations
+        String[] objectives = question[6].split("///");
+        for (int i = 0; i < objectives.length; i++) {
+            try {
+                DbTableRelationQuestionObjective.addRelationQuestionObjective(objectives[i].replace("'", "''"));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
+
+    private List<String> readFile(String filename) {
+        List<String> records = new ArrayList<String>();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                records.add(line);
+            }
+            reader.close();
+            return records;
+        } catch (Exception e) {
+            System.err.format("Exception occurred trying to read '%s'.", filename);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public <T> T[] concatenate(T[] a, T[] b) {
+        int aLen = a.length;
+        int bLen = b.length;
+
+        @SuppressWarnings("unchecked")
+        T[] c = (T[]) Array.newInstance(a.getClass().getComponentType(), aLen + bLen);
+        System.arraycopy(a, 0, c, 0, aLen);
+        System.arraycopy(b, 0, c, aLen, bLen);
+
+        return c;
+    }
+
     private void broadcastQuestionMultipleChoice(QuestionMultipleChoice questionMultipleChoice) {
         NetworkCommunication.networkCommunicationSingleton.getClassroom().addQuestMultChoice(questionMultipleChoice);
         try {

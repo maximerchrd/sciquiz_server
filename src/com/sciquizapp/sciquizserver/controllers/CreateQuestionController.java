@@ -210,7 +210,7 @@ public class CreateQuestionController implements Initializable {
         } else if (typeOfQuestion.getSelectionModel().getSelectedItem().toString().equals("Question Multiple Choice")) {
             Vector<String> options_vector = new Vector<String>();
             for (int i = 0; i < 10; i++) options_vector.add(" ");
-            for (int i = 0; i < 10 && i < hBoxArrayList.size() && !((TextField) hBoxArrayList.get(i).getChildren().get(1)).equals(" "); i++) {
+            for (int i = 0; i < 10 && i < hBoxArrayList.size() && !((TextField) hBoxArrayList.get(i).getChildren().get(1)).getText().contentEquals(" "); i++) {
                 options_vector.set(i,((TextField) hBoxArrayList.get(i).getChildren().get(1)).getText());
             }
             int number_correct_answers = 0;
