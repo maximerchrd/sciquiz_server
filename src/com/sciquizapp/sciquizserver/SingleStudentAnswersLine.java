@@ -11,26 +11,15 @@ public class SingleStudentAnswersLine {
     private final SimpleStringProperty Student = new SimpleStringProperty("");
     private final SimpleStringProperty Status = new SimpleStringProperty("");
     private final SimpleStringProperty Evaluation = new SimpleStringProperty("");
-    private final ArrayList<SimpleStringProperty> Answers = new ArrayList<>();
+    private final ArrayList<SimpleStringProperty> Answers;
 
-    private final SimpleStringProperty Evluation = new SimpleStringProperty("");
 
-    public String getEvluation() {
-        return Evluation.get();
-    }
-
-    public SimpleStringProperty evluationProperty() {
-        return Evluation;
-    }
-
-    public void setEvluation(String evluation) {
-        this.Evluation.set(evluation);
-    }
 
     public SingleStudentAnswersLine(String student, String status, String evaluation) {
         setStudent(student);
         setStatus(status);
         setEvaluation(evaluation);
+        Answers = new ArrayList<>();
     }
 
     public String getStudent() {
@@ -71,5 +60,18 @@ public class SingleStudentAnswersLine {
 
     public ArrayList<SimpleStringProperty> getAnswers() {
         return Answers;
+    }
+
+    public void addAnswer() {
+        SimpleStringProperty answer = new SimpleStringProperty("");
+        Answers.add(answer);
+    }
+    public int setAnswer(String answer, int index) {
+        if (Answers.size() > index) {
+            Answers.get(index).set(answer);
+            return 0;
+        } else {
+            return -1;
+        }
     }
 }

@@ -28,4 +28,7 @@ public class LearningTrackerController implements Initializable {
     public void addUser(Student UserStudent, Boolean connection) {
         ClassroomActivityTabController.addUser(UserStudent,connection);
     }
+    public void addAnswerForUser(Student student, String answer, String question, double evaluation, Integer questionId) {
+        ClassroomActivityTabController.addAnswerForUser(student,answer,question,evaluation,questionId);
+    }
 }

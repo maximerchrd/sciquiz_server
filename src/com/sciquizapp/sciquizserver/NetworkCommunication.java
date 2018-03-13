@@ -534,7 +534,8 @@ public class NetworkCommunication {
                                 arg_student.setName(answerString.split("///")[2]);
                                 double eval = DbTableIndividualQuestionForStudentResult.addIndividualQuestionForStudentResult(Integer.valueOf(answerString.split("///")[5]),answerString.split("///")[2],answerString.split("///")[3],answerString.split("///")[0]);
                                 SendEvaluation(eval,Integer.valueOf(answerString.split("///")[5]), arg_student);
-                                mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
+                                //mTableQuestionVsUser.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval);
+                                learningTrackerController.addAnswerForUser(arg_student, answerString.split("///")[3],answerString.split("///")[4], eval, Integer.valueOf(answerString.split("///")[5]));
                             } else if (answerString.split("///")[0].contains("CONN")) {
                                 Student student = arg_student;
                                 student.setAddress(answerString.split("///")[1]);
