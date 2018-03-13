@@ -230,6 +230,20 @@ public class QuestionSendingController extends Window implements Initializable {
                 options_vector.get(5).replace("'", "''"), options_vector.get(6).replace("'", "''"), options_vector.get(7).replace("'", "''"), options_vector.get(8).replace("'", "''"),
                 options_vector.get(9).replace("'", "''"), "pictures/" + question[4].replace("'", "''"));
         new_questmultchoice.setNB_CORRECT_ANS(number_correct_answers);
+
+        //copy image file to correct directory
+        if (!new_questmultchoice.getIMAGE().contentEquals("pictures/")) {
+            File source = new File("questions/" + new_questmultchoice.getIMAGE());
+            File dest = new File(new_questmultchoice.getIMAGE());
+            try {
+                FileUtils.copyFile(source, dest);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            new_questmultchoice.setIMAGE("");
+        }
+
         try {
             DbTableQuestionMultipleChoice.addMultipleChoiceQuestion(new_questmultchoice);
             new_questmultchoice.setID(DbTableQuestionMultipleChoice.getLastIDGlobal());
@@ -238,14 +252,6 @@ public class QuestionSendingController extends Window implements Initializable {
             e1.printStackTrace();
         }
 
-        //copy image file to correct directory
-        File source = new File("questions/" + new_questmultchoice.getIMAGE());
-        File dest = new File(new_questmultchoice.getIMAGE());
-        try {
-            FileUtils.copyFile(source, dest);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         //insert question in tree view
         QuestionGeneric questionGeneric = new QuestionGeneric(new_questmultchoice.getID(), 0);
         questionGeneric.setQuestion(new_questmultchoice.getQUESTION());
@@ -298,6 +304,20 @@ public class QuestionSendingController extends Window implements Initializable {
             }
         }
         new_questshortanswer.setANSWER(answerOptions);
+
+        //copy image file to correct directory
+        if (!new_questshortanswer.getIMAGE().contentEquals("pictures/")) {
+            File source = new File("questions/" + new_questshortanswer.getIMAGE());
+            File dest = new File(new_questshortanswer.getIMAGE());
+            try {
+                FileUtils.copyFile(source, dest);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            new_questshortanswer.setIMAGE("");
+        }
+
         String idGlobal = "-1";
         try {
             idGlobal = DbTableQuestionShortAnswer.addShortAnswerQuestion(new_questshortanswer);
@@ -306,14 +326,6 @@ public class QuestionSendingController extends Window implements Initializable {
         }
         new_questshortanswer.setID(Integer.valueOf(idGlobal));
 
-        //copy image file to correct directory
-        File source = new File("questions/" + new_questshortanswer.getIMAGE());
-        File dest = new File(new_questshortanswer.getIMAGE());
-        try {
-            FileUtils.copyFile(source, dest);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         //put the question in the treeView
         QuestionGeneric questionGeneric = new QuestionGeneric(new_questshortanswer.getID(), 1);
