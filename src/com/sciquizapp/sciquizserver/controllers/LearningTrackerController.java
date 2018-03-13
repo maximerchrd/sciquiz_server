@@ -34,4 +34,7 @@ public class LearningTrackerController implements Initializable {
     public void removeQuestion(int index) {
         ClassroomActivityTabController.removeQuestion(index);
     }
+    public void userDisconnected(Student student) {
+        ClassroomActivityTabController.userDisconnected(student);
+    }
 }

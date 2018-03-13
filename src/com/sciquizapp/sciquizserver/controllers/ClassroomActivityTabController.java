@@ -118,4 +118,7 @@ public class ClassroomActivityTabController implements Initializable {
     public void removeQuestion(int index) {
         studentsQuestionsTableController.removeQuestion(index);
     }
+    public void userDisconnected(Student student) {
+        studentsQuestionsTableController.userDisconnected(student);
+    }
 }

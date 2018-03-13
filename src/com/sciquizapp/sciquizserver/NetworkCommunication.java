@@ -552,7 +552,8 @@ public class NetworkCommunication {
                                 aClass.updateStudent(student);
                             } else if (answerString.split("///")[0].contains("DISC")) {
                                 Student student = new Student(answerString.split("///")[1], answerString.split("///")[2]);
-                                mTableQuestionVsUser.userDisconnected(student);
+                                //mTableQuestionVsUser.userDisconnected(student);
+                                learningTrackerController.userDisconnected(student);
                             }
                         } else {
 

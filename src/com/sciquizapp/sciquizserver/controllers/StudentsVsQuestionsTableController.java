@@ -145,6 +145,18 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         studentsQuestionsTable.getItems().set(indexRow,singleStudentAnswersLine);
     }
 
+    public void userDisconnected(Student student) {
+        int indexStudent = -1;
+        for (int i = 0; i < studentsQuestionsTable.getItems().size(); i++) {
+            if (studentsQuestionsTable.getItems().get(i).getStudent().contentEquals(student.getName())) indexStudent = i;
+        }
+        if (indexStudent <= 0) {
+            SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(0);
+            singleStudentAnswersLine.setStatus("disconnected");
+            studentsQuestionsTable.getItems().set(indexStudent,singleStudentAnswersLine);
+        }
+    }
+
     private void popUpIfQuestionNotCorresponding() {
         final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
