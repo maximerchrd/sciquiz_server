@@ -12,10 +12,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -24,6 +26,7 @@ import javafx.util.Callback;
 import org.controlsfx.control.PropertySheet;
 
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -59,6 +62,28 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
                 return p.getValue().getAnswers().get(questionIndex);
             }
         });
+        column.setCellFactory(new Callback<TableColumn<SingleStudentAnswersLine, String>, TableCell<SingleStudentAnswersLine, String>>() {
+            @Override
+            public TableCell<SingleStudentAnswersLine, String> call(TableColumn<SingleStudentAnswersLine, String> param) {
+                return new TableCell<SingleStudentAnswersLine, String>() {
+
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (!isEmpty()) {
+                            this.setTextFill(Color.RED);
+                            // Get fancy and change color based on data
+                            if(item.contains("#/#")) {
+                                this.setTextFill(Color.GREEN);
+                            }
+                            setText(item.replace("#/#",""));
+
+                        }
+                    }
+
+                };
+            }
+        });
     }
 
     public void addUser(Student UserStudent, Boolean connection) {
@@ -74,14 +99,30 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         if (!questions.contains(question)) {
             popUpIfQuestionNotCorresponding();
         }
+
+        //set answer
+        answer = answer.replace("|||",";");
+        if (evaluation == 100) {
+            answer += "#/#";
+        }
         Integer indexColumn = questionsIDs.indexOf(questionId);
         Integer indexRow = students.indexOf(student.getName());
+        SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(indexRow);
         if (indexColumn >= 0 && indexRow >= 0) {
-            SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(indexRow);
             singleStudentAnswersLine.setAnswer(answer,indexColumn);
-            //Set the i-th item
-            studentsQuestionsTable.getItems().set(indexRow,singleStudentAnswersLine);
         }
+
+        //update evaluation
+        int numberAnswers = 0;
+        for (int i = 0; i < singleStudentAnswersLine.getAnswers().size(); i++) {
+            String answerInCell = singleStudentAnswersLine.getAnswers().get(i).getValue();
+            if (answerInCell.length() > 0) numberAnswers++;
+        }
+        Double meanEvaluation = Double.parseDouble(singleStudentAnswersLine.getEvaluation());
+        meanEvaluation = ((meanEvaluation * (numberAnswers -1)) + evaluation) / numberAnswers;
+        DecimalFormat df = new DecimalFormat("#.#");
+        singleStudentAnswersLine.setEvaluation(String.valueOf(df.format(meanEvaluation)));
+        studentsQuestionsTable.getItems().set(indexRow,singleStudentAnswersLine);
     }
 
     private void popUpIfQuestionNotCorresponding() {
