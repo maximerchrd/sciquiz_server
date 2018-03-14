@@ -139,6 +139,9 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
 
         //set answer
         answer = answer.replace("|||",";");
+        if (answer.contentEquals("") || answer.contentEquals(" ")) {
+            answer = "no answer";
+        }
         if (evaluation == 100) {
             answer += "#/#";
         }
