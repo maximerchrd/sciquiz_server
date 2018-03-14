@@ -305,7 +305,6 @@ public class CreateQuestionController implements Initializable {
             System.out.println("Problem saving question: question type not supported");
         }
         Stage stage = (Stage) vBox.getScene().getWindow();
-        // do what you have to do
         stage.close();
     }
 

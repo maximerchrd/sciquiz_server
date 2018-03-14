@@ -3,6 +3,7 @@ package com.sciquizapp.sciquizserver.controllers;
 import com.sciquizapp.sciquizserver.SingleResultForTable;
 import com.sciquizapp.sciquizserver.SingleStudentAnswersLine;
 import com.sciquizapp.sciquizserver.Student;
+import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,10 +11,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
@@ -21,10 +25,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import org.controlsfx.control.PropertySheet;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -37,7 +43,7 @@ import java.util.ResourceBundle;
 public class StudentsVsQuestionsTableController extends Window implements Initializable {
     private ArrayList<String> questions;
     private ArrayList<Integer> questionsIDs;
-    private ArrayList<String> students;
+    private ArrayList<Student> students;
     @FXML private TableView<SingleStudentAnswersLine> studentsQuestionsTable;
     @FXML private TableColumn<SingleStudentAnswersLine, String> Student;
     @FXML private TableColumn<SingleStudentAnswersLine, String> Status;
@@ -47,7 +53,6 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         // Add extra columns if necessary:
         System.out.println("adding column");
         TableColumn column = new TableColumn(question);
-        //column.setCellValueFactory(new PropertyValueFactory<SingleStudentAnswersLine, String>("Question" + String.valueOf(studentsQuestionsTable.getColumns().size() - 3)));
         column.setPrefWidth(180);
         studentsQuestionsTable.getColumns().add(column);
         questions.add(question);
@@ -107,13 +112,13 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
     }
 
     public void addUser(Student UserStudent, Boolean connection) {
-        if (!students.contains(UserStudent.getName())) {
+        if (!students.contains(UserStudent)) {
             SingleStudentAnswersLine singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(), "connected", "0");
             for (int i = 0; i < questions.size(); i++) {
                 singleStudentAnswersLine.addAnswer();
             }
             studentsQuestionsTable.getItems().add(singleStudentAnswersLine);
-            students.add(UserStudent.getName());
+            students.add(UserStudent);
         } else {
             int indexStudent = -1;
             for (int i = 0; i < studentsQuestionsTable.getItems().size(); i++) {
@@ -138,7 +143,7 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
             answer += "#/#";
         }
         Integer indexColumn = questionsIDs.indexOf(questionId);
-        Integer indexRow = students.indexOf(student.getName());
+        Integer indexRow = students.indexOf(student);
         SingleStudentAnswersLine singleStudentAnswersLine = studentsQuestionsTable.getItems().get(indexRow);
         if (indexColumn >= 0 && indexRow >= 0) {
             singleStudentAnswersLine.setAnswer(answer,indexColumn);
@@ -179,6 +184,30 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         Scene dialogScene = new Scene(dialogVbox, 400, 40);
         dialog.setScene(dialogScene);
         dialog.show();
+    }
+
+    //BUTTONS
+    public void editEvaluation() {
+        TablePosition tablePosition = studentsQuestionsTable.getFocusModel().getFocusedCell();
+        Integer globalID = questionsIDs.get(tablePosition.getColumn() - 3);
+        Integer studentID = students.get(tablePosition.getRow()).getStudentID();
+        if (globalID >= 0) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/EditEvaluation.fxml"));
+            Parent root1 = null;
+            try {
+                root1 = fxmlLoader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            EditEvaluationController controller = fxmlLoader.<EditEvaluationController>getController();
+            controller.initializeVariable(globalID, studentID);
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initStyle(StageStyle.DECORATED);
+            stage.setTitle("Edit Evaluation");
+            stage.setScene(new Scene(root1));
+            stage.show();
+        }
     }
 
     @Override

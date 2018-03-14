@@ -305,7 +305,7 @@ public class EditQuestionController implements Initializable {
                     e1.printStackTrace();
                 }
             }
-            
+
             DbTableRelationQuestionObjective.removeRelationsWithQuestion(questionGeneric.getGlobalID());
             for (int i = 0; i < objectivesComboBoxArrayList.size(); i++) {
                 try {
