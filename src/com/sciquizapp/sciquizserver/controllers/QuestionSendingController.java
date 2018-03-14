@@ -6,6 +6,7 @@ import com.sciquizapp.sciquizserver.database_management.*;
 import com.sciquizapp.sciquizserver.questions.QuestionGeneric;
 import com.sciquizapp.sciquizserver.questions.QuestionMultipleChoice;
 import com.sciquizapp.sciquizserver.questions.QuestionShortAnswer;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -15,6 +16,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
@@ -67,6 +69,17 @@ public class QuestionSendingController extends Window implements Initializable {
         allQuestionsTree.setShowRoot(false);
         populateTree(root);
         allQuestionsTree.setRoot(root);
+        allQuestionsTree.setOnMouseClicked(new EventHandler<MouseEvent>()
+        {
+            @Override
+            public void handle(MouseEvent mouseEvent)
+            {
+                if(mouseEvent.getClickCount() == 2)
+                {
+                    broadcastQuestionForStudents();
+                }
+            }
+        });
 
         //question ready (right panel)
         readyQuestionsList.setCellFactory(param -> new ListCell<QuestionGeneric>() {
