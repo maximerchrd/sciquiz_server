@@ -4,6 +4,7 @@ import com.sciquizapp.sciquizserver.SingleResultForTable;
 import com.sciquizapp.sciquizserver.SingleStudentAnswersLine;
 import com.sciquizapp.sciquizserver.Student;
 import com.sciquizapp.sciquizserver.database_management.DbTableClasses;
+import com.sciquizapp.sciquizserver.database_management.DbTableRelationClassStudent;
 import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -112,8 +113,15 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
     }
 
     public void addUser(Student UserStudent, Boolean connection) {
-        if (!students.contains(UserStudent)) {
-            SingleStudentAnswersLine singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(), "connected", "0");
+        ArrayList<String> studentNames = new ArrayList<>();
+        for (Student student: students) studentNames.add(student.getName());
+        if (!studentNames.contains(UserStudent.getName())) {
+            SingleStudentAnswersLine singleStudentAnswersLine;
+            if (connection) {
+                singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(), "connected", "0");
+            } else {
+                singleStudentAnswersLine = new SingleStudentAnswersLine(UserStudent.getName(), "disconnected", "0");
+            }
             for (int i = 0; i < questions.size(); i++) {
                 singleStudentAnswersLine.addAnswer();
             }
@@ -229,6 +237,23 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         stage.setTitle("Create a New Class");
         stage.setScene(new Scene(root1));
         stage.show();
+    }
+
+    public void saveStudentsToClass() {
+        if (chooseClassComboBox.getSelectionModel().getSelectedItem() != null) {
+            for (int i = 0; i < studentsQuestionsTable.getItems().size(); i++) {
+                String studentName = studentsQuestionsTable.getItems().get(i).getStudent();
+                String className = chooseClassComboBox.getSelectionModel().getSelectedItem().toString();
+                DbTableRelationClassStudent.addClassStudentRelation(className, studentName);
+            }
+        }
+    }
+
+    public void loadClass() {
+        Vector<Student> students = DbTableClasses.getStudentsInClass(chooseClassComboBox.getSelectionModel().getSelectedItem().toString());
+        for (int i = 0; i < students.size(); i++) {
+            addUser(students.get(i),false);
+        }
     }
 
     @Override
