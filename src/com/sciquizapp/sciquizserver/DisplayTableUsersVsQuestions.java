@@ -26,7 +26,7 @@ public class DisplayTableUsersVsQuestions extends JPanel {
         JButton removeStudentFromClassButton = null;
         JButton editEvaluationButton = null;
 
-        final DefaultComboBoxModel modelChooseClass = new DefaultComboBoxModel(DbTableClasses.getAllClasses());
+        final DefaultComboBoxModel modelChooseClass = new DefaultComboBoxModel(DbTableClasses.getAllClasses().toArray());
         chooseClass = new JComboBox(modelChooseClass);
         GridBagConstraints chooseClassConstraints = new GridBagConstraints();
         chooseClassConstraints.gridx = 0;

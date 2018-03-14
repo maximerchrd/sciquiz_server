@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -55,8 +57,8 @@ public class DbTableClasses {
             System.exit(0);
         }
     }
-    static public Vector<String> getAllClasses() {
-        Vector<String> classes = new Vector<>();
+    static public List<String> getAllClasses() {
+        List<String> classes = new ArrayList<>();
         Connection c = null;
         Statement stmt = null;
         stmt = null;
@@ -77,7 +79,7 @@ public class DbTableClasses {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
-        if (classes.size() == 0) classes.addElement("no class yet");
+        if (classes.size() == 0) classes.add("no class yet");
         return classes;
     }
     static public Vector<Student> getStudentsInClass(String className) {

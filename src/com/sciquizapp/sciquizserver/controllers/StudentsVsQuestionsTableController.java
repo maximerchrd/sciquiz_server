@@ -3,6 +3,7 @@ package com.sciquizapp.sciquizserver.controllers;
 import com.sciquizapp.sciquizserver.SingleResultForTable;
 import com.sciquizapp.sciquizserver.SingleStudentAnswersLine;
 import com.sciquizapp.sciquizserver.Student;
+import com.sciquizapp.sciquizserver.database_management.DbTableClasses;
 import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -15,10 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -36,6 +34,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 /**
  * Created by maximerichard on 12.03.18.
@@ -48,6 +47,7 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
     @FXML private TableColumn<SingleStudentAnswersLine, String> Student;
     @FXML private TableColumn<SingleStudentAnswersLine, String> Status;
     @FXML private TableColumn<SingleStudentAnswersLine, String> Evaluation;
+    @FXML private ComboBox chooseClassComboBox;
 
     public void addQuestion(String question, Integer ID) {
         // Add extra columns if necessary:
@@ -213,6 +213,24 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         }
     }
 
+    public void createClass() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/CreateClass.fxml"));
+        Parent root1 = null;
+        try {
+            root1 = fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        CreateClassController controller = fxmlLoader.<CreateClassController>getController();
+        controller.initializeParameters(chooseClassComboBox);
+        Stage stage = new Stage();
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initStyle(StageStyle.DECORATED);
+        stage.setTitle("Create a New Class");
+        stage.setScene(new Scene(root1));
+        stage.show();
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Student.setCellValueFactory(new PropertyValueFactory<SingleStudentAnswersLine, String>("Student"));
@@ -221,5 +239,8 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         questions = new ArrayList<>();
         questionsIDs = new ArrayList<>();
         students = new ArrayList<>();
+        List<String> classes = DbTableClasses.getAllClasses();
+        ObservableList<String> observableList = FXCollections.observableList(classes);
+        chooseClassComboBox.setItems(observableList);
     }
 }
