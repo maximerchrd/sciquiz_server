@@ -249,6 +249,17 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         }
     }
 
+    public void removeStudentFromClass() {
+        String studentName = studentsQuestionsTable.getSelectionModel().getSelectedItem().getStudent();
+        String className = chooseClassComboBox.getSelectionModel().getSelectedItem().toString();
+        try {
+            DbTableRelationClassStudent.removeStudentFromClass(studentName, className);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        studentsQuestionsTable.getItems().remove(studentsQuestionsTable.getSelectionModel().getSelectedItem());
+    }
+
     public void loadClass() {
         Vector<Student> students = DbTableClasses.getStudentsInClass(chooseClassComboBox.getSelectionModel().getSelectedItem().toString());
         for (int i = 0; i < students.size(); i++) {
