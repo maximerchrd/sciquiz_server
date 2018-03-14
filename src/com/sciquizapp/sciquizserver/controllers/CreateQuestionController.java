@@ -60,6 +60,9 @@ public class CreateQuestionController implements Initializable {
         TextField textField = new TextField("");
 
         CheckBox checkBox = new CheckBox();
+        if (typeOfQuestion.getSelectionModel().getSelectedItem().toString().contentEquals("Question with Short Answer")) {
+            checkBox.setVisible(false);
+        }
         hBox.getChildren().add(checkBox);
         hBox.getChildren().add(textField);
         vBox.getChildren().add(vBox.getChildren().size() - 2, hBox);

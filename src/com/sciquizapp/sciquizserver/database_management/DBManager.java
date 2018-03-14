@@ -55,7 +55,7 @@ public class DBManager {
 		DbTableRelationClassTest.createTableSubject(c,stmt);
 		DbTableRelationQuestionMultipleChoiceTest.createTableRelationQuestionTest(c,stmt);
 		DbTableRelationQuestionSubject.createTableSubject(c,stmt);
-		DbTableRelationQuestionObjective.createTableSubject(c,stmt);
+		DbTableRelationQuestionObjective.createTableRelationQuestionObjective(c,stmt);
 		DbTableRelationStudentObjective.createTableSubject(c,stmt);
 		DbTableRelationClassStudent.createTableRelationClassStudent(c,stmt);
 		DbTableAnswerOptions.createTableAnswerOptions(c,stmt);
@@ -157,7 +157,6 @@ public class DBManager {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 			c.setAutoCommit(false);
-			System.out.println("Opened database successfully");
 
 			stmt = c.createStatement();
 			ResultSet rs = stmt.executeQuery( "SELECT * FROM QUESTION;" );
@@ -187,7 +186,6 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("Operation done successfully");
 		return quesList;
 	}
 	/**
@@ -202,7 +200,6 @@ public class DBManager {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
 			c.setAutoCommit(false);
-			System.out.println("Opened database successfully");
 
 			stmt = c.createStatement();
 			ResultSet rs = stmt.executeQuery( "SELECT * FROM multiple_choice_questions;" );
@@ -243,7 +240,6 @@ public class DBManager {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
 		}
-		System.out.println("Operation done successfully");
 		return multquestList;
 	}
 } 

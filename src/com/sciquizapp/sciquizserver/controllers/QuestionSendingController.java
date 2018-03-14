@@ -169,6 +169,26 @@ public class QuestionSendingController extends Window implements Initializable {
         stage.show();
     }
 
+    public void editQuestion() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/EditQuestion.fxml"));
+        Parent root1 = null;
+        try {
+            root1 = fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        EditQuestionController controller = fxmlLoader.<EditQuestionController>getController();
+        QuestionGeneric questionGeneric = allQuestionsTree.getSelectionModel().getSelectedItem().getValue();
+        TreeItem selectedItem = allQuestionsTree.getSelectionModel().getSelectedItem();
+        controller.initVariables(genericQuestionsList, allQuestionsTree, questionGeneric, selectedItem);
+        Stage stage = new Stage();
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initStyle(StageStyle.DECORATED);
+        stage.setTitle("Edit Question");
+        stage.setScene(new Scene(root1));
+        stage.show();
+    }
+
     public void removeQuestion() {
         int index = readyQuestionsList.getSelectionModel().getSelectedIndex();
         NetworkCommunication.networkCommunicationSingleton.removeQuestion(index);

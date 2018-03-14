@@ -60,13 +60,13 @@ public class DbTableRelationQuestionSubject {
 
     /**
      * Method that adds a relation between a question and a subject
-     * by linking the last added question with the subject given as parameter
+     * by linking the question with questionID to the subject given as parameter
      *
      * @param subject,questionID
      * @throws Exception
      */
     static public void addRelationQuestionSubject(Integer questionID, String subject) {
-        //first get the list of all subjects linked to the question
+        //first get the list of all subjects linked to the question (also check parents subjects)
         Vector<String> subjectsVector = DbTableSubject.getSubjectsForQuestionID(questionID);
         Vector<String> allSubjectsVector = new Vector<>();
         if (!allSubjectsVector.contains(subject)) {
