@@ -24,9 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
-import sun.nio.ch.Net;
 
-import javax.swing.*;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -165,7 +163,7 @@ public class QuestionSendingController extends Window implements Initializable {
     }
 
     public void createQuestion() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/CreateQuestion.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/CreateQuestion.fxml"));
         Parent root1 = null;
         try {
             root1 = fxmlLoader.load();
@@ -183,7 +181,7 @@ public class QuestionSendingController extends Window implements Initializable {
     }
 
     public void editQuestion() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/EditQuestion.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/EditQuestion.fxml"));
         Parent root1 = null;
         try {
             root1 = fxmlLoader.load();

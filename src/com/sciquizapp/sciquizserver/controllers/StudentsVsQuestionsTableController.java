@@ -1,14 +1,9 @@
 package com.sciquizapp.sciquizserver.controllers;
 
-import com.sciquizapp.sciquizserver.SingleResultForTable;
 import com.sciquizapp.sciquizserver.SingleStudentAnswersLine;
 import com.sciquizapp.sciquizserver.Student;
 import com.sciquizapp.sciquizserver.database_management.DbTableClasses;
 import com.sciquizapp.sciquizserver.database_management.DbTableRelationClassStudent;
-import com.sciquizapp.sciquizserver.database_management.DbTableStudents;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,7 +22,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Callback;
-import org.controlsfx.control.PropertySheet;
 
 import java.io.IOException;
 import java.net.URL;
@@ -203,7 +197,7 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
         Integer globalID = questionsIDs.get(tablePosition.getColumn() - 3);
         Integer studentID = students.get(tablePosition.getRow()).getStudentID();
         if (globalID >= 0) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/EditEvaluation.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/EditEvaluation.fxml"));
             Parent root1 = null;
             try {
                 root1 = fxmlLoader.load();
@@ -222,7 +216,7 @@ public class StudentsVsQuestionsTableController extends Window implements Initia
     }
 
     public void createClass() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../views/CreateClass.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/CreateClass.fxml"));
         Parent root1 = null;
         try {
             root1 = fxmlLoader.load();

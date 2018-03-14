@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/sciquiz_server.iml" filepath="$PROJECT_DIR$/sciquiz_server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sciquiz_server.iml" filepath="$PROJECT_DIR$/.idea/modules/sciquiz_server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sciquiz_server_main.iml" filepath="$PROJECT_DIR$/.idea/modules/sciquiz_server_main.iml" group="sciquiz_server" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sciquiz_server_test.iml" filepath="$PROJECT_DIR$/.idea/modules/sciquiz_server_test.iml" group="sciquiz_server" />
     </modules>
   </component>
 </project>

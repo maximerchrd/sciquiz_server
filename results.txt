@@ -1,3 +1,0 @@
-Alex;2018-03-10;asdf;100.0;a|||c|||;a,;d,;asdfads,;rqwereqrdgf,
-Alex;2018-03-10;asdf;0.0;c|||;a,;d,;asdfads,;rqwereqrdgf,
-Alex;2018-03-10;asdf;100.0;a|||;a,;d,;asdfads,;rqwereqrdgf,
