@@ -63,10 +63,21 @@ public class CreateQuestionController implements Initializable {
         if (typeOfQuestion.getSelectionModel().getSelectedItem().toString().contentEquals("Question with Short Answer")) {
             checkBox.setVisible(false);
         }
+        Button removeButton = new Button("X");
+        removeButton.setOnAction(event -> {
+            hBoxArrayList.remove(hBox);
+            (( VBox)hBox.getParent()).getChildren().remove(hBox);
+        });
         hBox.getChildren().add(checkBox);
         hBox.getChildren().add(textField);
+        hBox.getChildren().add(removeButton);
         vBox.getChildren().add(vBox.getChildren().size() - 2, hBox);
         hBoxArrayList.add(hBox);
+    }
+
+    public void removeAnswerOption() {
+        hBoxArrayList.remove(firstAnswer);
+        vBox.getChildren().removeAll(firstAnswer);
     }
 
     public void addSubject() {
@@ -77,7 +88,17 @@ public class CreateQuestionController implements Initializable {
         ComboBox comboBox = new ComboBox(options);
         comboBox.setEditable(true);
         subjectsComboBoxArrayList.add(comboBox);
-        vBoxSubjects.getChildren().add(comboBox);
+
+        HBox hBox = new HBox();
+        //button for removing subject
+        Button removeButton = new Button("X");
+        removeButton.setOnAction(event -> {
+            subjectsComboBoxArrayList.remove(comboBox);
+            (( VBox)hBox.getParent()).getChildren().remove(hBox);
+        });
+        hBox.getChildren().add(comboBox);
+        hBox.getChildren().add(removeButton);
+        vBoxSubjects.getChildren().add(hBox);
         TextFields.bindAutoCompletion(comboBox.getEditor(), comboBox.getItems());
     }
 
@@ -89,7 +110,17 @@ public class CreateQuestionController implements Initializable {
         ComboBox comboBox = new ComboBox(options);
         comboBox.setEditable(true);
         objectivesComboBoxArrayList.add(comboBox);
-        vBoxObjectives.getChildren().add(comboBox);
+
+        HBox hBox = new HBox();
+        //button for removing subject
+        Button removeButton = new Button("X");
+        removeButton.setOnAction(event -> {
+            objectivesComboBoxArrayList.remove(comboBox);
+            (( VBox)hBox.getParent()).getChildren().remove(hBox);
+        });
+        hBox.getChildren().add(comboBox);
+        hBox.getChildren().add(removeButton);
+        vBoxObjectives.getChildren().add(hBox);
         TextFields.bindAutoCompletion(comboBox.getEditor(), comboBox.getItems());
     }
 

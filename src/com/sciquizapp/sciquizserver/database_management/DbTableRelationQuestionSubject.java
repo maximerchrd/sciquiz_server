@@ -146,4 +146,24 @@ public class DbTableRelationQuestionSubject {
         return questionIDs;
     }
 
+    static public void removeRelationsWithQuestion(Integer questionID) {
+        Connection c = null;
+        Statement stmt = null;
+        stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:learning_tracker.db");
+            c.setAutoCommit(false);
+            stmt = c.createStatement();
+            String sql = "DELETE FROM question_subject_relation WHERE ID_GLOBAL='" + questionID + "';";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
 }
